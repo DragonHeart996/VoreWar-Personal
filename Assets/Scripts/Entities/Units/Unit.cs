@@ -3357,7 +3357,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         var ten = GetStatusEffect(StatusEffectType.Tenacious);
         if (ten != null)
         {
-            int reduction = 5 - (HasTrait(Traits.Unflinching) && Health * .1f > ten.Strength? 3 : 0);
+            int reduction = 5 - (HasTrait(Traits.Unflinching) && Health * .1f > ten.Strength? 5 : 0);
             ten.Duration -= reduction;
             ten.Strength -= reduction;
             if (ten.Duration <= 0)
