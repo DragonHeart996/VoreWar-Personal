@@ -2345,6 +2345,8 @@ public class TacticalMode : SceneBase
             miscDiscards.Add(new MiscDiscard(location, MiscDiscardType.Cum, spriteNum, sortOrder, color, description));
         else if (type == BoneTypes.HoneyPuddle)
             miscDiscards.Add(new MiscDiscard(location, MiscDiscardType.Honey, spriteNum, sortOrder, color, description));
+        else if (type == BoneTypes.UrinePuddle)
+            miscDiscards.Add(new MiscDiscard(location, MiscDiscardType.Urine, spriteNum, sortOrder, color, description));
         else if (type == BoneTypes.DisposedCondom)
             miscDiscards.Add(new MiscDiscard(location, MiscDiscardType.DisposedCondom, spriteNum, sortOrder, color, description));
         else
@@ -2463,6 +2465,9 @@ public class TacticalMode : SceneBase
                 break;
             case SpecialAction.BreastVore:
                 ShowVoreHitPercentages(actor, PreyLocation.breasts);
+                break;
+            case SpecialAction.BladderVore:
+                ShowVoreHitPercentages(actor, PreyLocation.bladder);
                 break;
             case SpecialAction.Transfer:
                 ShowCockVoreTransferPercentages(actor);
@@ -3891,6 +3896,9 @@ public class TacticalMode : SceneBase
                         break;
                     case VoreType.TailVore:
                         StatusUI.VoreButton.GetComponentInChildren<UnityEngine.UI.Text>().text = "Tail Vore";
+                        break;
+                    case VoreType.BladderVore:
+                        StatusUI.VoreButton.GetComponentInChildren<UnityEngine.UI.Text>().text = "Bladder Vore";
                         break;
                     default:
                         StatusUI.VoreButton.GetComponentInChildren<UnityEngine.UI.Text>().text = "Vore";

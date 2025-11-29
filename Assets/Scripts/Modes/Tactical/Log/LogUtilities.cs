@@ -140,6 +140,7 @@ static class LogUtilities
             case PreyLocation.womb:
             case PreyLocation.tail:
             case PreyLocation.anal:
+            case PreyLocation.bladder:
                 return "s";
         }
         return "";

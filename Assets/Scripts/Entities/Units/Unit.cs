@@ -457,7 +457,8 @@ public class Unit
     internal bool CanBreastVore => Config.BreastVore && HasBreasts && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.BreastVore);
     internal bool CanAnalVore => Config.AnalVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.Anal);
     internal bool CanTailVore => Config.TailVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.TailVore);
-
+    internal bool CanBladderVore => Config.BladderVore && (HasVagina || HasDick) && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.BladderVore);
+    
     public bool CanVore(PreyLocation location)
     {
         switch (location)
@@ -472,6 +473,8 @@ public class Unit
                 return CanAnalVore;
             case PreyLocation.tail:
                 return CanTailVore;
+            case PreyLocation.bladder:
+                return CanBladderVore;
             default:
                 return true;
         }

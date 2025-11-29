@@ -116,6 +116,7 @@ public class TacticalMessageLog
         GreatEscapeKeep,
         GreatEscapeFlee,
         ManualRegurgitation,
+        BladderVore,
     }
 
     public void RefreshListing()
@@ -238,6 +239,10 @@ public class TacticalMessageLog
                 msg = GenerateAVSwallowMessage(action);
                 msg = msg += odds;
                 return msg;
+            case MessageLogEvent.BladderVore:
+                msg = GenerateBldrVSwallowMessage(action);
+                msg = msg += odds;
+                return msg;
             case MessageLogEvent.BellyRub:
                 return GenerateBellyRubMessage(action);
             case MessageLogEvent.BreastRub:
@@ -259,6 +264,8 @@ public class TacticalMessageLog
             //Additional fail lines by Tatltuae
                 if (action.Target.Race != Race.Iliijiith && action.Unit.Race == Race.Iliijiith) //Ultra generic Iliijiith VoreSteal Fail line
                 return $"<b>{action.Unit.Name}</b> {GetRandomStringFrom("quickly", "rapidly")} approaches <b>{action.Target.Name}</b> and passes through {GPPHim(action.Target)} seemingly doing nothing, although {GPPHe(action.Target)} feels and odd coldness in {GPPHis(action.Target)} body as though something \"tried\" happening.";
+                if (action.oldLocation == PreyLocation.bladder) //Generic bladder VoreSteal Fail line
+                return $"<b>{action.Unit.Name}</b> {GetRandomStringFrom("squeezes tightly", "presses hard")} on <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> \"belly\" but no matter how hard {GPPHe(action.Unit)} tries the {ApostrophizeWithOrWithoutS(GetRaceDescSingl(action.Target))} {GetRandomStringFrom("steel ", "tough ", "")}bladder refuses to let <b>{action.Prey.Name}</b> go.";
                 if (action.oldLocation == PreyLocation.breasts || action.oldLocation == PreyLocation.leftBreast || action.oldLocation == PreyLocation.rightBreast)
                 {
                     if (action.Target.Race == Race.Kangaroos)
@@ -446,7 +453,7 @@ public class TacticalMessageLog
                 return (action.Unit.IsDead ? $"<b>{action.Target.Name}</b> was freed because <b>{action.Unit.Name}</b> died." : $"<b>{action.Target.Name}</b> was freed because <b>{action.Unit.Name}</b> surrendered.");
             //$"<b>{action.Target.Name}</b> sees insides of {action.preyLocation.ToSyn()} around him melting, only to find {GPPHimself(action.Target)} <b>{action.Unit.Name}</b>'s {action.preyLocation.ToSyn()}{odds}"
             case MessageLogEvent.Regurgitated:
-                return $"<b>{action.Unit.Name}</b> hears {GPPHis(action.Unit)} comrade's plea for help and regurgitates <b>{action.Target.Name}</b>.";
+                return $"<b>{action.Unit.Name}</b> hears {GPPHis(action.Unit)} comrade's plea for help and releases <b>{action.Target.Name}</b>.";
             case MessageLogEvent.Heal:
                 if (new[] { "breastfeeding", "cumfeeding" }.Contains(action.Message))
                 {
@@ -958,6 +965,29 @@ public class TacticalMessageLog
                     );
                 }
             }
+            if (State.Rand.Next(4) != 0 && action.preyLocation == PreyLocation.bladder)
+            {
+                if (action.Unit.HasDick && ActorHumanoid(action.Target) && ActorHumanoid(action.Unit) && State.Rand.Next(3) == 0)
+                    return $"With a kick to {GPPHis(action.Unit)} lower spine, <b>{action.Target.Name}</b> shoots out of <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> {PreyLocStrings.ToCockSyn()}{odds}";
+                if (action.Unit.HasVagina && ActorHumanoid(action.Target) && ActorHumanoid(action.Unit) && State.Rand.Next(3) == 0)
+                    return $"<b>{action.Target.Name}</b> manages to reach {GPPHis(action.Target)} arm out of <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> body, and uses the {ApostrophizeWithOrWithoutS(GetRaceDescSingl(action.Unit))} thighs as handholds whist pulling {GPPHimself(action.Target)} out.{odds}";
+                if (action.Unit.HasDick && State.Rand.Next(2) != 0)
+                    return GetRandomStringFrom(
+                    $"<b>{action.Target.Name}</b> slowly and carefully extracts {GPPHimself(action.Target)} from <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder, {GPPHis(action.Target)} head emerging from <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> {PreyLocStrings.ToCockSyn()}.{odds}",
+                    $"Getting clever, <b>{action.Target.Name}</b> remains perfectly still for a minute. Believing {GPPHimself(action.Unit)} to have won, <b>{action.Unit.Name}</b> casually takes a piss, unwittingly pushing <b>{action.Target.Name}</b> back out {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()}.{odds}"
+                    );
+                if (action.Unit.HasVagina && State.Rand.Next(2) != 0)
+                    return GetRandomStringFrom(
+                    $"Within <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder, <b>{action.Target.Name}</b> stretches out, and forces {GPPHimself(action.Target)} out from <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> nethers.{odds}",
+                    $"After a particularly vicious struggle, <b>{action.Target.Name}</b> manages to reemerge from <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> slit.{odds}"
+                    );
+                else
+                    return GetRandomStringFrom(
+                    $"<b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> constant movement within <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder makes <b>{action.Unit.Name}</b> feel as though {GPPHe(action.Unit)} need{SIfSingular(action.Unit)} to go pee. As <b>{action.Unit.Name}</b> urinates, <b>{action.Target.Name}</b> is pissed out intact.{odds}",
+                    $"<b>{action.Target.Name}</b> aggressively forces {GPPHis(action.Target)} way out through <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> urethra.{odds}",
+                    $"Within <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder, <b>{action.Target.Name}</b> orients {GPPHimself(action.Target)} upside down. With one mighty push, <b>{action.Target.Name}</b> goes straight back out the hole {GPPHe(action.Target)} came in through.{odds}"
+                    );
+            }
             return GetRandomStringFrom(
             $"<b>{action.Target.Name}</b> escaped from <b>{action.Unit.Name}</b>'s {action.preyLocation.ToSyn()}.{odds}",
             $"From within <b>{action.Unit.Name}</b>’s {action.preyLocation.ToSyn()}, <b>{action.Target.Name}</b> remembers all the loved ones that would miss {GPPHim(action.Target)}, and with this incentive forces {GPPHis(action.Target)} way out.{odds}",
@@ -1131,6 +1161,21 @@ public class TacticalMessageLog
                 }
             }
         }
+        else if (action.preyLocation == PreyLocation.bladder)
+        {
+            possibleLines.Add($"<b>{action.Unit.Name}</b> feels as though {GPPHe(action.Unit)} need{SIfSingular(action.Unit)} to go pee. As <b>{action.Unit.Name}</b> urinates, <b>{action.Target.Name}</b> is pissed out intact.");
+            if (action.Unit.HasDick)
+            {
+                possibleLines.Add($"<b>{action.Unit.Name}</b> decides that {GPPHe(action.Unit)} no longer need{SIfSingular(action.Unit)} <b>{action.Target.Name}</b> within {GPPHim(action.Unit)}, and uncerimoniously pees <b>{action.Target.Name}</b> out of {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> grabs {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()} tightly, and pisses out a living {GetRaceDescSingl(action.Target)}.");
+                possibleLines.Add($"<b>{action.Unit.Name}</b> slowly massages <b>{action.Target.Name}</b> out of {GPPHis(action.Unit)} {PreyLocStrings.ToCockSyn()}.");
+            }
+            if (action.Unit.HasVagina && ActorHumanoid(action.Unit))
+            {
+                possibleLines.Add($"<b>{action.Unit.Name}</b> reaches up {GPPHis(action.Unit)} slit, and yanks <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} bladder.");
+                possibleLines.Add($"As <b>{action.Unit.Name}</b> pushes <b>{action.Target.Name}</b> from {GPPHis(action.Unit)} slit, {GPPHe(action.Unit)} say{SIfSingular(action.Unit)} \"Your ride ends here, please get out of my bladder now.\"");
+            }
+        }
         return GetRandomStringFrom(possibleLines.ToArray());
     }
 
@@ -1174,6 +1219,13 @@ public class TacticalMessageLog
         return GetStoredMessage(StoredLogTexts.MessageTypes.CockVoreMessages, action);
     }
 
+    private string GenerateBldrVSwallowMessage(EventLog action)
+    {
+        if (SimpleText)
+            return $"<b>{action.Unit.Name}</b> bladder vores <b>{action.Target.Name}</b>.";
+        return GetStoredMessage(StoredLogTexts.MessageTypes.BladderMessages, action);
+    }
+
     private string GenerateRandomDigestionMessage(EventLog action)
     {
         return GetStoredMessage(StoredLogTexts.MessageTypes.RandomDigestionMessages, action);
@@ -1190,7 +1242,7 @@ public class TacticalMessageLog
                 $"<b>{action.Unit.Name}</b> can feel <b>{action.Target.Name}</b>'s struggles getting weaker, kindly reminding {GPPHim(action.Target)} that if {GPPHe(action.Target)} fail{SIfSingular(action.Target)} to escape {GPPHeIs(action.Target)} getting {PreyLocStrings.DigestedVerbSyn()} into {PreyLocStrings.ScatSyn()}.",
                 $"<b>{action.Unit.Name}</b>’s {action.preyLocation.ToSyn()} rumbles ominously while telling <b>{action.Target.Name}</b> that {GPPHe(action.Unit)} will enjoy {GetRandomStringFrom("shitting", "crapping", "dumping", "squeezing", "pooping")} {GPPHim(action.Target)} out later.");
         }
-        if (Config.HardVoreDialog && Random.Range(0, 5) == 0)
+        if (Config.HardVoreDialog && (action.preyLocation == PreyLocation.stomach || action.preyLocation == PreyLocation.stomach2) && Random.Range(0, 5) == 0)
         {
             string loc = action.preyLocation.ToSyn();
             string locs = (loc.EndsWith("s") ? "" : "s");
@@ -1222,6 +1274,21 @@ public class TacticalMessageLog
                     {return $"With each exertion of strength, <b>{action.Target.Name}</b> forgets a little more. Right now, {GPPHeIsAbbr(action.Target)} wondering \"what's my name? It's <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> Breasts, right?\"";}
                 default:
                     return $"As <b>{action.Target.Name}</b> continues to struggle, {GPPHe(action.Target)} find{SIfSingular(action.Target)} {GPPHimself(action.Target)} less and less able to remember anything about the world beyond <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> {GetRandomStringFrom("breasts", "boobs", "tits")}.";
+            }
+        }
+        if (action.preyLocation == PreyLocation.bladder && State.Rand.Next(4) != 0)
+        {
+            switch (State.Rand.Next(3))
+            {
+                case 0:
+                    return $"As <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder fills with more smelly piss, <b>{action.Target.Name}</b> takes solace in the fact that {GPPHis(action.Target)} odorous existance seems to be drawing to a close.";
+                case 1:
+                    if (ActorHumanoid(action.Target) && ActorHumanoid(action.Unit) && Config.HardVoreDialog && State.Rand.Next(2) != 0)
+                    {return $"As <b>{ApostrophizeWithOrWithoutS(action.Target.Name)}</b> struggles slow, <b>{action.Unit.Name}</b> taunts {GPPHis(action.Unit)} prey. \"{GetRandomStringFrom("Soon, you'll be pure liquid, and I'll leave you behind.", $"You're getting close, soon I'll get to {GetRandomStringFrom("pee", "piss")} you out.", "You know, half the fun of this is your struggling. Get back to it or I'll make your death WAY more painful.")}\"";}
+                    else
+                    {return $"As <b>{ApostrophizeWithOrWithoutS(action.Unit.Name)}</b> bladder fills with more smelly piss, <b>{action.Target.Name}</b> takes solace in the fact that {GPPHis(action.Target)} odorous existance seems to be drawing to a close.";}
+                default:
+                    return $"As the {PreyLocStrings.ToFluid(PreyLocation.bladder)} around <b>{action.Target.Name}</b> fizzes violently, the {GetRaceDescSingl(action.Target)} commits to one last struggle. Either {GPPHe(action.Target)} escape{SIfSingular(action.Target)}, or {GPPHe(action.Target)} become{SIfSingular(action.Target)} {PreyLocStrings.ToFluid(PreyLocation.bladder)}.";
             }
         }
         int ran = Random.Range(0, 9);
@@ -1404,7 +1471,20 @@ public class TacticalMessageLog
         UpdateListing();
     }
 
-    public void RegisterBellyRub(Unit rubber, Unit target, Unit prey, float odds)
+    public void RegisterBladderVore(Unit predator, Unit prey, float odds)
+    {
+        events.Add(new EventLog
+        {
+            Type = MessageLogEvent.BladderVore,
+            Unit = predator,
+            Target = prey,
+            Odds = odds,
+            preyLocation = PreyLocation.bladder,
+        });
+        UpdateListing();
+    }
+
+    public void RegisterBellyRub(Unit rubber, Unit target, Unit prey, PreyLocation preyLoc, float odds)
     {
         events.Add(new EventLog
         {
@@ -1413,7 +1493,7 @@ public class TacticalMessageLog
             Target = target,
             Prey = prey ?? defaultPrey,
             Odds = odds,
-            preyLocation = PreyLocation.stomach,
+            preyLocation = preyLoc,
         });
         UpdateListing();
     }
