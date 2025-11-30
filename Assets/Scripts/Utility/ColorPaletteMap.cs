@@ -137,6 +137,7 @@ public static class ColorPaletteMap
         IliijiithAttackColor,
         DemidragonSkin,
         LamiaTmp,
+        BadgersSkin,
     }
 
     static Dictionary<SwapType, List<ColorSwapPalette>> Swaps;
@@ -320,6 +321,7 @@ public static class ColorPaletteMap
         List<ColorSwapPalette> IliijiithAttackColorSwaps = WireUp(SwapType.IliijiithAttackColor);
         List<ColorSwapPalette> DemidragonSkinSwaps = WireUp(SwapType.DemidragonSkin);
         List<ColorSwapPalette> LamiaTmpSwaps = WireUp(SwapType.LamiaTmp);
+        List<ColorSwapPalette> BadgersSkinSwaps = WireUp(SwapType.BadgersSkin);
 
         int[] NormalIndexes = { 81, 153, 198, 229, 255 };
         Texture2D map = State.GameManager.PaletteDictionary.SimpleHair;
@@ -2706,6 +2708,31 @@ public static class ColorPaletteMap
             clear[196] = true;
             ColorSwapPalette swap = new ColorSwapPalette(swapDict, clear);
             LamiaTmpSwaps.Add(swap);
+        }
+
+        map = State.GameManager.PaletteDictionary.BadgersSkin;
+        for (int pixelY = 0; pixelY < map.height; pixelY++)
+        {
+            Dictionary<int, Color> swapDict = new Dictionary<int, Color>
+            {
+                [0] = map.GetPixel(14, pixelY),
+                [30] = map.GetPixel(13, pixelY),
+                [45] = map.GetPixel(12, pixelY),
+                [60] = map.GetPixel(11, pixelY),
+                [75] = map.GetPixel(10, pixelY),
+                [90] = map.GetPixel(9, pixelY),
+                [120] = map.GetPixel(8, pixelY),
+                [135] = map.GetPixel(7, pixelY),
+                [150] = map.GetPixel(6, pixelY),
+                [165] = map.GetPixel(5, pixelY),
+                [180] = map.GetPixel(4, pixelY),
+                [210] = map.GetPixel(3, pixelY),
+                [225] = map.GetPixel(2, pixelY),
+                [240] = map.GetPixel(1, pixelY),
+                [255] = map.GetPixel(0, pixelY),
+            };
+            ColorSwapPalette swap = new ColorSwapPalette(swapDict);
+            BadgersSkinSwaps.Add(swap);
         }
     }
 

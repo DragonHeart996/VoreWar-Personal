@@ -212,6 +212,8 @@ T-Rex
 Utahraptors
 Vargul
 Vipers
+Badgers
+Ryan
 
 <b><u>Novoyetelo:</b></u>
 Abakhanskya
@@ -242,6 +244,7 @@ Banner updates (w/ Wolfwar)
 Tatltuae
 Twisted Vine Updates
 Virae Ultimae
+Iliijiith
 Bird scat sprites
 Urine sprites
 
@@ -317,6 +320,9 @@ Xelhilde
 
 <b><u>Supra:</b></u>
 Olivia
+
+<b><u>Legoshi:</b></u>
+Ryan
 
 <b><u>Zezmeril:</b></u>
 Skapa

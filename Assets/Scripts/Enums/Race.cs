@@ -61,6 +61,7 @@
     Centaur = 65,
     Eevee = 66,
     Equaleon = 67,
+    Badgers = 68,
 
     Vagrants = 100,
     Serpents = 101,

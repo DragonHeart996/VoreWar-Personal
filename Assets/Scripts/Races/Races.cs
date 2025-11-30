@@ -62,6 +62,7 @@
     static internal Centaur Centaur = new Centaur();
     static internal Eevee Eevee = new Eevee();
     static internal Equaleon Equaleon = new Equaleon();
+    static internal Badgers Badgers = new Badgers();
 
     static internal Vagrants Vagrants = new Vagrants();
     static internal Serpents Serpents = new Serpents();
@@ -468,6 +469,8 @@
                 return Iliijiith;
             case Race.Pudding:
                 return Pudding;
+            case Race.Badgers:
+                return Badgers;
         }
         UnityEngine.Debug.LogWarning("Couldn't find race, substituting the Blank Slate");
         return BlankSlate;

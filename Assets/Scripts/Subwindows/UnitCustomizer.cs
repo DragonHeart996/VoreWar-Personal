@@ -619,6 +619,11 @@ public class UnitCustomizer
                 buttons[(int)ButtonTypes.BodyAccentTypes3].Label.text = "Spots Type";
                 buttons[(int)ButtonTypes.BodyAccentTypes4].Label.text = "Lower Mushroom Type";
                 break;
+            case Race.Badgers:
+                buttons[(int)ButtonTypes.BodyAccessoryType].Label.text = "Body Pattern Type";
+                buttons[(int)ButtonTypes.BodyAccentTypes1].Label.text = "Ear Shape";
+                break;
+
         }
     }
 

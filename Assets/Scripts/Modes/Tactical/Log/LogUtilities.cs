@@ -469,6 +469,8 @@ static class LogUtilities
                 return GetRandomStringFrom("humble", "cunning", "resourceful");
             case Race.Tatltuae:
                 return GetRandomStringFrom("black feathered", "chaotic", "purple eyed", "ominous", "unnerving", "omen-bringing");
+            case Race.Badgers:
+                return GetRandomStringFrom("fierce", "fearless", "vicious");
             default:
                 return "strong";
         }
@@ -629,6 +631,8 @@ static class LogUtilities
                 return GetRandomStringFrom("sphinx", "deity", "grand cat");
             case Race.Ryan:
                 return GetRandomStringFrom("sergal", "veteran", "captain");
+            case Race.Badgers:
+                return GetRandomStringFrom("badger", GetGenderString(unit, "sow", "boar", "badger"), "mustelid");
             default:
                 return "creature";
         }
@@ -736,6 +740,18 @@ static class LogUtilities
         {
             if (weapon.Name == "Mace") return "Turtle Club";
             else if (weapon.Name == "Axe") return "Flint Spear";
+            else if (weapon.Name == "Claw") return "Claws";
+        }
+        else if (unit.Race == Race.Badgers)
+        {
+            if (weapon.Name == "Mace") return "Hand Axe";
+            else if (weapon.Name == "Axe") return "Glaive";
+            else if (weapon.Name == "Claw") return "Claws";
+        }
+        else if (unit.Race == Race.Komodos)
+        {
+            if (weapon.Name == "Mace") return "Hunting Knife";
+            else if (weapon.Name == "Axe") return "War Scythe";
             else if (weapon.Name == "Claw") return "Claws";
         }
         else if (unit.Race == Race.Puca)

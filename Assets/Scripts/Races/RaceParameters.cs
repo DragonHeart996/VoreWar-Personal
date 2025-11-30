@@ -144,6 +144,7 @@ static class RaceParameters
     static readonly RaceTraits Trex;
     static readonly RaceTraits Utahraptor;
     static readonly RaceTraits Pudding;
+    static readonly RaceTraits Badgers;
     static readonly RaceTraits Ghosts;
     static readonly RaceTraits DemiDragons;
     static readonly RaceTraits WoodDryad;
@@ -467,6 +468,8 @@ static class RaceParameters
                 return Utahraptor;
             case Race.Pudding:
                 return Pudding;
+            case Race.Badgers:
+                return Badgers;
             case (Race)700: //Singled out so that it doesn't make the debug message
                 return Default;
             case (Race)701:
@@ -1761,6 +1764,38 @@ static class RaceParameters
         },
             InnateSpells = new List<SpellTypes>() { SpellTypes.FireBomb },
             RaceDescription = "A highly trained soldier of the Red Wolf United Mercenary Company. It is unknown which faction or race first started this company due to the technology they boast and open recruitment policy. However, one thing is certain; these soldiers are no slouches when it comes to combat and are quite a formidable force on the battlefield.",
+        };
+
+
+        Badgers = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 20,
+            HasTail = true,
+            FavoredStat = Stat.Endurance,
+            CanUseRangedWeapons = false,
+            PowerAdjustment = 1.4f,
+            DeployCost = 1,
+            Upkeep = 7f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(16, 24),
+                Dexterity = new RaceStats.StatRange(6, 10),
+                Endurance = new RaceStats.StatRange(18, 26),
+                Mind = new RaceStats.StatRange(6, 10),
+                Will = new RaceStats.StatRange(8, 16),
+                Agility = new RaceStats.StatRange(10, 16),
+                Voracity = new RaceStats.StatRange(14, 24),
+                Stomach = new RaceStats.StatRange(12, 18),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.WildFury,
+                Traits.GiantSlayer,
+                Traits.Berserk,
+                Traits.Resilient,
+            },
+            RaceDescription = "Created by taking wild, feral badgers and infusing them various types of blood, the Badgers were originally made by a consortium of wizards to serve as their personal bodyguards. However, said consortium were rather unpleasant, and it was not long before they ended up as naught but badger padding. Ever since, the badgers have lived as fighters-for-hire, renowned among the civilized peoples of the realm for their battle prowess and resilience against even the toughest of foes. However, they are still just regular badgers at heart, often having quite the temper, and they aren't always the cleverest. But still, a valuable ally to have in battle.",
         };
 
         Vagrants = new RaceTraits()
