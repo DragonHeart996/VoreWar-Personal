@@ -1522,6 +1522,53 @@ public class Actor_Unit
         }
     }
 
+    public bool AiSweepAttack(Actor_Unit mainTarget, Actor_Unit self, bool attack_ver)
+    {
+        if (Movement < 1 || Unit.HasTrait(Traits.Legendary) == false)
+            return false;
+        if (Unit.Mana >= 40)
+        {
+            Unit.SpendMana(40);
+        }
+        else
+            return false;
+        List<Actor_Unit> targets = TacticalUtilities.UnitsWithinPattern(self.Position, new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } });
+        List<AbilityTargets> targetTypes = new List<AbilityTargets>();
+        targetTypes.Add(AbilityTargets.Enemy);
+
+        foreach (var target in targets)
+        {
+            if (!TacticalUtilities.MeetsQualifier(targetTypes, this, target))
+                return false;
+            if (attack_ver)
+                TestAttack(target);
+            else
+                TestSwallow(target);
+        }
+
+        Movement = 0;
+
+        return true;
+
+        void TestAttack(Actor_Unit sideTarget)
+        {
+            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
+            {
+                Movement = 1;
+                Attack(sideTarget, false, damageMultiplier: .66f);
+            }
+        }
+        void TestSwallow(Actor_Unit sideTarget)
+        {
+            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
+            {
+                Movement = 1;
+                PredatorComponent.Devour(sideTarget);
+
+            }
+        }
+    }
+
     public bool SweepAttack(bool attack_ver)
     {
         if (Movement < 1 || Unit.HasTrait(Traits.Legendary) == false)
