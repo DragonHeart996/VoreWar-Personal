@@ -1890,7 +1890,7 @@ static class RaceParameters
 				Traits.Berserk,
 				Traits.Resilient,
         },
-            RaceDescription = "Fast, winged and ravenous. These lesser cousins of dragons do not have the magical abilities of true dragons, but they are still a dangerous force. They are often followed by their younger kin, but their care only extends as far as not snacking on the weaklings themselves. ",
+            RaceDescription = "Fast, winged, and ravenous. These lesser cousins of dragons do not have the magical abilities of true dragons, but they are still a dangerous force. They are often seen following a larger \"Wyvern Matron\". While you would assume they act as leaders to the Wyverns, it's more a case that, without a force to keep some amount of order, Wyverns often try to snack on the weakest of their ranks.",
 
         };
 
@@ -2587,7 +2587,7 @@ static class RaceParameters
             Traits.VerySlowMovement,
             Traits.HardSkin
         },
-            RaceDescription = "One of the four species of giant slug that can be found in the Realm, the Rock Slugs are known for their high resilience, being able to withstand some of the strongest beasts in the Realm. They would be far more difficult to deal with were it not for their speed, which makes the other already slow species of giant slug look like speed demons in comparasine."
+            RaceDescription = "One of the four species of giant slug that can be found in the Realm, the Rock Slugs are known for their high resilience, being able to withstand some of the strongest beasts in the Realm. They would be far more difficult to deal with were it not for their speed, which makes the other already slow species of giant slug look like speed demons in comparison."
         };
 
         CoralSlugs = new RaceTraits()

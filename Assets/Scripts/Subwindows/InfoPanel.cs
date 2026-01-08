@@ -787,6 +787,8 @@ public class InfoPanel
             if (actor?.Surrendered ?? false)
                 sb.AppendLine("Unit has surrendered!");
             string traits = unit.ListTraits(!(TacticalUtilities.IsUnitControlledByPlayer(unit) && TacticalUtilities.PlayerCanSeeTrueSide(unit)));
+            if (Config.RaceTraitsEnabled == false && (traits == ""))
+                sb.AppendLine("Race Traits disabled");
             if (traits != "")
                 sb.AppendLine("Traits:\n" + traits);
             StringBuilder sbSecond = new StringBuilder();
