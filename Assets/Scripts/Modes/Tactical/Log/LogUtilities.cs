@@ -498,7 +498,7 @@ static class LogUtilities
             case Race.Bunnies:
                 return GetRandomStringFrom("bunny", GetGenderString(unit, "doe", "buck", "lagomorph"), "rabbit");
             case Race.Deer:
-                return GetRandomStringFrom(GetGenderString(unit, GetRandomStringFrom("doe", "roe"), GetRandomStringFrom("buck", "stag", "hart"), "cervid"), "faun", "deer");
+                return GetRandomStringFrom(GetGenderString(unit, GetRandomStringFrom("doe", "roe"), GetRandomStringFrom("buck", "stag"), "cervid"), "deer");
             case Race.Lizards:
                 return GetRandomStringFrom("lizard", "reptile", "reptilian");
             case Race.Slimes:

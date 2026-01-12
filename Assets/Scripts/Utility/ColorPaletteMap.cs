@@ -2533,20 +2533,20 @@ public static class ColorPaletteMap
             Dictionary<int, Color> swapDict = new Dictionary<int, Color>
             {
                 [3] = map.GetPixel(0, pixelY),
-                [34] = map.GetPixel(1, pixelY),
-                [50] = map.GetPixel(2, pixelY),
-                [85] = map.GetPixel(3, pixelY),
                 [6] = map.GetPixel(4, pixelY),
-                [71] = map.GetPixel(5, pixelY),
-                [101] = map.GetPixel(6, pixelY),
-                [25] = map.GetPixel(7, pixelY),
-                [55] = map.GetPixel(8, pixelY),
-                [111] = map.GetPixel(9, pixelY),
-                [75] = map.GetPixel(10, pixelY),
-                [42] = map.GetPixel(11, pixelY),
-                [255] = map.GetPixel(12, pixelY),
-                [153] = map.GetPixel(13, pixelY),
                 [9] = map.GetPixel(14, pixelY),
+                [25] = map.GetPixel(7, pixelY),
+                [34] = map.GetPixel(1, pixelY),
+                [42] = map.GetPixel(11, pixelY),
+                [50] = map.GetPixel(2, pixelY),
+                [55] = map.GetPixel(8, pixelY),
+                [71] = map.GetPixel(5, pixelY),
+                [75] = map.GetPixel(10, pixelY),
+                [85] = map.GetPixel(3, pixelY),
+                [101] = map.GetPixel(6, pixelY),
+                [111] = map.GetPixel(9, pixelY),
+                [153] = map.GetPixel(13, pixelY),
+                [255] = map.GetPixel(12, pixelY),
             };
             ColorSwapPalette swap = new ColorSwapPalette(swapDict);
             PlantSkinSwaps.Add(swap);
