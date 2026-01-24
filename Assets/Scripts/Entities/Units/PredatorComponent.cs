@@ -892,6 +892,7 @@ public class PredatorComponent
         var target = alives[State.Rand.Next(alives.Length)];
         if (TacticalUtilities.OpenTile(location, target.Actor) == false)
             return null;
+        actor.SetPredMode(target.Location);
         if (!(target.Unit.FixedSide == unit.GetApparentSide(target.Unit)) ||
             !(unit.HasTrait(Traits.FriendlyStomach) || unit.HasTrait(Traits.Endosoma)))
             unit.DrainExp((unit.CalcScaledExp(4 * target.Unit.ExpMultiplier, unit.Level - target.Unit.Level, true)));
@@ -928,7 +929,7 @@ public class PredatorComponent
         {
             return; // Prevent NullPointer
         }
-
+        actor.SetPredMode(target.Location);
         State.GameManager.TacticalMode.TacticalStats.RegisterFreed(unit.Side);
         if (State.Rand.Next(2) == 0)
             State.GameManager.TacticalMode.Log.RegisterMiscellaneous(
@@ -4009,6 +4010,13 @@ public class PredatorComponent
         if (target.Unit.Side != actor.Unit.Side || target.Surrendered ||
             target.Position.GetNumberOfMovesDistance(actor.Position) > 1 || actor.Movement == 0 || !CanFeed())
             return false;
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(target.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        target.SetSuckleMode();
+        target.SetVoreSuccessMode();
         Tuple<int[], List<Prey>> digestion = CalcFeedValue(target, "breast");
         int[] nurseHeal = digestion.Item1;
         Prey deadPrey = digestion.Item2[0];
@@ -4060,6 +4068,13 @@ public class PredatorComponent
         if (target.Unit.Side != actor.Unit.Side || target.Surrendered ||
             target.Position.GetNumberOfMovesDistance(actor.Position) > 1 || actor.Movement == 0 || !CanFeedCum())
             return false;
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(target.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        target.SetSuckleMode();
+        target.SetVoreSuccessMode();
         Tuple<int[], List<Prey>> digestion = CalcFeedValue(target, "cock");
         int[] nurseHeal = digestion.Item1;
         Prey deadPrey = digestion.Item2[0];
@@ -4095,13 +4110,14 @@ public class PredatorComponent
 
     private bool Transfer(Actor_Unit target, Prey preyUnit)
     {
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(target.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        actor.SetPredMode(PreyLocation.balls);
         float r = (float)State.Rand.NextDouble();
         float v = target.GetSpecialChance(SpecialAction.CockVore);
-        if (target.Position.GetNumberOfMovesDistance(actor.Position) > 1)
-        {
-            return false;
-        }
-
         if (r > v && !preyUnit.Unit.IsDead)
         {
             return false;
@@ -4316,16 +4332,21 @@ public class PredatorComponent
                 recipient.PredatorComponent?.AddToWomb(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterTransferSuccess(unit, recipient.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.womb);
+                recipient.SetPredMode(PreyLocation.womb);
                 break;
             case PreyLocation.stomach:
                 recipient.PredatorComponent.AddToStomach(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterTransferSuccess(unit, recipient.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.stomach);
+                recipient.SetPredMode(PreyLocation.stomach);
+                recipient.SetVoreSuccessMode();
                 break;
             default:
                 recipient.PredatorComponent.AddToStomach(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterTransferSuccess(unit, recipient.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.stomach);
+                recipient.SetPredMode(PreyLocation.stomach);
+                recipient.SetVoreSuccessMode();
                 break;
         }
 
@@ -4341,6 +4362,11 @@ public class PredatorComponent
 
     private bool KissTransferFinalize(Actor_Unit recipient, Prey preyUnit, Prey preyref, PreyLocation destination)
     {
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(recipient.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
         if (preyUnit.Unit.IsDead == false)
         {
             recipient.PredatorComponent.AlivePrey++;
@@ -4359,6 +4385,9 @@ public class PredatorComponent
                 recipient.PredatorComponent.AddToStomach(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterKissTransfer(unit, recipient.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.stomach);
+                actor.SetPredMode(PreyLocation.stomach);
+                recipient.SetPredMode(PreyLocation.stomach);
+                recipient.SetVoreSuccessMode();
                 break;
         }
 
@@ -4372,6 +4401,11 @@ public class PredatorComponent
 
     public bool TransferAttempt(Actor_Unit target)
     {
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(target.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
         if (actor.Unit.Predator == false || target.Unit.Predator == false)
             return false;
         if (target.Unit.Side != actor.Unit.Side || target.Surrendered)
@@ -4542,6 +4576,12 @@ public class PredatorComponent
     private bool VoreStealFinalize(Actor_Unit donor, Prey preyUnit, Prey preyref, PreyLocation destination,
         PreyLocation oldLocation)
     {
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
+            State.GameManager.CameraCall(actor.Position);
+        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        donor.SetPredMode(oldLocation);
         actor.PredatorComponent.AlivePrey++;
         donor.PredatorComponent.AlivePrey--;
         switch (destination)
@@ -4550,16 +4590,21 @@ public class PredatorComponent
                 actor.PredatorComponent?.AddToWomb(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterVoreStealSuccess(donor.Unit, actor.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.womb, oldLocation);
+                actor.SetPredMode(PreyLocation.womb);
                 break;
             case PreyLocation.stomach:
                 actor.PredatorComponent.AddToStomach(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterVoreStealSuccess(donor.Unit, actor.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.stomach, oldLocation);
+                actor.SetPredMode(PreyLocation.stomach);
+                actor.SetVoreSuccessMode();
                 break;
             default:
                 actor.PredatorComponent.AddToStomach(preyref, 1.0f);
                 TacticalUtilities.Log.RegisterVoreStealSuccess(donor.Unit, actor.Unit, preyUnit.Unit, 1.0f,
                     PreyLocation.stomach, oldLocation);
+                actor.SetPredMode(PreyLocation.stomach);
+                actor.SetVoreSuccessMode();
                 break;
         }
 
