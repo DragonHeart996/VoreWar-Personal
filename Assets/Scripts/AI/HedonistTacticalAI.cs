@@ -129,11 +129,12 @@ public class HedonistTacticalAI : TacticalAI
             if (foundPath || didAction) return;
         }
 
-        RunBellyRub(actor, actor.Movement, true);
-        if (foundPath || didAction) return;
+        
         //Search for surrendered targets outside of vore range
         //If no path to any targets, will sit out its turn
         RunPred(actor, true);
+        if (foundPath || didAction) return;
+        RunBellyRub(actor, actor.Movement, true);
         if (foundPath || didAction) return;
         actor.ClearMovement();
     }
