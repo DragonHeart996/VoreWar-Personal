@@ -2329,7 +2329,7 @@ public class Actor_Unit
         }
         State.GameManager.TacticalMode.AITimer = Config.TacticalAttackDelay;
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
-            State.GameManager.CameraCall(Position);
+            State.GameManager.CameraCall(ranged ? Position : attacker.Position);
         chance = GetAttackChance(attacker, ranged);
 
         float r = (float)State.Rand.NextDouble();
