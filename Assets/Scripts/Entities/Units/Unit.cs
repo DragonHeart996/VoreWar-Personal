@@ -3159,7 +3159,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         StatusEffect old = GetStatusEffect(type);
         
         StatusEffects.Remove(old);                    // if null, nothing happens, otherwise status is effectively overwritten
-        StatusEffects.Add(new StatusEffect(type, Math.Max(strength, old.Strength), Math.Max(duration, old.Duration), applicator, expireEffect));
+        StatusEffects.Add(new StatusEffect(type, Math.Max(strength, old?.Strength ?? 0), Math.Max(duration, old?.Duration ?? 0), applicator, expireEffect));
     }
 
     internal StatusEffect GetStatusEffect(StatusEffectType type)
