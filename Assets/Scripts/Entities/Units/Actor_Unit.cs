@@ -1487,29 +1487,17 @@ public class Actor_Unit
             animationController.frameLists[0].currentlyActive = true;
         }
 
-        Attack(target, false, damageMultiplier: .66f);
-        Actor_Unit tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(1, 0));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(0, 1));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(-1, 0));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(0, -1));
-        TestAttack(tempTarget);
-        Attack(target, false, damageMultiplier: .66f);
-
+        int[,] targetGrid = { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 } };
+        foreach (Actor_Unit t in TacticalUtilities.UnitsWithinRotatingPattern(Position,
+                     targetGrid, TacticalUtilities.GetRotatingOctant(Position, target.Position)))
+        {
+            if(!TacticalUtilities.MeetsQualifier(targetTypes, this, target))
+                Attack(t, false, damageMultiplier: .66f);
+        }
+        
         Movement = 0;
 
         return true;
-
-        void TestAttack(Actor_Unit sideTarget)
-        {
-            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
-            {
-                Movement = 1;
-                Attack(sideTarget, false, damageMultiplier: .66f);
-            }
-        }
     }
     
     public bool AiSweepAttack(Actor_Unit mainTarget, Actor_Unit self, bool attack_ver)
