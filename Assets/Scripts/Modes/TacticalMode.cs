@@ -145,6 +145,10 @@ public class TacticalMode : SceneBase
     public bool IgnorePseudo = false;
     public bool SkipPseudo = false;
 
+    public bool tookCombatActions;
+    public int attackerTrappedUnitsTimer;
+    public int defenderTrappedUnitsTimer;
+    
     internal int currentTurn = 1;
 
     int lastDiscard = 5;
@@ -1757,6 +1761,10 @@ public class TacticalMode : SceneBase
 
             defenderSide = defenderSide,
             attackerSide = attackerSide,
+            
+            tookCombatActions = tookCombatActions,
+            attackerTrappedUnitsTimer = attackerTrappedUnitsTimer, 
+            defenderTrappedUnitsTimer = defenderTrappedUnitsTimer,
 
             attackersTurn = attackersTurn,
             isAPlayerTurn = IsPlayerTurn,
@@ -1813,6 +1821,10 @@ public class TacticalMode : SceneBase
 
         defenderSide = data.defenderSide;
         attackerSide = data.attackerSide;
+
+        tookCombatActions = data.tookCombatActions;
+        attackerTrappedUnitsTimer = data.attackerTrappedUnitsTimer;
+        defenderTrappedUnitsTimer = data.defenderTrappedUnitsTimer;
 
         currentTurn = data.currentTurn;
 
@@ -4126,6 +4138,7 @@ public class TacticalMode : SceneBase
 
     internal void ActionDone()
     {
+        tookCombatActions = true;
         ActionMode = 0;
         PlaceUndoMarker();
         RebuildInfo();
@@ -4594,6 +4607,14 @@ public class TacticalMode : SceneBase
         IsPlayerTurn = true;
         if (attackersTurn)
         {
+            if (!tookCombatActions)
+                attackerTrappedUnitsTimer++;
+            else
+                attackerTrappedUnitsTimer = 0;
+            if (attackerTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Attacker unable to fight for {attackerTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = false;
             attackersTurnCheck = false;
             activeSide = defenderSide;
@@ -4604,6 +4625,14 @@ public class TacticalMode : SceneBase
         }
         else
         {
+            if (!tookCombatActions)
+                defenderTrappedUnitsTimer++;
+            else
+                defenderTrappedUnitsTimer = 0;
+            if (defenderTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Defender unable to fight for {defenderTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = true;
             attackersTurnCheck = true;
             currentTurn++;

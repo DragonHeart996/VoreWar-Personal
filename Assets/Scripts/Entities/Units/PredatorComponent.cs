@@ -855,12 +855,12 @@ public class PredatorComponent
 
     public float FreeCap()
     {
-        float totalBulk = 0;
-        for (int i = 0; i < prey.Count; i++)
-        {
-            totalBulk += prey[i].Actor.Bulk();
-        }
-        return TotalCapacity() - totalBulk;
+        return TotalCapacity() - GetBulkOfPrey();
+    }
+    
+    public float ExpectedFreeCap()
+    {
+        return TotalCapacity() - GetBulkOfDefeatedEndoPrey();
     }
 
     public bool HasSpareCap(float bulk)
@@ -869,6 +869,14 @@ public class PredatorComponent
         return (bulk <= cap)
                || (cap >= 1 && actor.Unit.HasTrait(Traits.ExtremelyStretchy));
     }
+    
+    public bool HasExpectedSpareCap(float bulk)
+    {
+        float cap = TotalCapacity() - GetBulkOfDefeatedEndoPrey();
+        return (bulk <= cap)
+               || (cap >= 1 && actor.Unit.HasTrait(Traits.ExtremelyStretchy));
+    }
+    
 
     /// <summary>
     /// Designed to be used for manual regurgitation.

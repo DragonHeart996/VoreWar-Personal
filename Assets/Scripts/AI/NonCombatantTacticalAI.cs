@@ -68,6 +68,8 @@ public class NonCombatantTacticalAI : RaceServantTacticalAI
         actor.ClearMovement();
     }
 
+    protected override bool CheckCombatActionsAvailable(Actor_Unit actor) {return false;}
+    
     protected override List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves, bool spendFinalAP = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
