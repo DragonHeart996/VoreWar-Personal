@@ -613,7 +613,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.AllOutFirstStrike:
                 return "Unit starts battle in a protected state, with high dodge rate.  On their first attack or vore attempt of the battle, they get a significant bonus to damage or vore chance.  After that they become vulnerable, and move slower and have a dodge penalty.";
             case Traits.VenomousBite:
-                return "A missed bite from the biter trait will also poison an enemy, and give them the shaken debuff.";
+                return "If a missed vore from this unit triggers a bite, the target will also be poisoned and inflicted with Shaken.";
             case Traits.Petrifier:
                 return "Gives access to a single use ability that applies the petrified status effect to a target.  It prevents the target from acting, but also makes them resistant to damage and bulky to swallow.";
             case Traits.VenomShock:

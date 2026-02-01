@@ -252,7 +252,7 @@ public enum Traits
     Revenant = 125,
     /// <summary>Unit's first attack will deal 5x damage, or first vore attack will have 3.25 odds each battle.</summary>
     AllOutFirstStrike = 126,
-    /// <summary>If a missed vore from this unit triggers a bite, the tharget will also be poisoned and inflicted with Shaken.</summary>
+    /// <summary>If a missed vore from this unit triggers a bite, the target will also be poisoned and inflicted with Shaken.</summary>
     VenomousBite = 127,
     /// <summary>Allows unit to use <b>Petrify</b>, an attack that petrifies the target once per battle.</summary>
     Petrifier = 128,
