@@ -1091,40 +1091,42 @@ public class PredatorComponent
         prey.Add(preyUnit);
         UpdateAlivePrey();
     }
+    
+    
 
-    internal PreyLocation Location(Prey preyUnit)
+    internal PreyLocation Location(Prey preyUnit, bool trueLocation = false)
     {
-        if (womb.Contains(preyUnit) && unit.CanUnbirth)
+        if (womb.Contains(preyUnit) && (unit.CanUnbirth || trueLocation))
         {
             return PreyLocation.womb;
         }
 
-        if (breasts.Contains(preyUnit) && unit.CanBreastVore)
+        if (breasts.Contains(preyUnit) && (unit.CanBreastVore || trueLocation))
         {
             return PreyLocation.breasts;
         }
 
-        if (balls.Contains(preyUnit) && unit.CanCockVore)
+        if (balls.Contains(preyUnit) && (unit.CanCockVore || trueLocation))
         {
             return PreyLocation.balls;
         }
 
-        if (tail.Contains(preyUnit) && unit.CanTailVore)
+        if (tail.Contains(preyUnit) && (unit.CanTailVore || trueLocation))
         {
             return PreyLocation.tail;
         }
 
-        if (stomach2.Contains(preyUnit) && unit.HasTrait(Traits.DualStomach))
+        if (stomach2.Contains(preyUnit) && (unit.HasTrait(Traits.DualStomach) || trueLocation))
         {
             return PreyLocation.stomach2;
         }
 
-        if (leftBreast.Contains(preyUnit) && unit.CanBreastVore)
+        if (leftBreast.Contains(preyUnit) && (unit.CanBreastVore || trueLocation))
         {
             return PreyLocation.leftBreast;
         }
 
-        if (rightBreast.Contains(preyUnit) && unit.CanBreastVore)
+        if (rightBreast.Contains(preyUnit) && (unit.CanBreastVore || trueLocation))
         {
             return PreyLocation.rightBreast;
         }
@@ -1516,56 +1518,59 @@ public class PredatorComponent
 
     internal void WeightGain(Prey preyUnit)
     {
-        if (Location(preyUnit) == PreyLocation.balls)
+        var loc = Location(preyUnit, true);
+        
+        if (loc == PreyLocation.balls)
         {
-            if (unit.HasDick)
+            if (unit.HiddenUnit.HasDick)
             {
-                unit.DickSize = Math.Min(unit.DickSize + 1, Races.GetRace(unit).DickSizes - 1);
-                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideDick(unit.Race))
-                    unit.DickSize = Math.Min(unit.DickSize, State.RaceSettings.Get(unit.Race).MaxDick);
+                unit.HiddenUnit.DickSize = Math.Min(unit.HiddenUnit.DickSize + 1, Races.GetRace(unit.HiddenUnit).DickSizes - 1);
+                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideDick(unit.HiddenUnit.Race))
+                    unit.HiddenUnit.DickSize = Math.Min(unit.HiddenUnit.DickSize, State.RaceSettings.Get(unit.HiddenUnit.Race).MaxDick);
             }
         }
-        else if (Location(preyUnit) == PreyLocation.breasts || Location(preyUnit) == PreyLocation.leftBreast ||
-                 Location(preyUnit) == PreyLocation.rightBreast)
+        else if (loc == PreyLocation.breasts 
+                 || loc == PreyLocation.leftBreast
+                 || loc == PreyLocation.rightBreast)
         {
-            if (unit.HasBreasts)
+            if (unit.HiddenUnit.HasBreasts)
             {
-                unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize + 1, Races.GetRace(unit).BreastSizes - 1),
-                    unit.BreastSize == unit.DefaultBreastSize);
-                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideBreasts(unit.Race))
-                    unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize,
-                        State.RaceSettings.Get(unit.Race).MaxBoob));
+                unit.HiddenUnit.SetDefaultBreastSize(Math.Min(unit.HiddenUnit.DefaultBreastSize + 1, Races.GetRace(unit.HiddenUnit).BreastSizes - 1),
+                    unit.HiddenUnit.BreastSize == unit.HiddenUnit.DefaultBreastSize);
+                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideBreasts(unit.HiddenUnit.Race))
+                    unit.HiddenUnit.SetDefaultBreastSize(Math.Min(unit.HiddenUnit.DefaultBreastSize,
+                        State.RaceSettings.Get(unit.HiddenUnit.Race).MaxBoob));
             }
         }
         else
         {
             if (Config.AltVoreOralGain && State.Rand.NextDouble() < Config.WeightGainFraction)
             {
-                if (unit.HasDick)
+                if (unit.HiddenUnit.HasDick)
                 {
-                    unit.DickSize = Math.Min(unit.DickSize + 1, Races.GetRace(unit).DickSizes - 1);
-                    if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideDick(unit.Race))
-                        unit.DickSize = Math.Min(unit.DickSize, State.RaceSettings.Get(unit.Race).MaxDick);
+                    unit.HiddenUnit.DickSize = Math.Min(unit.HiddenUnit.DickSize + 1, Races.GetRace(unit.HiddenUnit).DickSizes - 1);
+                    if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideDick(unit.HiddenUnit.Race))
+                        unit.HiddenUnit.DickSize = Math.Min(unit.HiddenUnit.DickSize, State.RaceSettings.Get(unit.HiddenUnit.Race).MaxDick);
                 }
             }
 
             if (Config.AltVoreOralGain && State.Rand.NextDouble() < Config.WeightGainFraction)
             {
-                if (unit.HasBreasts)
+                if (unit.HiddenUnit.HasBreasts)
                 {
-                    unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize + 1, Races.GetRace(unit).BreastSizes - 1),
-                        unit.BreastSize == unit.DefaultBreastSize);
-                    if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideBreasts(unit.Race))
-                        unit.SetDefaultBreastSize(Math.Min(unit.DefaultBreastSize,
-                            State.RaceSettings.Get(unit.Race).MaxBoob));
+                    unit.HiddenUnit.SetDefaultBreastSize(Math.Min(unit.HiddenUnit.DefaultBreastSize + 1, Races.GetRace(unit.HiddenUnit).BreastSizes - 1),
+                        unit.HiddenUnit.BreastSize == unit.HiddenUnit.DefaultBreastSize);
+                    if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideBreasts(unit.HiddenUnit.Race))
+                        unit.HiddenUnit.SetDefaultBreastSize(Math.Min(unit.HiddenUnit.DefaultBreastSize,
+                            State.RaceSettings.Get(unit.HiddenUnit.Race).MaxBoob));
                 }
             }
 
-            if (Races.GetRace(unit).WeightGainDisabled == false && State.Rand.NextDouble() < Config.WeightGainFraction)
+            if (Races.GetRace(unit.HiddenUnit).WeightGainDisabled == false && State.Rand.NextDouble() < Config.WeightGainFraction)
             {
-                unit.BodySize = Math.Max(Math.Min(unit.BodySize + 1, Races.GetRace(unit).BodySizes - 1), 0);
-                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideWeight(unit.Race))
-                    unit.BodySize = Math.Min(unit.BodySize, State.RaceSettings.Get(unit.Race).MaxWeight);
+                unit.HiddenUnit.BodySize = Math.Max(Math.Min(unit.HiddenUnit.BodySize + 1, Races.GetRace(unit.HiddenUnit).BodySizes - 1), 0);
+                if (Config.RaceSizeLimitsWeightGain && State.RaceSettings.GetOverrideWeight(unit.HiddenUnit.Race))
+                    unit.HiddenUnit.BodySize = Math.Min(unit.HiddenUnit.BodySize, State.RaceSettings.Get(unit.HiddenUnit.Race).MaxWeight);
             }
         }
     }
@@ -1842,7 +1847,7 @@ public class PredatorComponent
                 {
                     Prey newPrey = new Prey(aliveSubUnits[i].Actor, actor, aliveSubUnits[i].SubPrey);
                     PreyLocation oldLocation = newPrey.Location;
-                    AddPrey(newPrey, Location(preyUnit));
+                    AddPrey(newPrey, Location(preyUnit,true));
                     preyUnit.SubPrey.Remove(aliveSubUnits[i]);
                     State.GameManager.TacticalMode.Log.RegisterMiscellaneous(
                         $"Sensing that <b>{preyUnit.Unit.Name}</b> is dead, <b>{newPrey.Unit.Name}</b> seizes the opportunity to claw {LogUtilities.GPPHis(newPrey.Unit)} way out of {LogUtilities.GPPHis(preyUnit.Unit)} {PreyLocStrings.ToSyn(oldLocation)}, only to find that now they are stuck in <b>{actor.Unit.Name}</b>'s {PreyLocStrings.ToSyn(newPrey.Location)}!");
@@ -1940,7 +1945,7 @@ public class PredatorComponent
                 for (int i = 0; i < deadSubUnits.Length; i++)
                 {
                     Prey newPrey = new Prey(deadSubUnits[i].Actor, actor, deadSubUnits[i].SubPrey);
-                    AddPrey(newPrey, Location(preyUnit));
+                    AddPrey(newPrey, Location(preyUnit,true));
                     preyUnit.SubPrey.Remove(deadSubUnits[i]);
                     preys += (i != 0 && deadSubUnits.Length > 2 ? "," : "") +
                              (deadSubUnits.Length > 1 && i == deadSubUnits.Length - 1 ? " and " : " ") +
@@ -2017,7 +2022,7 @@ public class PredatorComponent
                 }
 
                 unit.GiveScaledExp(8 * preyUnit.Unit.ExpMultiplier, unit.Level - preyUnit.Unit.Level, true);
-                AbsorptionEffect(preyUnit, Location(preyUnit));
+                AbsorptionEffect(preyUnit, Location(preyUnit,true));
                 if (!State.GameManager.TacticalMode.turboMode)
                     actor.SetAbsorptionMode();
                 CheckPredTraitAbsorption(preyUnit);
@@ -2032,7 +2037,7 @@ public class PredatorComponent
                     for (int i = 0; i < subUnits.Length; i++)
                     {
                         Prey newPrey = new Prey(subUnits[i].Actor, actor, subUnits[i].SubPrey);
-                        AddPrey(newPrey, Location(preyUnit));
+                        AddPrey(newPrey, Location(preyUnit,true));
                         preyUnit.SubPrey.Remove(subUnits[i]);
                     }
                 }
@@ -2528,12 +2533,20 @@ public class PredatorComponent
             VisibleFullness = Mathf.Lerp(StomachTransition.transitionStart, StomachTransition.transitionEnd,
                 StomachTransition.transitionTime / StomachTransition.transitionLength);
         }
+        else
+        {
+            VisibleFullness = StomachTransition.transitionEnd;
+        }
 
         if (BallsTransition.transitionTime < BallsTransition.transitionLength)
         {
             BallsTransition.transitionTime += Time.deltaTime;
             BallsFullness = Mathf.Lerp(BallsTransition.transitionStart, BallsTransition.transitionEnd,
                 BallsTransition.transitionTime / BallsTransition.transitionLength);
+        }
+        else
+        {
+            BallsFullness = BallsTransition.transitionEnd;
         }
 
         if (LeftBreastTransition.transitionTime < LeftBreastTransition.transitionLength)
@@ -2542,12 +2555,20 @@ public class PredatorComponent
             LeftBreastFullness = Mathf.Lerp(LeftBreastTransition.transitionStart, LeftBreastTransition.transitionEnd,
                 LeftBreastTransition.transitionTime / LeftBreastTransition.transitionLength);
         }
+        else
+        {
+            LeftBreastFullness = LeftBreastTransition.transitionEnd;
+        }
 
         if (RightBreastTransition.transitionTime < RightBreastTransition.transitionLength)
         {
             RightBreastTransition.transitionTime += Time.deltaTime;
             RightBreastFullness = Mathf.Lerp(RightBreastTransition.transitionStart, RightBreastTransition.transitionEnd,
                 RightBreastTransition.transitionTime / RightBreastTransition.transitionLength);
+        }
+        else
+        {
+            RightBreastFullness = RightBreastTransition.transitionEnd;
         }
     }
 
@@ -2617,7 +2638,7 @@ public class PredatorComponent
         }
 
         float newStomach = fullnessFactor * stomachFullness / stomachSize;
-        if (newStomach > 0)
+        if (newStomach > 0 || VisibleFullness > 0)
             StomachTransition = new Transition(Math.Abs(newStomach - VisibleFullness) / 4, VisibleFullness, newStomach);
         else
         {
@@ -2626,7 +2647,7 @@ public class PredatorComponent
         }
 
         float newBalls = fullnessFactor * ballsFullness / stomachSize;
-        if (newBalls > 0)
+        if (newBalls > 0 || BallsFullness > 0)
             BallsTransition = new Transition(Math.Abs(newBalls - BallsFullness) / 4, BallsFullness, newBalls);
         else
         {
@@ -2651,7 +2672,7 @@ public class PredatorComponent
             newRightBreast = newLeftBreast;
         }
 
-        if (newLeftBreast > 0)
+        if (newLeftBreast > 0 || LeftBreastFullness > 0)
             LeftBreastTransition = new Transition(Math.Abs(newLeftBreast - LeftBreastFullness) / 4, LeftBreastFullness,
                 newLeftBreast);
         else
@@ -2660,7 +2681,7 @@ public class PredatorComponent
             LeftBreastFullness = 0;
         }
 
-        if (newRightBreast > 0)
+        if (newRightBreast > 0 || RightBreastFullness > 0)
             RightBreastTransition = new Transition(Math.Abs(newRightBreast - RightBreastFullness) / 4,
                 RightBreastFullness, newRightBreast);
         else

@@ -449,11 +449,11 @@ public class Unit
         return HasTrait(Traits.AcellularBody) || HasTrait(Traits.ViralBiology);
     }
 
-    internal bool CanUnbirth => Config.Unbirth && HasVagina;
-    internal bool CanCockVore => Config.CockVore && HasDick;
-    internal bool CanBreastVore => Config.BreastVore && HasBreasts;
-    internal bool CanAnalVore => Config.AnalVore;
-    internal bool CanTailVore => Config.TailVore;
+    internal bool CanUnbirth => Config.Unbirth && HasVagina && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.Unbirth);
+    internal bool CanCockVore => Config.CockVore && HasDick && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.CockVore);
+    internal bool CanBreastVore => Config.BreastVore && HasBreasts && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.BreastVore);
+    internal bool CanAnalVore => Config.AnalVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.Anal);
+    internal bool CanTailVore => Config.TailVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.TailVore);
 
     public bool CanVore(PreyLocation location)
     {
