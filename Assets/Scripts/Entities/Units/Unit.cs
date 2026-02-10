@@ -771,6 +771,16 @@ public class Unit
             if (rand == 1) InnateSpells.Add(SpellTypes.Pyre);
             if (rand == 2) InnateSpells.Add(SpellTypes.LightningBolt);
         }
+
+        if (HasTrait(Traits.NaturalCaster))
+        {
+            int rand = State.Rand.Next(5);
+            if (rand == 0) InnateSpells.Add(SpellTypes.Icicle);
+            if (rand == 1) InnateSpells.Add(SpellTypes.Fireball);
+            if (rand == 2) InnateSpells.Add(SpellTypes.LightningBolt);
+            if (rand == 3) InnateSpells.Add(SpellTypes.PowerBolt);
+            if (rand == 4) InnateSpells.Add(SpellTypes.Poison);
+        }
         if (race == Race.Fairies)
         {
             FairyUtil.SetSeason(this, FairyUtil.GetSeason(this)); //To establish the spell properly
@@ -1031,6 +1041,11 @@ public class Unit
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.NectarWeapon);
         }
         else if (race == Race.Ryan)
+        {
+            FixedGear = true;
+            Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RyanWeapon);
+        }
+        else if (race == Race.Konane)
         {
             FixedGear = true;
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RyanWeapon);
@@ -1521,7 +1536,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             return _manaPct;
         }
     }
-    private float _stamPct = 100f;
+    private float _stamPct = 1f;
     public float StamPct
     {
         get
@@ -2010,6 +2025,10 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
 
         PermanentTraits.Add(traitIdToAdd);
         RecalculateStatBoosts();
+        if (traitIdToAdd == Traits.Resourceful)
+        {
+            SetMaxItems();
+        }
         return true;
     }
 
@@ -2348,6 +2367,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
                     if (SharedTraits.Contains((Traits)id))
                         SharedTraits.Remove((Traits)id);
                 }
+                AllConditionalTraits.Remove(toRemove);
             }
             RecalculateStatBoosts();
             PreyCheck();

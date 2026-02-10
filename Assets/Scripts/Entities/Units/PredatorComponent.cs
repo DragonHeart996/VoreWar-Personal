@@ -913,7 +913,7 @@ public class PredatorComponent
         TacticalUtilities.Log.RegisterRegurgitate(actor.Unit, target.Actor.Unit,
             actor.PredatorComponent.Location(target));
         RemovePrey(target);
-        unit.RestoreStamPct(1);
+        target.Actor.Unit.RestoreStamPct(0.1f);
         UpdateFullness();
         return target;
     }
@@ -1011,7 +1011,7 @@ public class PredatorComponent
                 preyUnit.Actor.UnitSprite.DisplayEscape();
             }
         }
-
+        preyUnit.Actor.Unit.RestoreStamPct(0.1f);
         RemovePrey(preyUnit);
         UpdateFullness();
     }
@@ -1260,6 +1260,7 @@ public class PredatorComponent
                 if (unit.HasTrait(Traits.Endosoma))
                 {
                     preyUnit.Unit.Stamina -= preyDamage;
+                    preyUnit.TurnsSinceLastDamage = 0;
                 }
 
                 if (unit.HasTrait(Traits.HealingBelly))
