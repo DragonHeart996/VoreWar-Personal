@@ -43,6 +43,7 @@
     static internal Lupine Lupine = new Lupine();
     static internal Jackals Jackals = new Jackals();
     static internal Ghosts Ghosts = new Ghosts();
+    static internal DemiDragons DemiDragons = new DemiDragons();
 
 
     static internal Tigers Tigers = new Tigers();
@@ -119,6 +120,7 @@
     static internal Trex Trex = new Trex();
     static internal Utahraptor Utahraptor = new Utahraptor();
     static internal Iliijiith Iliijiith = new Iliijiith();
+    static internal Pudding Pudding = new Pudding();
 
     static internal Selicia Selicia = new Selicia();
     static internal Vision Vision = new Vision();
@@ -150,6 +152,7 @@
     static internal Firefly Firefly = new Firefly();
     static internal Nectar Nectar = new Nectar();
     static internal Ryan Ryan = new Ryan();
+    static internal Konane Konane = new Konane();
 
 
     static internal DefaultRaceData GetRace(Unit unit)
@@ -435,6 +438,8 @@
                 return Nectar;
             case Race.Ryan:
                 return Ryan;
+            case Race.Konane:
+                return Konane;
             case Race.Otachi:
                 return Otachi;
             case Race.Raiju:
@@ -445,6 +450,8 @@
                return SpaceCroach;
             case Race.Ghosts:
                 return Ghosts;
+            case Race.DemiDragons:
+                return DemiDragons;
             case Race.WoodDryad:
                 return WoodDryad;
             case Race.EarthDryad:
@@ -459,6 +466,8 @@
                 return Utahraptor;
             case Race.Iliijiith:
                 return Iliijiith;
+            case Race.Pudding:
+                return Pudding;
         }
         UnityEngine.Debug.LogWarning("Couldn't find race, substituting the Blank Slate");
         return BlankSlate;
