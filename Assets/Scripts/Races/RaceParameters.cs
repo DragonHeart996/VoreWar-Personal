@@ -4312,7 +4312,7 @@ static class RaceParameters
                 Traits.Intimidating,
                 Traits.TailStrike,
             },
-            InnateSpells = new List<SpellTypes>() { SpellTypes.IceBlast, SpellTypes.Icicle },
+            //InnateSpells = new List<SpellTypes>() { SpellTypes.IceBlast, SpellTypes.Icicle },
             RaceDescription = "An ice dragoness claiming to hail from a distant city. She seems a bit nicer than the wild dragons, but even hungrier. Her deep experience with her element let's her frequently cast ice breath attacks, and chills the air around nearby foes.",
 
         };
