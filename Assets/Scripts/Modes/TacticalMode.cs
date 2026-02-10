@@ -3216,6 +3216,7 @@ public class TacticalMode : SceneBase
     {
         if (Config.PromptEndTurn == false)
         {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
             return;
         }
@@ -3231,10 +3232,17 @@ public class TacticalMode : SceneBase
         if (canStillMove)
         {
             var box = Instantiate(State.GameManager.DialogBoxPrefab).GetComponent<DialogBox>();
-            box.SetData(EndTurn, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
+            box.SetData(() => 
+            {
+                tookCombatActions |= !Config.AutoUseAI;
+                EndTurn();
+            }, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
         }
         else
+        {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
+        }
     }
 
     internal void SurrenderAll(bool attacker)
