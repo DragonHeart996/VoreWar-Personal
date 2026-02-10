@@ -859,7 +859,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.Hoarder:
                 return "Race increase the income of a village by 0.1% per population with this trait.";
             case Traits.NaturalCaster:
-                return "This unit is not completely fixed to the space around it. \n(Allows using the Dimension Shift ability once per battle, which attempts to teleport the User to a random open tile within 20 tiles.)";
+                return "This unit recives fireball, poison, icicle, power bolt, or lightning bolt as innate spell.";
         }  
         return "<b>This trait needs a tooltip!</b>";
     }
