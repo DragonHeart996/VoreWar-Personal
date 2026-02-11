@@ -4856,14 +4856,18 @@ public class TacticalMode : SceneBase
 
         bool foodRemaining = false;
         bool oneSideLeft = false;
-        if (visibleAttackers.Count() == 0)
+        if (!visibleAttackers.Any())
         {
-            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing)
+            if (!turboMode && IsPlayerTurn && attackersTurn && Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+                RunningFriendlyAI = true;
+            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance == Config.AutoAdvanceType.DoNothing)
                 foodRemaining = CanEatDefeated(visibleDefenders, edibleDefeated);
             oneSideLeft = !visibleDefenders.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, defenderSide, attackerSide) == attackerSide); // They are probably still fighting in this case
         }
-        if (visibleDefenders.Count() == 0)
+        if (!visibleDefenders.Any())
         {
+            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+                RunningFriendlyAI = true;
             if (!turboMode && IsPlayerTurn && attackersTurn && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing)
                 foodRemaining = CanEatDefeated(visibleAttackers, edibleDefeated);
             oneSideLeft = !visibleAttackers.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, attackerSide, defenderSide) == defenderSide); // They are probably still fighting in this case

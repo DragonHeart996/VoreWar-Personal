@@ -129,7 +129,7 @@ public abstract class TacticalAI : ITacticalAI
                                                  && a.Unit.Side == AISide);
         onlyForeignTroopsLeft = actorsThatMatter.All(a => TacticalUtilities.GetMindControlSide(a.Unit) == -1 
                                                           && TacticalUtilities.GetPreferredSide(a.Unit, enemySide, AISide) == enemySide);
-        onlySurrenderedEnemies = actors.Where(s => s.Unit.Side != AISide && s.Unit.IsDead == false && s.Surrendered == false && !s.Fled).Any() == false;
+        onlySurrenderedEnemies = actors.Any(s => s.Unit.Side != AISide && s.Unit.IsDead == false && s.Surrendered == false && !s.Fled) == false;
         var preds = actors.Where(s => s.Unit.Side == AISide && s.Unit.IsDead == false && !s.Surrendered && s.Unit.Predator);
         lackPredators = preds.Any() == false;
         bool tooBig = true;
