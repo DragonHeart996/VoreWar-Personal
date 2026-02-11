@@ -1938,7 +1938,7 @@ internal int StartOfTurnExpectedMP()
                         trait.ApplyStatusEffect(this, target, false, damage);
                     }
                     if (target.Unit.HasTrait(Traits.PoorConstitution) && State.Rand.Next(10) == 0)
-                        target.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 2);
+                        target.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 2, Unit);
                     if (Unit.HasTrait(Traits.WeaponChanneler) && Unit.Mana >= 6)
                         Unit.SpendMana(6);
                     if (Unit.HasTrait(Traits.BladeDance))
