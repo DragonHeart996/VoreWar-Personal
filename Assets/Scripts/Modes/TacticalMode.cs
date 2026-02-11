@@ -4626,7 +4626,7 @@ public class TacticalMode : SceneBase
         IsPlayerTurn = true;
         if (attackersTurn)
         {
-            if (!tookCombatActions)
+            if (!tookCombatActions && currentTurn > 10)
                 attackerTrappedUnitsTimer++;
             else
                 attackerTrappedUnitsTimer = 0;
@@ -4644,7 +4644,7 @@ public class TacticalMode : SceneBase
         }
         else
         {
-            if (!tookCombatActions)
+            if (!tookCombatActions && currentTurn > 10)
                 defenderTrappedUnitsTimer++;
             else
                 defenderTrappedUnitsTimer = 0;
