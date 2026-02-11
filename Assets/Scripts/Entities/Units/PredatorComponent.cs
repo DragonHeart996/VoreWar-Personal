@@ -2948,7 +2948,7 @@ public class PredatorComponent
             actor.sidesAttackedThisBattle.Add(target.Unit.GetApparentSide());
         }
 
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
@@ -3005,7 +3005,7 @@ public class PredatorComponent
     bool Consume(Actor_Unit target, Action<Actor_Unit, float, Prey, float> action, PreyLocation preyType,
         float delay = 0)
     {
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         int boost = 0;
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
@@ -3629,7 +3629,7 @@ public class PredatorComponent
                 State.GameManager.TacticalMode.IsPlayerInControl == false &&
                 State.GameManager.TacticalMode.turboMode == false)
                 State.GameManager.CameraCall(actor.Position);
-            State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+            State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
             actor.SetSuckleMode();
             actor.SetVoreSuccessMode();
             State.GameManager.SoundManager.PlaySwallow(PreyLocation.stomach,actor);
@@ -4044,7 +4044,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(target.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         target.SetSuckleMode();
         target.SetVoreSuccessMode();
         Tuple<int[], List<Prey>> digestion = CalcFeedValue(target, "breast");
@@ -4102,7 +4102,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(target.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         target.SetSuckleMode();
         target.SetVoreSuccessMode();
         Tuple<int[], List<Prey>> digestion = CalcFeedValue(target, "cock");
@@ -4144,7 +4144,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(target.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         actor.SetPredMode(PreyLocation.balls);
         float r = (float)State.Rand.NextDouble();
         float v = target.GetSpecialChance(SpecialAction.CockVore);
@@ -4396,7 +4396,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(recipient.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         if (preyUnit.Unit.IsDead == false)
         {
             recipient.PredatorComponent.AlivePrey++;
@@ -4435,7 +4435,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(target.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         if (actor.Unit.Predator == false || target.Unit.Predator == false)
             return false;
         if (target.Unit.Side != actor.Unit.Side || target.Surrendered)
@@ -4610,7 +4610,7 @@ public class PredatorComponent
             State.GameManager.TacticalMode.IsPlayerInControl == false &&
             State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(actor.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         donor.SetPredMode(oldLocation);
         actor.PredatorComponent.AlivePrey++;
         donor.PredatorComponent.AlivePrey--;
@@ -4670,7 +4670,7 @@ public class PredatorComponent
     {
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(actor.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         if (forcePrey.Unit.IsDead == false)
             AlivePrey++;
         State.GameManager.TacticalMode.TacticalStats.RegisterVore(unit.Side);
@@ -5166,7 +5166,7 @@ public class PredatorComponent
     {
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(actor.Position);
-        State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
 
         if (forcePrey.Unit.IsDead == false)
             AlivePrey++;

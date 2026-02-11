@@ -2159,7 +2159,7 @@ internal int StartOfTurnExpectedMP()
 
     internal bool DefendSpellCheck(Spell spell, Actor_Unit attacker, out float chance, float mod = 0, Stat stat = Stat.Mind)
     {
-        State.GameManager.TacticalMode.AITimer = Config.TacticalAttackDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(Position);
         chance = spell.Resistable ? GetMagicChance(attacker, spell, mod, stat) : 1;
@@ -2351,7 +2351,7 @@ internal int StartOfTurnExpectedMP()
                 attacker.sidesAttackedThisBattle = new List<int>();
             attacker.sidesAttackedThisBattle.Add(Unit.GetApparentSide());
         }
-        State.GameManager.TacticalMode.AITimer = Config.TacticalAttackDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(ranged ? Position : attacker.Position);
         chance = GetAttackChance(attacker, ranged);
@@ -2537,7 +2537,7 @@ internal int StartOfTurnExpectedMP()
             if (Config.BellyRubHands)
                 GameObject.Instantiate(State.GameManager.TacticalMode.HandPrefab, new Vector3(target.Position.x + UnityEngine.Random.Range(-0.2F, 0.2F), target.Position.y + 0.1F + UnityEngine.Random.Range(-0.1F, 0.1F)), new Quaternion());
             State.GameManager.CameraCall(target.Position);
-            State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+            State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         }
         target.DigestCheck();
         if (Unit.HasTrait(Traits.PleasurableTouch))

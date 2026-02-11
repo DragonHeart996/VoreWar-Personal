@@ -3492,7 +3492,7 @@ public class TacticalMode : SceneBase
                         EndTurn();
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
             else if (foreignAI != null || foreignUnits.Count() > 0)
@@ -3518,7 +3518,7 @@ public class TacticalMode : SceneBase
                         foreignAI = null;
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
         }
@@ -3599,7 +3599,7 @@ public class TacticalMode : SceneBase
                 EndTurn();
             }
             if (AITimer <= 0)
-                AITimer = Config.TacticalAIMovementDelay;
+                AITimer = Math.Max(AITimer,Config.TacticalAIMovementDelay);
         }
     }
 
