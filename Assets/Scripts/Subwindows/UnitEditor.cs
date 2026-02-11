@@ -328,9 +328,15 @@ class UnitEditor : UnitCustomizer
             Unit.Predator = false;
             actor.PredatorComponent?.FreeAnyAlivePrey();
         }
-            else
-        if (trait == Traits.BookWormI || trait == Traits.BookWormII || trait == Traits.BookWormIII)
-            Unit.GiveTraitBooks();
+            else if (trait == Traits.BookWormI || trait == Traits.BookWormII || trait == Traits.BookWormIII)
+            {
+                Unit.GiveTraitBooks();
+                Unit.SetMaxItems();
+            }
+        else if (trait == Traits.Resourceful)
+        {
+            Unit.SetMaxItems();
+        }
         actor.Unit.InitializeTraits();
         RefreshStats();
     }

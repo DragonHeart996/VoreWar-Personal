@@ -2381,7 +2381,31 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             AllConditionalTraits = new Dictionary<ConditionalTraitContainer, bool>();
         if (Config.RaceTraitsEnabled)
             Tags.AddRange(State.RaceSettings.GetRaceTraits(HiddenUnit.Race));
-        if (HiddenUnit.HasBreasts && HiddenUnit.HasDick == false)
+        
+        
+        if (Type == UnitType.Leader)
+        {
+            var leaderTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            if (Config.LeaderTraits != null) leaderTraits.AddRange(Config.LeaderTraits);
+            if (leaderTraits.Contains(Traits.TraitOverride)) Tags.Clear();
+            Tags.AddRange(leaderTraits);
+        }
+        else if (Type == UnitType.Soldier)
+        {
+            var soldierTraits = State.RaceSettings.GetSoldierRaceTraits(HiddenUnit.Race) ?? new List<Traits>();
+            if (Config.SoldierTraits != null) soldierTraits.AddRange(Config.SoldierTraits);
+            if (soldierTraits.Contains(Traits.TraitOverride)) Tags.Clear();
+            Tags.AddRange(soldierTraits);
+        }
+        else if (Type == UnitType.Spawn)
+        {
+            var spawnTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race) ?? new List<Traits>();
+            if (Config.SpawnTraits != null) spawnTraits.AddRange(Config.SpawnTraits);
+            if (spawnTraits.Contains(Traits.TraitOverride)) Tags.Clear();
+            Tags.AddRange(spawnTraits);
+        }
+        
+        if (HiddenUnit.HasBreasts && !HiddenUnit.HasDick)
         {
             var femaleTraits = State.RaceSettings.GetFemaleRaceTraits(HiddenUnit.Race);
             if (femaleTraits != null) Tags.AddRange(femaleTraits);
@@ -2401,19 +2425,6 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             if (hermTraits != null) Tags.AddRange(hermTraits);
             hermTraits = Config.HermTraits;
             if (hermTraits != null) Tags.AddRange(hermTraits);
-        }
-        if (Type == UnitType.Leader)
-        {
-            var leaderTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race);
-            if (leaderTraits != null) Tags.AddRange(leaderTraits);
-            if (Config.LeaderTraits != null) Tags.AddRange(Config.LeaderTraits);
-        }
-        else if (Type == UnitType.Spawn)
-        {
-            var spawnTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race);
-            if (spawnTraits != null) Tags.AddRange(spawnTraits);
-            spawnTraits = Config.SpawnTraits;
-            if (spawnTraits != null) Tags.AddRange(spawnTraits);
         }
         if (TemporaryTraits != null)
             Tags.AddRange(TemporaryTraits);
@@ -3189,6 +3200,10 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         return StatusEffects.Where(s => s.Type == type).OrderByDescending(s => s.Strength).ThenByDescending(s => s.Duration).FirstOrDefault();
     }
 
+    internal bool HasEffect(StatusEffectType type)
+    {
+        return GetStatusEffect(type) != null;
+    }
     internal int GetNegativeStatusEffects()
     {
         int ret = 0;
@@ -3205,11 +3220,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         if (HasEffect(StatusEffectType.Staggering)) ret++;
         if (HasEffect(StatusEffectType.Virus)) ret++;
         if (HasEffect(StatusEffectType.Weakness)) ret++;
-
-        bool HasEffect(StatusEffectType type)
-        {
-            return GetStatusEffect(type) != null;
-        }
+        
         return ret;
     }
 

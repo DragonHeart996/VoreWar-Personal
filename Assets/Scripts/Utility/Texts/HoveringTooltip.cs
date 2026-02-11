@@ -860,8 +860,16 @@ public class HoveringTooltip : MonoBehaviour
                 return "Race increase the income of a village by 0.1% per population with this trait.";
             case Traits.NaturalCaster:
                 return "This unit recives fireball, poison, icicle, power bolt, or lightning bolt as innate spell.";
+            case Traits.TraitOverride:
+                return
+                    "Forces the trait list containing it to override base racial traits, rather than adding onto them";
+            case Traits.SweepingSwallow:
+                return "Grants SweepingSwallow Attack";
+            case Traits.ExtremelyStretchy:
+                return "Can attempt to eat anything so long as it has some space, also prevents overfeeding damage";
+            default:
+                return "<b>This trait needs a tooltip!</b>";
         }  
-        return "<b>This trait needs a tooltip!</b>";
     }
 
     private static string GetTraitName(Traits trait)

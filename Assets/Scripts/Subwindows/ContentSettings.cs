@@ -239,6 +239,7 @@ public class ContentSettings : MonoBehaviour
     public InputField MonsterConquestTurns;
 
     public InputField LeaderTraits;
+    public InputField SoldierTraits;
     public InputField MaleTraits;
     public InputField FemaleTraits;
     public InputField HermTraits;
@@ -730,6 +731,7 @@ public class ContentSettings : MonoBehaviour
         Config.World.MaxSpellLevelDrop = PlayerPrefs.GetInt("MaxSpellLevelDrop", 4);
         Config.World.MaxEquipmentLevelDrop = PlayerPrefs.GetInt("MaxEquipmentLevelDrop", 4);
         Config.World.LeaderTraits = RaceEditorPanel.TextToTraitList(PlayerPrefs.GetString("LeaderTraits", ""));
+        Config.World.SoldierTraits = RaceEditorPanel.TextToTraitList(PlayerPrefs.GetString("SoldierTraits", ""));
         Config.World.MaleTraits = RaceEditorPanel.TextToTraitList(PlayerPrefs.GetString("MaleTraits", ""));
         Config.World.FemaleTraits = RaceEditorPanel.TextToTraitList(PlayerPrefs.GetString("FemaleTraits", ""));
         Config.World.HermTraits = RaceEditorPanel.TextToTraitList(PlayerPrefs.GetString("HermTraits", ""));
@@ -949,11 +951,12 @@ public class ContentSettings : MonoBehaviour
         DiplomacyScale.RefreshShownValue();
         MaxSpellLevelDrop.RefreshShownValue();
         MaxEquipmentLevelDrop.RefreshShownValue();
-        LeaderTraits.text = RaceEditorPanel.TraitListToText(Config.LeaderTraits);
-        MaleTraits.text = RaceEditorPanel.TraitListToText(Config.MaleTraits);
-        FemaleTraits.text = RaceEditorPanel.TraitListToText(Config.FemaleTraits);
-        HermTraits.text = RaceEditorPanel.TraitListToText(Config.HermTraits);
-        SpawnTraits.text = RaceEditorPanel.TraitListToText(Config.SpawnTraits);
+        LeaderTraits.text = RaceEditorPanel.VerifyTraitText(LeaderTraits.text);
+        SoldierTraits.text = RaceEditorPanel.VerifyTraitText(SoldierTraits.text);
+        MaleTraits.text = RaceEditorPanel.VerifyTraitText(MaleTraits.text);
+        FemaleTraits.text = RaceEditorPanel.VerifyTraitText(FemaleTraits.text);
+        HermTraits.text = RaceEditorPanel.VerifyTraitText(HermTraits.text);
+        SpawnTraits.text = RaceEditorPanel.VerifyTraitText(SpawnTraits.text);
         TacticalMovementSoftCap.text = Config.TacticalMovementSoftCap.ToString();
         TacticalMovementHardCap.text = Config.TacticalMovementHardCap.ToString();
         SizeAccuracyMod.text = Config.SizeAccuracyMod.ToString();
@@ -1169,6 +1172,7 @@ public class ContentSettings : MonoBehaviour
         Config.World.MaxSpellLevelDrop = MaxSpellLevelDrop.value + 1;
         Config.World.MaxEquipmentLevelDrop = MaxEquipmentLevelDrop.value + 1;
         Config.World.LeaderTraits = RaceEditorPanel.TextToTraitList(LeaderTraits.text);
+        Config.World.SoldierTraits = RaceEditorPanel.TextToTraitList(SoldierTraits.text);
         Config.World.MaleTraits = RaceEditorPanel.TextToTraitList(MaleTraits.text);
         Config.World.FemaleTraits = RaceEditorPanel.TextToTraitList(FemaleTraits.text);
         Config.World.HermTraits = RaceEditorPanel.TextToTraitList(HermTraits.text);
@@ -1455,13 +1459,13 @@ public class ContentSettings : MonoBehaviour
 
 
         if (int.TryParse(TacticalMovementSoftCap.text, out int tmsc))
-            PlayerPrefs.SetFloat("TacticalMovementSoftCap", tmsc);
+            PlayerPrefs.SetInt("TacticalMovementSoftCap", tmsc);
         else
-            PlayerPrefs.SetFloat("TacticalMovementSoftCap", -1);
+            PlayerPrefs.SetInt("TacticalMovementSoftCap", -1);
         if (int.TryParse(TacticalMovementHardCap.text, out int tmhc))
-            PlayerPrefs.SetFloat("TacticalMovementHardCap", tmhc);
+            PlayerPrefs.SetInt("TacticalMovementHardCap", tmhc);
         else
-            PlayerPrefs.SetFloat("TacticalMovementHardCap", -1);
+            PlayerPrefs.SetInt("TacticalMovementHardCap", -1);
         if (float.TryParse(SizeAccuracyMod.text, out float sam))
             PlayerPrefs.SetFloat("SizeAccuracyMod", sam);
         else
@@ -1471,13 +1475,13 @@ public class ContentSettings : MonoBehaviour
         else
             PlayerPrefs.SetFloat("SizeAccuracyLowerBound", 10);
         if (int.TryParse(SizeAccuracyInterval.text, out int sai))
-            PlayerPrefs.SetFloat("SizeAccuracyInterval", sai);
+            PlayerPrefs.SetInt("SizeAccuracyInterval", sai);
         else
-            PlayerPrefs.SetFloat("SizeAccuracyInterval", 5);
+            PlayerPrefs.SetInt("SizeAccuracyInterval", 5);
         if (int.TryParse(SizeAccuracyCap.text, out int sac))
-            PlayerPrefs.SetFloat("SizeAccuracyCap", sac);
+            PlayerPrefs.SetInt("SizeAccuracyCap", sac);
         else
-            PlayerPrefs.SetFloat("SizeAccuracyCap", -1);
+            PlayerPrefs.SetInt("SizeAccuracyCap", -1);
 
         if (float.TryParse(SizeDamageMod.text, out float sbm))
             PlayerPrefs.SetFloat("SizeDamageMod", sbm);
@@ -1488,14 +1492,14 @@ public class ContentSettings : MonoBehaviour
         else
             PlayerPrefs.SetFloat("SizeDamageLowerBound", 10);
         if (int.TryParse(SizeDamageInterval.text, out int sbi))
-            PlayerPrefs.SetFloat("SizeDamageInterval", sbi);
+            PlayerPrefs.SetInt("SizeDamageInterval", sbi);
         else
-            PlayerPrefs.SetFloat("SizeDamageInterval", 5);
+            PlayerPrefs.SetInt("SizeDamageInterval", 5);
 
         if (int.TryParse(SizeDamageCap.text, out int sdc))
-            PlayerPrefs.SetFloat("SizeDamageCap", sdc);
+            PlayerPrefs.SetInt("SizeDamageCap", sdc);
         else
-            PlayerPrefs.SetFloat("SizeDamageCap", -1);
+            PlayerPrefs.SetInt("SizeDamageCap", -1);
 
         foreach (MonsterSpawnerPanel spawner in MonsterSpawners)
         {

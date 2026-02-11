@@ -4604,6 +4604,7 @@ internal class RaceTraits
     internal Stat FavoredStat;
     internal List<Traits> RacialTraits;
     internal List<Traits> LeaderTraits;
+    internal List<Traits> SoldierTraits;
     internal List<Traits> SpawnTraits;
     internal List<int> RacialTags = new List<int>();
     //internal List<Traits> RandomTraits;

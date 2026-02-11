@@ -650,7 +650,9 @@ public enum Traits
     /// <summary>Grants SweepingSwallow Attack</summary>
     SweepingSwallow = 999,
     /// <summary>Can attempt to eat anything so long as it has some space, also prevents overfeeding damage</summary>
-    ExtremelyStretchy = 998
+    ExtremelyStretchy = 998,
+    /// <summary>Forces the trait list containing it to override base racial traits, rather than adding onto them</summary>
+    TraitOverride = 997
 
 }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OdinSerializer.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -82,6 +83,7 @@ public class RaceEditorPanel : MonoBehaviour
     public InputField FemaleTraits;
     public InputField HermTraits;
     public InputField SpawnTraits;
+    public InputField SoldierTraits;
     public InputField LeaderTraits;
 
     public TMP_Dropdown BannerType;
@@ -539,10 +541,22 @@ public class RaceEditorPanel : MonoBehaviour
                 item.DeployCost = float.TryParse(DeployCost.text, out float outputDeploy) ? outputDeploy : 1;
 
                 item.FemaleTraits = TextToTraitList(FemaleTraits.text);
+                item.FemaleTraitsText = VerifyTraitText(FemaleTraits.text);
+                
                 item.MaleTraits = TextToTraitList(MaleTraits.text);
+                item.MaleTraitsText = VerifyTraitText(MaleTraits.text);
+                
                 item.HermTraits = TextToTraitList(HermTraits.text);
+                item.HermTraitsText = VerifyTraitText(HermTraits.text);
+                
                 item.SpawnTraits = TextToTraitList(SpawnTraits.text);
+                item.SpawnTraitsText = VerifyTraitText(SpawnTraits.text);
+                
+                item.SoldierTraits = TextToTraitList(SoldierTraits.text);
+                item.SoldierTraitsText = VerifyTraitText(SoldierTraits.text);
+                
                 item.LeaderTraits = TextToTraitList(LeaderTraits.text);
+                item.LeaderTraitsText = VerifyTraitText(LeaderTraits.text);
             }
         }
         catch
@@ -564,38 +578,125 @@ public class RaceEditorPanel : MonoBehaviour
         UpdateInteractable();
     }
 
+    public static String VerifyTraitText(String text)
+    {
+        if (text.IsNullOrWhitespace())
+            return "";
+        
+        StringBuilder result = new StringBuilder();
+
+        foreach (String value in text.Split(new char[]{ ',',' ' },StringSplitOptions.RemoveEmptyEntries)) 
+        {
+            bool matched = false;
+            
+            if (value.ToLower().StartsWith("tag:"))
+            {
+                result.Append(value);
+                result.Append(", ");
+                continue;
+            }
+            foreach (RandomizeList rl in State.RandomizeLists)
+            {
+                if (value.ToLower().Equals(rl.name.ToString().ToLower()))
+                {
+                    result.Append(value);
+                    result.Append(", ");
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched)
+                continue;
+            foreach (CustomTraitBoost ct in State.CustomTraitList)
+            {
+                if (value.ToLower().Equals(ct.name.ToString().ToLower()))
+                {
+                    result.Append(value);
+                    result.Append(", ");
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched)
+                continue;
+            foreach (ConditionalTraitContainer ct in State.ConditionalTraitList)
+            {
+                if (value.ToLower().Equals(ct.name.ToString().ToLower()))
+                {
+                    result.Append(value);
+                    result.Append(", ");
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched)
+                continue;
+            foreach (Traits trait in (Stat[])Enum.GetValues(typeof(Traits)))
+            {
+                if (value.ToLower().Equals(trait.ToString().ToLower()))
+                {
+                    result.Append(value);
+                    result.Append(", ");
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched)
+                continue;
+        }
+        return result.ToString();
+    }
+    
     public static List<Traits> TextToTraitList(string text)
     {
         List<Traits> traits = new List<Traits>();
-        foreach (RandomizeList rl in State.RandomizeLists)
+        
+        if (string.IsNullOrEmpty(text))
+            return traits;
+        
+        foreach (String value in text.Split(new char[]{',',' '}, StringSplitOptions.RemoveEmptyEntries))
         {
-            if (text.ToLower().Contains(rl.name.ToString().ToLower()))
+            bool byTag = value.ToLower().StartsWith("tag:");
+            
+            foreach (RandomizeList rl in State.RandomizeLists)
             {
-                traits.Add((Traits)rl.id);
+                if (!byTag && value.ToLower().Equals(rl.name.ToString().ToLower()))
+                {
+                    traits.Add((Traits)rl.id);
+                }
             }
-        }
-        foreach (CustomTraitBoost ct in State.CustomTraitList)
-        {
-            if (text.ToLower().Contains(ct.name.ToString().ToLower()))
+            foreach (CustomTraitBoost ct in State.CustomTraitList)
             {
-                traits.Add((Traits)ct.id);
+                if (byTag ? ct.tags.Any((s) => s.ToLower().Equals(value.ToLower().Substring("tag:".Length)))
+                        : value.ToLower().Equals(ct.name.ToString().ToLower()))
+                {
+                    traits.Add((Traits)ct.id);
+                }
             }
-        }
-        foreach (ConditionalTraitContainer ct in State.ConditionalTraitList)
-        {
-            if (text.ToLower().Contains(ct.name.ToString().ToLower()))
+            foreach (ConditionalTraitContainer ct in State.ConditionalTraitList)
             {
-                traits.Add((Traits)ct.id);
+                if (!byTag && value.ToLower().Equals(ct.name.ToString().ToLower()))
+                {
+                    traits.Add((Traits)ct.id);
+                }
             }
-        }
-        foreach (Traits trait in (Stat[])Enum.GetValues(typeof(Traits)))
-        {
-            if (text.ToLower().Contains(trait.ToString().ToLower()))
+            foreach (Traits trait in (Stat[])Enum.GetValues(typeof(Traits)))
             {
-                traits.Add(trait);
+                if (byTag && State.TieredTraitsList.TryGetValue(trait, out TaggedTrait t))
+                {
+                    if (t.tags.Any((s) => s.ToLower().Equals(value.ToLower().Substring("tag:".Length))))
+                    {
+                        traits.Add(trait);
+                    }
+                }
+                else if (value.ToLower().Equals(trait.ToString().ToLower()))
+                {
+                    traits.Add(trait);
+                }
             }
+            traits = traits.Distinct().ToList();
         }
-        traits = traits.Distinct().ToList();
+        
         return traits;
     }
 
@@ -776,11 +877,11 @@ public class RaceEditorPanel : MonoBehaviour
             }
             Upkeep.text = upMult.ToString();
 
-            FemaleTraits.text = TraitListToText(item.FemaleTraits);
-            MaleTraits.text = TraitListToText(item.MaleTraits);
-            HermTraits.text = TraitListToText(item.HermTraits);
-            SpawnTraits.text = TraitListToText(item.SpawnTraits);
-            LeaderTraits.text = TraitListToText(item.LeaderTraits);
+            FemaleTraits.text = item.FemaleTraitsText;
+            MaleTraits.text = item.MaleTraitsText;
+            HermTraits.text = item.HermTraitsText;
+            SpawnTraits.text = item.SpawnTraitsText;
+            LeaderTraits.text = item.LeaderTraitsText;
         }
     }
 
