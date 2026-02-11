@@ -1096,7 +1096,7 @@ class DemiDragons : DefaultRaceData
 
     protected override Sprite BodyAccentSprite15(Actor_Unit actor) // Left Nipple
     {
-        if (actor.Unit.HasBreasts == false)
+        if (actor.Unit.HasBreasts == false || Config.HideBreasts)
             return null;
         if (actor.Unit.Furry)
         {
@@ -1133,7 +1133,7 @@ class DemiDragons : DefaultRaceData
 
     protected override Sprite BeardSprite(Actor_Unit actor) // Right Nipple
     {
-        if (actor.Unit.HasBreasts == false)
+        if (actor.Unit.HasBreasts == false || Config.HideBreasts)
             return null;
         if (actor.Unit.Furry)
         {
@@ -1745,11 +1745,11 @@ class DemiDragons : DefaultRaceData
                     Dick.layer = 20;
                     if (actor.IsCockVoring)
                     {
-                        return SpritesCustomisation2[114 + actor.Unit.DickSize];
+                        return SpritesCustomisation2[106 + actor.Unit.DickSize];
                     }
                     else
                     {
-                        return SpritesCustomisation2[106 + actor.Unit.DickSize];
+                        return SpritesCustomisation2[90 + actor.Unit.DickSize];
                     }
                 }
                 else
@@ -1757,11 +1757,11 @@ class DemiDragons : DefaultRaceData
                     Dick.layer = 13;
                     if (actor.IsCockVoring)
                     {
-                        return SpritesCustomisation2[98 + actor.Unit.DickSize];
+                        return SpritesCustomisation2[114  + actor.Unit.DickSize];
                     }
                     else
                     {
-                        return SpritesCustomisation2[90 + actor.Unit.DickSize];
+                        return SpritesCustomisation2[98 + actor.Unit.DickSize];
                     }
                 }
             }

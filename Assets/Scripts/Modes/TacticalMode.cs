@@ -1539,6 +1539,7 @@ public class TacticalMode : SceneBase
         foreach (Actor_Unit unit in units)
         {
             unit.PredatorComponent?.UpdateAlivePrey();
+            unit.PredatorComponent?.UpdateFullness();
         }
         GeneralSetup();
         Log.RefreshListing();
@@ -3445,19 +3446,29 @@ public class TacticalMode : SceneBase
                         if (Config.FairyBVType == FairyBVType.Shared)
                         {
                             unit.UnitSprite.AnimateBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                 * 0.011f);
                             unit.UnitSprite.AnimateSecondBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                * 0.011f);
                         }
                         else
                             unit.UnitSprite.AnimateBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.0022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true)
+                                + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                                * 0.0022f);
                     }
 
                     if (unit.PredatorComponent?.RightBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
                     {
                         unit.UnitSprite.AnimateSecondBoobs(
-                            unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true) * 0.0022f);
+                            (unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                             + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                            * 0.0022f);
                     }
                 }
             }

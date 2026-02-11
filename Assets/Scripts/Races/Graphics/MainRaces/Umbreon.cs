@@ -214,7 +214,7 @@ class Umbreon : DefaultRaceData
     }
     protected override Sprite BodyAccentSprite2(Actor_Unit actor)
     {
-        if (actor.Unit.HasDick == false /*|| CockBlocked*/)
+        if (actor.Unit.HasDick == false || Config.HideCocks)
             return null;
 
         if (actor.IsErect())
@@ -234,7 +234,7 @@ class Umbreon : DefaultRaceData
     }
     protected override Sprite BodyAccentSprite3(Actor_Unit actor) // Left Breast Ring color. Animation syncing with breast handled in "CompleteSprite.cs" "Void UpdateSprite"
     {
-        if (actor.Unit.HasBreasts == false /*|| BreastBlocked*/)
+        if (actor.Unit.HasBreasts == false || Config.HideBreasts)
             return null;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
@@ -265,7 +265,7 @@ class Umbreon : DefaultRaceData
     }
     protected override Sprite BodyAccentSprite4(Actor_Unit actor) // Right Breast Ring color. Animation syncing with breast handled in "CompleteSprite.cs" "Void UpdateSprite"
     {
-        if (actor.Unit.HasBreasts == false /*|| BreastBlocked*/)
+        if (actor.Unit.HasBreasts == false || Config.HideBreasts)
             return null;
         if (actor.PredatorComponent?.RightBreastFullness > 0)
         {
