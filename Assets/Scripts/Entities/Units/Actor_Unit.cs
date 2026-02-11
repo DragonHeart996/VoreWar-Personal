@@ -216,14 +216,17 @@ public class Actor_Unit
             Paralyzed = false;
             Slimed = false;
         }
-        else if ((Unit.GetStatusEffect(StatusEffectType.Petrify) != null) || (Unit.GetStatusEffect(StatusEffectType.Frozen) != null))
+        else if (Unit.HasEffect(StatusEffectType.Petrify) 
+                 || Unit.HasEffect(StatusEffectType.Frozen)
+                 || Unit.HasEffect(StatusEffectType.Sleeping))
         {
             Movement = 0;
             Slimed = false;
         }
-        else if (Unit.GetStatusEffect(StatusEffectType.Glued) != null)
+        else if (TurnsSlacking >= 1) 
         {
-            Movement = 2;
+            Movement = 0;
+            TurnsSlacking--;
             Slimed = false;
         }
         else if ((Unit.GetStatusEffect(StatusEffectType.Webbed) != null) || (Unit.GetStatusEffect(StatusEffectType.Snared) != null))
@@ -231,36 +234,27 @@ public class Actor_Unit
             Movement = 1;
             Slimed = false;
         }
-        else if (Unit.GetStatusEffect(StatusEffectType.Staggering) != null)
+        else if (Unit.GetStatusEffect(StatusEffectType.Glued) != null)
+        {
+            Movement = 2;
+            Slimed = false;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Staggering)
+                 || Slimed)
         {
             Movement = CurrentMaxMovement() / 2;
             Slimed = false;
-        }
-        else if (Unit.GetStatusEffect(StatusEffectType.Sleeping) != null)
-        {
-            Movement = 0;
-            Slimed = false;
-        }
-        else if (Slimed)
-        {
-            Movement = CurrentMaxMovement() / 2;
-            Slimed = false;
-        }
-        else if (TurnsSlacking >= 1) 
-        {
-            Movement = 0;
-            TurnsSlacking--;
         }
         else
             Movement = CurrentMaxMovement();
 
-        if ((Unit.HasTrait(Traits.Slacker) || Unit.HasTrait(Traits.Juggernaut)) && Movement > 0)
+        if (Unit.HasTrait(Traits.Slacker) && Movement > 0)
         {
             TurnsSlacking++;
-            if (Unit.HasTrait(Traits.Slacker) && Unit.HasTrait(Traits.Juggernaut))
-            {
-                TurnsSlacking++;
-            }
+        }
+        if (Unit.HasTrait(Traits.Juggernaut) && Movement > 0)
+        {
+            TurnsSlacking++;
         }
 
         if (Movement > Config.TacticalMovementHardCap && Config.TacticalMovementHardCap > 0)
@@ -280,7 +274,47 @@ public class Actor_Unit
         }
     }
 
+internal int StartOfTurnExpectedMP()
+{
+    int ap = MaxMovement();
+        
+        if (Paralyzed
+                 || Unit.HasEffect(StatusEffectType.Petrify) 
+                 || Unit.HasEffect(StatusEffectType.Frozen)
+                 || (Unit.GetStatusEffect(StatusEffectType.Sleeping)?.Applicator ?? Unit) != Unit)
+        {
+            ap = 0;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Webbed) 
+                 || Unit.HasEffect(StatusEffectType.Snared)
+                 || Unit.HasEffect(StatusEffectType.Glued))
+        {
+            ap = 1;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Staggering)
+                 || Slimed)
+        {
+            ap /= 2;
+        }
 
+        if (ap > Config.TacticalMovementHardCap && Config.TacticalMovementHardCap > 0)
+        {
+            ap = Config.TacticalMovementHardCap;
+        }
+        if (ap > Config.TacticalMovementSoftCap && Config.TacticalMovementSoftCap >= 0)
+        {
+            int excess = ap - Config.TacticalMovementSoftCap;
+            int required = 2;
+            ap = Config.TacticalMovementSoftCap;
+            while (excess >= required) 
+            {
+                ap++;
+                required *= 2;
+            }
+        }
+
+        return ap;
+}
 
     public int MaxMovement()
     {
@@ -296,6 +330,8 @@ public class Actor_Unit
         {
             total = (int)(total * (1 + speed.Strength));
         }
+        if (Unit.HasTrait(Traits.AllOutFirstStrike) && HasAttackedThisCombat) //apply here as well because it is non-reversible
+            total /= 2;
         total = (int)(total * Unit.TraitBoosts.SpeedMultiplier);
         if (total < Unit.TraitBoosts.MinSpeed)
             total = Unit.TraitBoosts.MinSpeed;

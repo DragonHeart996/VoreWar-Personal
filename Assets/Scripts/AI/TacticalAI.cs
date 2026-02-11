@@ -146,7 +146,7 @@ public abstract class TacticalAI : ITacticalAI
                 }
             }
         }
-        trappedUnits = trappedUnitsTimer >= 2;
+        trappedUnits = trappedUnitsTimer >= 5;
         veryTrappedUnits = trappedUnitsTimer >= 10 
                            && enemyTrappedUnitsTimer >= 10;
         if (onlySurrenderedEnemies)
@@ -372,11 +372,12 @@ public abstract class TacticalAI : ITacticalAI
 
     protected virtual bool CheckCombatActionsAvailable(Actor_Unit actor)
     {
-        if (actor.Movement == 0)
+        int ap = actor.StartOfTurnExpectedMP();
+        
+        if (ap == 0)
             return false;
         
         Vec2i position = actor.Position;
-        int ap = actor.MaxMovement();
         
         if (actor.Unit.HasTrait(Traits.Pounce) && ap >= 2)
             if (CheckVorePounce(actor, position, ap, true) > 0
