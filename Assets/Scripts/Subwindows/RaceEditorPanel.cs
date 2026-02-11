@@ -881,6 +881,7 @@ public class RaceEditorPanel : MonoBehaviour
             MaleTraits.text = item.MaleTraitsText;
             HermTraits.text = item.HermTraitsText;
             SpawnTraits.text = item.SpawnTraitsText;
+            SoldierTraits.text = item.SoldierTraitsText;
             LeaderTraits.text = item.LeaderTraitsText;
         }
     }

@@ -2574,7 +2574,7 @@ public class PredatorComponent
 
     internal void UpdateFullness()
     {
-        float fullnessFactor = 2.25f / unit.GetScale(2);
+        float fullnessFactor = 2.25f / unit.GetScale();
         float fullness = 0;
         float stomachFullness = 0;
         float breastFullness = 0;
@@ -3005,12 +3005,8 @@ public class PredatorComponent
     bool Consume(Actor_Unit target, Action<Actor_Unit, float, Prey, float> action, PreyLocation preyType,
         float delay = 0)
     {
-        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         int boost = 0;
-        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
-            State.GameManager.TacticalMode.IsPlayerInControl == false &&
-            State.GameManager.TacticalMode.turboMode == false)
-            State.GameManager.CameraCall(actor.Position);
+        
         if (TacticalUtilities.AppropriateVoreTarget(actor, target) == false)
         {
             return false;
@@ -3077,6 +3073,11 @@ public class PredatorComponent
                 actor.sidesAttackedThisBattle.Add(target.Unit.GetApparentSide());
             }
 
+            State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
+            if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+                State.GameManager.TacticalMode.IsPlayerInControl == false &&
+                State.GameManager.TacticalMode.turboMode == false)
+                State.GameManager.CameraCall(actor.Position);
             float r = (float)State.Rand.NextDouble();
             float v = target.GetDevourChance(actor, skillBoost: boost);
             if (r < v)
@@ -3124,6 +3125,7 @@ public class PredatorComponent
                 }
                 else
                 {
+                    State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
                     target.UnitSprite.DisplayResist();
                     if (unit.HasTrait(Traits.Tenacious))
                         unit.AddTenacious();

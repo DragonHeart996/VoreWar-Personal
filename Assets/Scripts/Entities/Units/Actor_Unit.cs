@@ -1892,7 +1892,9 @@ internal int StartOfTurnExpectedMP()
             if (targetRange < 2)
             {
                 animationUpdateTime = 1.0F;
-                if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
+                if (forceBite)
+                    Mode = DisplayMode.OralVore;
+                else if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
                     Mode = DisplayMode.MeleeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
