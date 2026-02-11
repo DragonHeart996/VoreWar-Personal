@@ -243,7 +243,7 @@ class Lizards : DefaultRaceData
     {
         if (facingFront == true)
         {
-            Breasts.layer = 16;
+            Breasts.layer = 15;
             if (Config.LizardsHaveNoBreasts)
                 return null;
             if (actor.Unit.HasBreasts == false)
