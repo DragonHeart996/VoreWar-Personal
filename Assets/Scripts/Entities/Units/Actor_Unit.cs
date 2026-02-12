@@ -2054,7 +2054,8 @@ internal int StartOfTurnExpectedMP()
         if (Unit.HasTrait(Traits.InfectiousReproduction) && target.Unit.GetStatusEffect(StatusEffectType.Poisoned) != null)
         {
             Race spawnRace = Unit.DetermineSpawnRace();
-            target.PredatorComponent.CreateSpawn(spawnRace, Unit.Side, Unit.Experience / 2, true);
+            if (target.Unit.Type != UnitType.Spawn)     //prevent infinite spawn loops
+                target.PredatorComponent.CreateSpawn(spawnRace, Unit.Side, Unit.Experience / 2, true);
         }
 
         Unit.GiveScaledExp(4 * target.Unit.ExpMultiplier, Unit.Level - target.Unit.Level);

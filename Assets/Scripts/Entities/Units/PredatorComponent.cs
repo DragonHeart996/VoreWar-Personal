@@ -1972,7 +1972,8 @@ public class PredatorComponent
                 {
                     actor.Damage(totalHeal * 2);
                     totalHeal = 0;
-                    CreateSpawn(actor.InfectedRace, actor.InfectedSide, unit.Experience / 2, true);
+                    if (preyUnit.Unit.Type != UnitType.Spawn)   //prevent infinite spawn loops
+                        CreateSpawn(actor.InfectedRace, actor.InfectedSide, unit.Experience / 2, true);
                 }
 
                 foreach (IVoreCallback callback in Callbacks)

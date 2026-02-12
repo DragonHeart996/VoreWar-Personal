@@ -873,7 +873,9 @@ internal class CreateSpawn : VoreTrait
             side = predUnit.Unit.HiddenUnit.Side;
         }
         // use source race and side IF changeling already had this ability before transforming
-        predUnit.PredatorComponent.CreateSpawn(spawnRace, side, predUnit.Unit.Experience / 2);
+        
+        if (preyUnit.Unit.Type != UnitType.Spawn)   //prevent infinite spawn loops
+            predUnit.PredatorComponent.CreateSpawn(spawnRace, side, predUnit.Unit.Experience / 2);
         return true;
     }
 }
