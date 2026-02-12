@@ -129,8 +129,8 @@ public abstract class TacticalAI : ITacticalAI
                                                  && a.Unit.Side == AISide);
         onlyForeignTroopsLeft = actorsThatMatter.All(a => TacticalUtilities.GetMindControlSide(a.Unit) == -1 
                                                           && TacticalUtilities.GetPreferredSide(a.Unit, enemySide, AISide) == enemySide);
-        onlySurrenderedEnemies = actors.Any(s => s.Unit.Side != AISide && s.Unit.IsDead == false && s.Surrendered == false && !s.Fled) == false;
-        var preds = actors.Where(s => s.Unit.Side == AISide && s.Unit.IsDead == false && !s.Surrendered && s.Unit.Predator);
+        onlySurrenderedEnemies = !actors.Any(s => s.Unit.Side != AISide && !s.Unit.IsDead && !s.Surrendered && !s.Fled);
+        var preds = actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered && s.Unit.Predator);
         lackPredators = preds.Any() == false;
         bool tooBig = true;
         trappedUnits = false;
@@ -929,6 +929,7 @@ public abstract class TacticalAI : ITacticalAI
                               && Config.EdibleCorpses
                               && onlySurrenderedEnemies) 
                              || (unit.Surrendered 
+                                 && !unit.Unit.IsDead
                                  && (Config.EatSurrenderedAllies
                                      || TacticalUtilities.TreatAsHostile(actor, unit))))
                          && unit.Visible

@@ -1096,7 +1096,7 @@ class DemiDragons : DefaultRaceData
 
     protected override Sprite BodyAccentSprite15(Actor_Unit actor) // Left Nipple
     {
-        if (actor.Unit.HasBreasts == false || Config.HideBreasts)
+        if (!actor.Unit.HasBreasts || Config.HideBreasts)
             return null;
         if (actor.Unit.Furry)
         {
@@ -1233,7 +1233,7 @@ class DemiDragons : DefaultRaceData
     {
         if (actor.Unit.Furry)
         {
-            if (actor.IsOralVoring)
+            if (actor.IsEating)
             {
                 return SpritesCustomisation2[66 + actor.Unit.EyeType];
             }
@@ -1253,7 +1253,7 @@ class DemiDragons : DefaultRaceData
     {
         if (actor.Unit.Furry)
         {
-            if (actor.IsOralVoring)
+            if (actor.IsEating)
             {
                 return SpritesCustomisation2[82 + actor.Unit.EyeType];
             }
@@ -2624,6 +2624,7 @@ class DemiDragons : DefaultRaceData
             clothing1 = new SpriteExtraInfo(18, null, null);
             clothing2 = new SpriteExtraInfo(7, null, null);
             FixedColor = true;
+            blocksDick = false;
         }
 
         public override void Configure(CompleteSprite sprite, Actor_Unit actor)
@@ -3151,7 +3152,7 @@ class DemiDragons : DefaultRaceData
                     else if (actor.Unit.DickSize > 5)
                         clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[44];
                     else
-                        clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[46];
+                        clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[45];
                 }
                 else clothing1.GetSprite = null;
 

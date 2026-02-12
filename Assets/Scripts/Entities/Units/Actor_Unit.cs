@@ -2156,7 +2156,9 @@ internal int StartOfTurnExpectedMP()
     internal bool DefendSpellCheck(Spell spell, Actor_Unit attacker, out float chance, float mod = 0, Stat stat = Stat.Mind)
     {
         State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
-        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(Position);
         chance = spell.Resistable ? GetMagicChance(attacker, spell, mod, stat) : 1;
         float r = (float)State.Rand.NextDouble();
@@ -2361,7 +2363,7 @@ internal int StartOfTurnExpectedMP()
         }
         State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
-            State.GameManager.CameraCall(ranged ? Position : attacker.Position);
+            State.GameManager.CameraCall(ranged ? attacker.Position : Position);
         chance = GetAttackChance(attacker, ranged);
 
         float r = (float)State.Rand.NextDouble();

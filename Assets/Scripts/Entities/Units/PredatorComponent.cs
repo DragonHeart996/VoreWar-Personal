@@ -1520,7 +1520,7 @@ public class PredatorComponent
     {
         var loc = Location(preyUnit, true);
         
-        if (loc == PreyLocation.balls)
+        if (loc == PreyLocation.balls && State.Rand.NextDouble() < Config.WeightGainFraction)
         {
             if (unit.HiddenUnit.HasDick)
             {
@@ -1533,7 +1533,7 @@ public class PredatorComponent
                  || loc == PreyLocation.leftBreast
                  || loc == PreyLocation.rightBreast)
         {
-            if (unit.HiddenUnit.HasBreasts)
+            if (unit.HiddenUnit.HasBreasts && State.Rand.NextDouble() < Config.WeightGainFraction)
             {
                 unit.HiddenUnit.SetDefaultBreastSize(Math.Min(unit.HiddenUnit.DefaultBreastSize + 1, Races.GetRace(unit.HiddenUnit).BreastSizes - 1),
                     unit.HiddenUnit.BreastSize == unit.HiddenUnit.DefaultBreastSize);

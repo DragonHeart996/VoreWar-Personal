@@ -172,6 +172,11 @@ abstract class MainClothing
                 sprite.HideSprite(SpriteType.BodyAccent3); //Used for Breast Ring colors
                 sprite.HideSprite(SpriteType.BodyAccent4);
             }
+            if (actor.Unit.Race == Race.DemiDragons)
+            {
+                sprite.HideSprite(SpriteType.BodyAccent15); //Used for nipple colors
+                sprite.HideSprite(SpriteType.Beard);
+            }
 
         }
         else if (coversBreasts)
