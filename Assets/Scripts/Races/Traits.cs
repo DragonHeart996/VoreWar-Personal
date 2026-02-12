@@ -804,7 +804,7 @@ internal class Symbiote : VoreTrait
         }
         predUnit.Unit.ReloadTraits();
         predUnit.Unit.InitializeTraits();
-        predUnit.ReloadSpellTraits();
+        //predUnit.ReloadSpellTraits();
         return true;
     }
 
@@ -838,7 +838,7 @@ internal class TraitBorrower : VoreTrait
         }
         predUnit.Unit.ReloadTraits();
         predUnit.Unit.InitializeTraits();
-        predUnit.ReloadSpellTraits();
+        //predUnit.ReloadSpellTraits();
         return true;
     }
 

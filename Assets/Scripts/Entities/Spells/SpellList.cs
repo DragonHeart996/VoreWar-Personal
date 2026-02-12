@@ -1736,6 +1736,7 @@ public class Spell
             if ((actor.Unit.SingleUseSpells?.Contains(SpellType) ?? false) && actor.Unit.Mana != startMana)
             {
                 actor.Unit.SingleUseSpells.Remove(SpellType);
+                actor.Unit.ExpendedSingleUseSpells.Add(SpellType);
                 actor.Unit.UpdateSpells();
             }
             return true;
@@ -1751,6 +1752,7 @@ public class Spell
             if ((actor.Unit.SingleUseSpells?.Contains(SpellType) ?? false) && actor.Unit.Mana != startMana)
             {
                 actor.Unit.SingleUseSpells.Remove(SpellType);
+                actor.Unit.ExpendedSingleUseSpells.Add(SpellType);
                 actor.Unit.UpdateSpells();
             }
             return true;

@@ -1663,7 +1663,6 @@ public static class State
                 if (pureTactical)
                 {
                     GameManager.TacticalMode.RefreshPureTacticalTraits();
-                    GameManager.TacticalMode.ForceUpdate();
                 }
             }
             

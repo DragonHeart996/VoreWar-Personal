@@ -48,7 +48,8 @@ public class AdvancedUnitCommands : MonoBehaviour
             if (action.AppearConditional(actor))
                 SetButton(action.Name, action.OnClicked, action.ButtonColor, false);
         }
-
+        
+        actor.ReloadSpellTraits();
         foreach (var spell in actor.Unit.UseableSpells)
         {
             SetButtonSpell(actor, spell);

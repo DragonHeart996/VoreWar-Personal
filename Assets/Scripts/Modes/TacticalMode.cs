@@ -514,6 +514,7 @@ public class TacticalMode : SceneBase
 
         foreach (Actor_Unit actor in units)
         {
+            actor.Unit.ExpendedSingleUseSpells.Clear();
             actor.Unit.EnemiesKilledThisBattle = 0;
             actor.allowedToDefect = !actor.DefectedThisTurn && TacticalUtilities.GetPreferredSide(actor.Unit, actor.Unit.Side, actor.Unit.Side == attackerSide ? defenderSide : attackerSide) != actor.Unit.Side;
             actor.DefectedThisTurn = false;

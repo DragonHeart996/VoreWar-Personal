@@ -406,68 +406,61 @@ internal int StartOfTurnExpectedMP()
 
     public void ReloadSpellTraits()
     {
+        if (Unit.ExpendedSingleUseSpells == null)
+        {
+            Unit.ExpendedSingleUseSpells = new List<SpellTypes>();
+        }
+        
         Unit.SingleUseSpells = new List<SpellTypes>();
         Unit.MultiUseSpells = new List<SpellTypes>();
         if (Unit.HasTrait(Traits.MadScience) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(((SpellBook)State.World.ItemRepository.GetRandomBook(1, 4)).ContainedSpell);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.PollenProjector) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.AlraunePuff.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Webber) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Web.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.GlueBomb) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.GlueBomb.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.PoisonSpit) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.ViperPoisonStatus.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Petrifier) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Petrify.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Charmer) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Charm.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.HypnoticGas) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.HypnoGas.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Reanimator) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Reanimate.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Binder) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Bind.SpellType);
-            Unit.UpdateSpells();
         }
         // Multi-use section
         if (Unit.HasTrait(Traits.ForceFeeder) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.MultiUseSpells.Add(SpellList.ForceFeed.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.DimensionalAntilock) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.DimensionShift.SpellType);
-            Unit.UpdateSpells();
         }
         if (State.World?.ItemRepository != null) //protection for the create strat screen
         {
@@ -483,8 +476,8 @@ internal int StartOfTurnExpectedMP()
                 foreach (SpellTypes spell in callback.GetMultiSpells(Unit))
                     Unit.MultiUseSpells.Add(spell);
             }
-            Unit.UpdateSpells();
         }
+        Unit.UpdateSpells();
     }
 
     public void GenerateSpritePrefab(Transform folder)
@@ -2195,13 +2188,19 @@ internal int StartOfTurnExpectedMP()
             {
                 Unit.TraitBoosts.Incoming.MagicDamage *= 0.75f;
             }
+
             if (Unit.GetStatusEffect(StatusEffectType.Fractured) != null)
             {
                 Unit.TraitBoosts.Incoming.MagicDamage *= 1.50f;
             }
-            damage = (int)(damage * attacker.Unit.TraitBoosts.Outgoing.MagicDamage * Unit.TraitBoosts.Incoming.MagicDamage * TagConditionChecker.ApplyTagEffect(attacker.Unit, Unit, UnitTagModifierEffect.MagicDamageMult));
-            EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.WhenHitBySpellDamage, new object[] { this, attacker, damage });
-            State.GameManager.TacticalMode.TacticalStats.RegisterHit(spell, Mathf.Min(damage, Unit.Health), attacker.Unit.Side);
+
+            damage = (int)(damage * attacker.Unit.TraitBoosts.Outgoing.MagicDamage *
+                           Unit.TraitBoosts.Incoming.MagicDamage * TagConditionChecker.ApplyTagEffect(attacker.Unit,
+                               Unit, UnitTagModifierEffect.MagicDamageMult));
+            EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.WhenHitBySpellDamage,
+                new object[] { this, attacker, damage });
+            State.GameManager.TacticalMode.TacticalStats.RegisterHit(spell, Mathf.Min(damage, Unit.Health),
+                attacker.Unit.Side);
             Damage(damage, true, damageType: spell.DamageType);
             State.GameManager.TacticalMode.Log.RegisterSpellHit(attacker.Unit, Unit, spell.SpellType, damage, chance);
             if (attacker.Unit.FixedSide == TacticalUtilities.GetMindControlSide(Unit))
@@ -2209,26 +2208,31 @@ internal int StartOfTurnExpectedMP()
                 StatusEffect charm = Unit.GetStatusEffect(StatusEffectType.Charmed);
                 if (charm != null)
                 {
-                    Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                    Unit.StatusEffects.Remove(charm); // betrayal dispels charm
                 }
             }
+
             if (Unit.HasTrait(Traits.Crystalline) && State.Rand.Next(4) == 0)
                 Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
             if (attacker.Unit.HasTrait(Traits.ArcaneMagistrate))
             {
                 attacker.Unit.AddFocus((Unit.IsDead ? 5 : 1));
             }
+
             if (Unit.HasTrait(Traits.MagicSynthesis))
             {
+                Unit.ExpendedSingleUseSpells.Remove(spell.SpellType);
                 Unit.SingleUseSpells.Add(spell.SpellType);
                 Unit.RestoreMana((int)(spell.ManaCost * 0.75f));
                 Unit.UpdateSpells();
             }
+
             attacker.Unit.GiveScaledExp(1 * Unit.ExpMultiplier, Unit.Level - Unit.Level);
             if (Unit.IsDead)
             {
                 attacker.Unit.GiveScaledExp(4 * Unit.ExpMultiplier, Unit.Level - Unit.Level);
             }
+
             return true;
         }
         else
@@ -2304,6 +2308,7 @@ internal int StartOfTurnExpectedMP()
             }
             if (Unit.HasTrait(Traits.MagicSynthesis))
             {
+                Unit.ExpendedSingleUseSpells.Remove(spell.SpellType);
                 Unit.SingleUseSpells.Add(spell.SpellType);
                 Unit.RestoreMana((int)(spell.ManaCost * 0.75f));
                 Unit.UpdateSpells();
@@ -3805,7 +3810,7 @@ internal int StartOfTurnExpectedMP()
             AnimationController = new AnimationController();
             Unit.ReloadTraits();
             Unit.InitializeTraits();
-            ReloadSpellTraits();
+            //ReloadSpellTraits();
             State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{Unit.Name} shifted form to resemble {template.Name}");
             Unit.FixedSide = Unit.Side;
             Unit.Side = template.Side;
@@ -3845,7 +3850,7 @@ internal int StartOfTurnExpectedMP()
             AnimationController = new AnimationController();
             Unit.ReloadTraits();
             Unit.InitializeTraits();
-            ReloadSpellTraits();
+            //ReloadSpellTraits();
             PredatorComponent?.UpdateFullness();
         }
     }

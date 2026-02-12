@@ -347,6 +347,9 @@ public class Unit
 
     [OdinSerialize]
     internal List<SpellTypes> SingleUseSpells = new List<SpellTypes>();
+    
+    [OdinSerialize]
+    internal List<SpellTypes> ExpendedSingleUseSpells = new List<SpellTypes>();
 
     [OdinSerialize]
     internal List<SpellTypes> MultiUseSpells = new List<SpellTypes>();  // This is so much more straightforward than adding Special Actions
@@ -2470,6 +2473,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         SetMaxItems();
         if (EquippedPotions == null)
             EquippedPotions = new Dictionary<int, int[]>();
+        BoundUnit?.ReloadSpellTraits();
         //if (HasTrait(Traits.Shapeshifter) || HasTrait(Traits.Skinwalker))
         //{
         //    if (ShifterShapes == null)
@@ -3112,9 +3116,12 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         {
             foreach (var spellType in SingleUseSpells)
             {
-                if (SpellList.SpellDict.TryGetValue(spellType, out Spell spell))
+                if (!(ExpendedSingleUseSpells?.Contains(spellType) ?? false))
                 {
-                    UseableSpells.Add(spell);
+                    if (SpellList.SpellDict.TryGetValue(spellType, out Spell spell))
+                    {
+                        UseableSpells.Add(spell);
+                    }
                 }
             }
 
