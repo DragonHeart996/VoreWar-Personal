@@ -40,11 +40,11 @@ class Lamia : DefaultRaceData
         Eyes = new SpriteExtraInfo(6, EyesSprite, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.EyeColor, s.Unit.EyeColor));
         SecondaryEyes = new SpriteExtraInfo(6, EyesSecondarySprite, WhiteColored);
         SecondaryAccessory = new SpriteExtraInfo(3, SecondaryAccessorySprite, WhiteColored);
-        Belly = new SpriteExtraInfo(15, null, null, (s) => FurryColorInner(s));
+        Belly = new SpriteExtraInfo(15, null, null, (s) => BellyColor(s));
         Weapon = new SpriteExtraInfo(1, WeaponSprite, WhiteColored);
         BackWeapon = new SpriteExtraInfo(0, BackWeaponSprite, WhiteColored);
         BodySize = new SpriteExtraInfo(4, BodySizeSprite, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LizardMain, s.Unit.AccessoryColor));
-        Breasts = new SpriteExtraInfo(16, BreastsSprite, null, (s) => FurryColorInner(s));
+        Breasts = new SpriteExtraInfo(16, BreastsSprite, null, (s) => BreastColor(s));
         BreastShadow = null;
         Dick = new SpriteExtraInfo(9, DickSprite, null, (s) => FurryColor(s));
         Balls = new SpriteExtraInfo(8, BallsSprite, null, (s) => FurryColorInner(s));
@@ -69,7 +69,6 @@ class Lamia : DefaultRaceData
             ClothingTypes.BikiniBottom,
             ClothingTypes.Loincloth,
         };
-
     }
 
     internal override void RunFirst(Actor_Unit actor)
@@ -93,10 +92,27 @@ class Lamia : DefaultRaceData
         AddOffset(BodyAccent3, xOffset, yOffset);
         AddOffset(BodyAccent4, xOffset, yOffset);
         AddOffset(BodyAccent5, xOffset, yOffset);
-        AddOffset(Weapon, xOffset + 1.25f, yOffset + 1.25f);
+        if (actor.Unit.HasBreasts)
+        {
+            if (actor.Unit.Furry)
+                AddOffset(Weapon, xOffset + (actor.Unit.BodySize%3 > 0 ? 1 : 0)*0.625f, 
+                    yOffset + (actor.Unit.BodySize < 3  ? (2 - (actor.Unit.BodySize + 1)/2) : 3)*0.625f);
+            else
+                AddOffset(Weapon, xOffset + (actor.Unit.BodySize%3 > 0  ? 1 : 0)*0.625f,
+                    yOffset + (actor.Unit.BodySize < 3 ? (0 - (actor.Unit.BodySize + 1)/2) : 1)*0.625f);
+        }
+        else
+        {
+            if (actor.Unit.Furry)
+                AddOffset(Weapon, xOffset + 2*0.625f, yOffset + 1*0.625f);
+            else
+                AddOffset(Weapon, xOffset + 2*0.625f, yOffset + -1*0.625f);
+        }
         AddOffset(BackWeapon, xOffset, yOffset);
         if (Selicia == false)
             AddOffset(Belly, xOffset, yOffset);
+        else if (actor.Unit.Furry)
+            AddOffset(Belly, 0, 2 * 0.625f);
         AddOffset(Breasts, xOffset, yOffset);
         AddOffset(Dick, xOffset, yOffset + 2.5f);
         AddOffset(Balls, xOffset, yOffset + 2.5f);
@@ -298,14 +314,19 @@ class Lamia : DefaultRaceData
         }
         return State.GameManager.SpriteDictionary.LamiaScales[19 + actor.Unit.BodyAccentType2];
     }
-
+    
     internal override Sprite BellySprite(Actor_Unit actor, GameObject belly)
     {
-        if (Selicia) return State.GameManager.SpriteDictionary.Lamia[15];
+
+        if (Selicia)
+        {
+            return State.GameManager.SpriteDictionary.Lamia[15];
+        }
         if (!Config.LamiaUseTailAsSecondBelly)
         {
             if (actor.HasBelly)
             {
+                belly.transform.localScale = new Vector3(1, 1, 1);
                 belly.SetActive(true);
 
                 if (actor.PredatorComponent.CombinedStomachFullness > 4)
@@ -315,9 +336,9 @@ class Lamia : DefaultRaceData
                     float yScale = Mathf.Min(1 + (extraCap / 40), 1.1f);
                     belly.transform.localScale = new Vector3(xScale, yScale, 1);
                 }
-                else
-                    belly.transform.localScale = new Vector3(1, 1, 1);
+                
                 return State.GameManager.SpriteDictionary.Bellies[actor.GetCombinedStomachSize()];
+                
             }
             else
             {
@@ -326,6 +347,7 @@ class Lamia : DefaultRaceData
         }
         if (actor.HasBelly)
         {
+            belly.transform.localScale = new Vector3(1, 1, 1);
             belly.SetActive(true);
 
             if (actor.PredatorComponent.VisibleFullness > 4)
@@ -335,8 +357,7 @@ class Lamia : DefaultRaceData
                 float yScale = Mathf.Min(1 + (extraCap / 40), 1.1f);
                 belly.transform.localScale = new Vector3(xScale, yScale, 1);
             }
-            else
-                belly.transform.localScale = new Vector3(1, 1, 1);
+            
             return State.GameManager.SpriteDictionary.Bellies[actor.GetStomachSize()];
         }
         else
@@ -345,6 +366,22 @@ class Lamia : DefaultRaceData
         }
     }
 
+    protected override Sprite BreastsSprite(Actor_Unit actor)
+    {
+        if (actor.Unit.HasBreasts == false)
+            return null;
+        if (actor.Unit.Furry && actor.Unit.BreastSize == 0)
+        {
+            return null;
+            AddOffset(Breasts, 0, -3 * .625f);
+            return State.GameManager.SpriteDictionary.Lizards[18 + actor.Unit.BreastSize];
+        }
+        else
+        {
+           return base.BreastsSprite(actor);
+        }
+    }
+    
     protected override Sprite DickSprite(Actor_Unit actor)
     {
         if (actor.Unit.Furry)
@@ -445,5 +482,32 @@ class Lamia : DefaultRaceData
             return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LizardMain, actor.Unit.ExtraColor1);
         return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.Skin, actor.Unit.SkinColor);
     }
+        
+    static ColorSwapPalette BreastColor(Actor_Unit actor)
+    {
+        if (actor.Unit.Furry)
+        {
+            return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LamiaTmp, actor.Unit.ExtraColor1);
+        }
+        return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.Skin, actor.Unit.SkinColor);
+    }
+    
+    static ColorSwapPalette BellyColor(Actor_Unit actor)
+    {
+        if (actor.Unit.Furry)
+        {
+            /*
+             if (((actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach) ?? false)
+                 || (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.womb) ?? false)
+                 || (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach2) ?? false))
+                && (actor.GetCombinedStomachSize() == 15))
+            */
+                return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LamiaTmp, actor.Unit.ExtraColor1);
+            
+            return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LizardMain, actor.Unit.ExtraColor1);
+        }
+        return ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.Skin, actor.Unit.SkinColor);
+    }
 }
+
 

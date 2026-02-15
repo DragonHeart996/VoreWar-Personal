@@ -1135,7 +1135,7 @@ class Toga : MainClothing
         Type = 230;
         OccupiesAllSlots = true;
         //These are there to counteract the lamias natural clothing offset
-        clothing1.XOffset = 1.875f;
+        clothing1.XOffset = 2.5f;
         clothing1.YOffset = -3.75f;
         clothing2.XOffset = 1.875f;
         clothing2.YOffset = -3.75f;
@@ -1146,6 +1146,9 @@ class Toga : MainClothing
     {
         //clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ClothingStrict, actor.Unit.ClothingColor);
         //clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ClothingStrict, actor.Unit.ClothingColor);
+        
+        clothing1.XOffset = actor.Unit.BreastSize == 0 ? 1.875f : 2.5f; //fix a sprite misalignment
+        clothing1.YOffset = actor.Unit.BreastSize == 3 ? -3.125f : -3.75f; //fix a sprite misalignment
         clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.Togas[actor.Unit.HasBreasts ? (1 + actor.Unit.BreastSize) : 9];
         clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Togas[0];
         base.Configure(sprite, actor);

@@ -98,7 +98,7 @@ abstract class MainClothing
     /// </summary>
     public virtual void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
-        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && actor.PredatorComponent?.BallsFullness > 0)
+        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect()))
             return;
         Apply(sprite, actor);
     }
