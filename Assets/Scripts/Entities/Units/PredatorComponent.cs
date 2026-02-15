@@ -3289,7 +3289,7 @@ public class PredatorComponent
                         return;
                     }
 
-                    if (LeftBreastFullness < RightBreastFullness || State.Rand.Next(2) == 0)
+                    if (LeftBreastFullness < RightBreastFullness ^ State.Rand.Next(2) == 0)
                         leftBreast.Add(preyref);
                     else
                         rightBreast.Add(preyref);
@@ -3346,7 +3346,7 @@ public class PredatorComponent
                 return;
             }
 
-            if (LeftBreastFullness < RightBreastFullness || State.Rand.Next(2) == 0)
+            if (LeftBreastFullness < RightBreastFullness ^ State.Rand.Next(2) == 0)
                 leftBreast.Add(preyref);
             else
                 rightBreast.Add(preyref);
@@ -4893,7 +4893,7 @@ public class PredatorComponent
                     }
 
                     int breastSide = 1;
-                    if (LeftBreastFullness < RightBreastFullness || State.Rand.Next(2) == 0)
+                    if (LeftBreastFullness < RightBreastFullness ^ State.Rand.Next(2) == 0)
                         leftBreast.Add(preyref);
                     else
                     {
@@ -5423,7 +5423,7 @@ public class PredatorComponent
                     }
 
                     int breastSide = 1;
-                    if (LeftBreastFullness < RightBreastFullness || State.Rand.Next(2) == 0)
+                    if (LeftBreastFullness < RightBreastFullness ^ State.Rand.Next(2) == 0)
                         leftBreast.Add(preyref);
                     else
                     {

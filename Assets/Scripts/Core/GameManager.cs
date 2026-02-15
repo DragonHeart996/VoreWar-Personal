@@ -284,7 +284,7 @@ public class GameManager : MonoBehaviour
 
     internal void CameraCall(Vec2i location)
     {
-        State.GameManager.TacticalMode.Translator.ClearTranslator();
+        State.GameManager.TacticalMode.Translator.CancelCameraControl();
         CameraCall(new Vector3(location.x, location.y, 0));
     }
 

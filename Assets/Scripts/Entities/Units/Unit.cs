@@ -2393,7 +2393,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             if (leaderTraits.Contains(Traits.TraitOverride)) Tags.Clear();
             Tags.AddRange(leaderTraits);
         }
-        else if (Type == UnitType.Soldier)
+        else if (Type == UnitType.Soldier || Type == UnitType.Summon)
         {
             var soldierTraits = State.RaceSettings.GetSoldierRaceTraits(HiddenUnit.Race) ?? new List<Traits>();
             if (Config.SoldierTraits != null) soldierTraits.AddRange(Config.SoldierTraits);

@@ -2662,7 +2662,11 @@ class DemiDragons : DefaultRaceData
             clothing2.GetPalette = (s) => FurryColorInner(s);
 
             if (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect())
+            {
+                blocksDick = false;
                 clothing2.GetSprite = null;
+            }
+            else blocksDick = true;
             
             base.ConfigureIgnoreHidingRules(sprite, actor);
         }
