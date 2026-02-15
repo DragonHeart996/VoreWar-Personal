@@ -105,10 +105,13 @@ class Konane : BlankSlate
 
         if (!actor.HasBelly)
             return null;
-        if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach, PreyLocation.womb) && actor.GetStomachSize(27, 1) == 27)
-            return Sprites[45];
-        if (size > 19 && (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)) size = 19;
-
+        if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, PreyLocation.stomach,
+                PreyLocation.womb))
+        {
+            size = Selicia.GetSelSize(actor, size, 19, PreyLocation.stomach, PreyLocation.womb);
+        }
+        else size = Math.Min(19, size);
+        
         return Sprites[18 + size];
     }
 

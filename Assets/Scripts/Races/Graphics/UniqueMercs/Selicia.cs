@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 class Selicia : BlankSlate
@@ -15,6 +17,35 @@ class Selicia : BlankSlate
         BreastShadow = new SpriteExtraInfo(4, BreastsShadowSprite, WhiteColored);
         Belly = new SpriteExtraInfo(3, null, WhiteColored);
         BodySize = new SpriteExtraInfo(4, BodySizeSprite, WhiteColored);
+    }
+
+    public static int GetSelSize(Actor_Unit actor, int size, int maxNoSel, params PreyLocation[] locations)
+    {
+        bool anyLocation = locations.Length == 0;
+        int sizeNoSel = Math.Min(maxNoSel, size);
+        
+            var Sel = actor.PredatorComponent?.GetDirectPrey().OrderBy((s) => 
+            {
+                float bulk = s.Unit.Bulk();
+                if (s.Unit.IsDead)
+                {
+                    bulk *= s.Unit.Health + s.Unit.MaxHealth;
+                    bulk /= s.Unit.MaxHealth;
+                }
+                return bulk;
+            }).First((s) => s.Unit.Race == Race.Selicia && (anyLocation || locations.Contains(actor.PredatorComponent.Location(s)))).Unit;
+
+            if (Sel == null)
+                return sizeNoSel;
+
+            float SelSize = 1;
+            if (Sel.IsDead)
+            {
+                SelSize *= Sel.Health + Sel.MaxHealth;
+                SelSize /= Sel.MaxHealth;
+            }
+
+            return (int)Math.Max(sizeNoSel, size * SelSize);
     }
 
     internal override void RandomCustom(Unit unit)
