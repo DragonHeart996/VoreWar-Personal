@@ -376,7 +376,7 @@ class Rags : MainClothing
                 spr = 7;
         }
 
-        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && actor.PredatorComponent?.BallsFullness > 0)       
+        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect()))       
             clothing1.GetSprite = null;        
         else
             clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[spr];

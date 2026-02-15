@@ -1672,7 +1672,6 @@ class DemiDragons : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.Unit.Furry)
         {
             if (actor.PredatorComponent?.RightBreastFullness > 0)
@@ -2300,7 +2299,7 @@ class DemiDragons : DefaultRaceData
                 if (Races.DemiDragons.oversize)
                 {
                     clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[91];
-                    clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[142];
+                    clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[82];
                 }
                 else if (actor.Unit.HasBreasts)
                 {
@@ -2624,18 +2623,18 @@ class DemiDragons : DefaultRaceData
             clothing1 = new SpriteExtraInfo(18, null, null);
             clothing2 = new SpriteExtraInfo(7, null, null);
             FixedColor = true;
-            blocksDick = false;
+            blocksDick = true;
         }
 
         public override void Configure(CompleteSprite sprite, Actor_Unit actor)
         {
             if (actor.Unit.Furry)
             {
-                if (Races.DemiDragons.oversize)
+                if (Races.DemiDragons.oversize && !Config.HideBreasts)
                 {
                     clothing1.GetSprite = null;
                 }
-                else if (actor.Unit.HasBreasts)
+                else if (actor.Unit.HasBreasts && !Config.HideBreasts)
                 {
                     clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[2 + actor.Unit.BreastSize];
                 }
@@ -2662,7 +2661,10 @@ class DemiDragons : DefaultRaceData
             clothing1.GetPalette = (s) => FurryColorInner(s);
             clothing2.GetPalette = (s) => FurryColorInner(s);
 
-            base.Configure(sprite, actor);
+            if (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect())
+                clothing2.GetSprite = null;
+            
+            base.ConfigureIgnoreHidingRules(sprite, actor);
         }
     }
 
@@ -2685,7 +2687,11 @@ class DemiDragons : DefaultRaceData
         {
             if (actor.Unit.HasBreasts)
             {
-                if (actor.Unit.BreastSize < 3)
+                if (Races.DemiDragons.oversize)
+                {
+                    clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[123];
+                }
+                else if (actor.Unit.BreastSize < 3)
                     clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[124];
                 else if (actor.Unit.BreastSize < 6)
                     clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[125];
@@ -2700,7 +2706,10 @@ class DemiDragons : DefaultRaceData
                 clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.DemidragonClothes[120 + actor.Unit.BodySize];
             }
 
-            base.Configure(sprite, actor);
+            if (Config.CockVoreHidesClothes && (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect()))
+                clothing2.GetSprite = null;
+            
+            base.ConfigureIgnoreHidingRules(sprite, actor);
         }
     }
 
@@ -2713,7 +2722,7 @@ class DemiDragons : DefaultRaceData
             Type = 200700;
             OccupiesAllSlots = true;
             clothing1 = new SpriteExtraInfo(5, null, WhiteColored); // Shoes
-            clothing2 = new SpriteExtraInfo(18, null, WhiteColored); // Robe low
+            clothing2 = new SpriteExtraInfo(6, null, WhiteColored); // Robe low
             clothing3 = new SpriteExtraInfo(19, null, WhiteColored); // Robe high
             clothing4 = new SpriteExtraInfo(19, null, WhiteColored); // Robe Breast
             clothing5 = new SpriteExtraInfo(20, null, WhiteColored); // Robe Waist
