@@ -143,6 +143,11 @@ class Bees : DefaultRaceData
         actor.AnimationController.frameLists = new AnimationController.FrameList[] {
             new AnimationController.FrameList(State.Rand.Next(0, 6), 0, true)};  // Wing controller. Index 0.
     }
+    
+    internal override void RunFirst(Actor_Unit actor)
+    {
+        oversize = false;
+    }
 
     protected override Sprite BodySprite(Actor_Unit actor)
     {

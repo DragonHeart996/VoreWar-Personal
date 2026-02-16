@@ -904,7 +904,6 @@ abstract class DefaultRaceData
 
     internal virtual void RunFirst(Actor_Unit actor)
     {
-
     }
 
     protected static Color WhiteColored(Actor_Unit actor) => Color.white;

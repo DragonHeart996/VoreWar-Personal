@@ -125,6 +125,11 @@ class Cockatrice : DefaultRaceData
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
 
+    internal override void RunFirst(Actor_Unit actor)
+    {
+        oversize = false;
+    }
+    
     protected override Sprite BodySprite(Actor_Unit actor) // Body - Skin
     {
         if (actor.Unit.HasBreasts)

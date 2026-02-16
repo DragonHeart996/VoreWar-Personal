@@ -115,7 +115,7 @@ class Konane : BlankSlate
         return Sprites[18 + size];
     }
 
-    protected override Sprite BodyAccentSprite(Actor_Unit actor) // Right WIng
+    protected override Sprite BodyAccentSprite(Actor_Unit actor) // Right Wing
     {
         if (SpecialAttack)
         {

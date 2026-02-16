@@ -120,6 +120,11 @@ class Vargul : DefaultRaceData
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
 
+    internal override void RunFirst(Actor_Unit actor)
+    {
+        oversize = false;
+    }
+
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         if (actor.Unit.HasBreasts)
@@ -384,7 +389,6 @@ class Vargul : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(30 * 30, 1f));

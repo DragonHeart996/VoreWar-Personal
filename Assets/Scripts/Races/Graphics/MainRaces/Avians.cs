@@ -113,6 +113,10 @@ class Avians : DefaultRaceData
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
 
+    internal override void RunFirst(Actor_Unit actor)
+    {
+        oversize = false;
+    }
     protected override Sprite BodySprite(Actor_Unit actor) // body (white/ primary)
     {
         if (actor.Unit.HasBreasts)
@@ -375,7 +379,6 @@ class Avians : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

@@ -120,6 +120,7 @@ class Gnolls : DefaultRaceData
 
     internal override void RunFirst(Actor_Unit actor)
     {
+        oversize = false;
         int RandomExpression = State.Rand.Next(3);
     }
 
