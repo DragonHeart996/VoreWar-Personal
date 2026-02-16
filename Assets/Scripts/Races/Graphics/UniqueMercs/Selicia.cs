@@ -19,35 +19,6 @@ class Selicia : BlankSlate
         BodySize = new SpriteExtraInfo(4, BodySizeSprite, WhiteColored);
     }
 
-    public static int GetSelSize(Actor_Unit actor, int size, int maxNoSel, int maxSel, params PreyLocation[] locations)
-    {
-        bool anyLocation = locations.Length == 0;
-        int sizeNoSel = Math.Min(maxNoSel, size);
-        
-            var Sel = actor.PredatorComponent?.GetDirectPrey().OrderBy((s) => 
-            {
-                float health = 1;
-                if (s.Unit.IsDead)
-                {
-                    health *= s.Unit.Health + s.Unit.MaxHealth;
-                    health /= s.Unit.MaxHealth;
-                }
-                return -health;
-            }).First((s) => s.Unit.Race == Race.Selicia && (anyLocation || locations.Contains(actor.PredatorComponent.Location(s)))).Unit;
-
-            if (Sel == null)
-                return sizeNoSel;
-
-            float SelSize = 1;
-            if (Sel.IsDead)
-            {
-                SelSize *= Sel.Health + Sel.MaxHealth;
-                SelSize /= Sel.MaxHealth;
-            }
-
-            return (int)Math.Min(size, sizeNoSel + ((maxSel - maxNoSel) * SelSize));
-    }
-
     internal override void RandomCustom(Unit unit)
     {
         base.RandomCustom(unit);
