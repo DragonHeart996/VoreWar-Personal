@@ -19,20 +19,20 @@ class Selicia : BlankSlate
         BodySize = new SpriteExtraInfo(4, BodySizeSprite, WhiteColored);
     }
 
-    public static int GetSelSize(Actor_Unit actor, int size, int maxSel, int maxNoSel, params PreyLocation[] locations)
+    public static int GetSelSize(Actor_Unit actor, int size, int maxNoSel, int maxSel, params PreyLocation[] locations)
     {
         bool anyLocation = locations.Length == 0;
         int sizeNoSel = Math.Min(maxNoSel, size);
         
             var Sel = actor.PredatorComponent?.GetDirectPrey().OrderBy((s) => 
             {
-                float bulk = s.Unit.Bulk();
+                float health = 1;
                 if (s.Unit.IsDead)
                 {
-                    bulk *= s.Unit.Health + s.Unit.MaxHealth;
-                    bulk /= s.Unit.MaxHealth;
+                    health *= s.Unit.Health + s.Unit.MaxHealth;
+                    health /= s.Unit.MaxHealth;
                 }
-                return bulk;
+                return -health;
             }).First((s) => s.Unit.Race == Race.Selicia && (anyLocation || locations.Contains(actor.PredatorComponent.Location(s)))).Unit;
 
             if (Sel == null)
