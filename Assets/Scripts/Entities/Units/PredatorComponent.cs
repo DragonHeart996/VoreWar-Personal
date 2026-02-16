@@ -1583,10 +1583,10 @@ public class PredatorComponent
         bool freshKill = false;
         if (unit.HasTrait(Traits.Extraction) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
         {
-            if (preyUnit.Unit.GetTraits.Any())
+            if (preyUnit.Unit.HiddenUnit.GetTraits.Any())
             {
-                var trait = preyUnit.Unit.GetTraits[State.Rand.Next(preyUnit.Unit.GetTraits.Count)];
-                var possibleTraits = preyUnit.Unit.GetTraits
+                var trait = preyUnit.Unit.HiddenUnit.GetTraits[State.Rand.Next(preyUnit.Unit.HiddenUnit.GetTraits.Count)];
+                var possibleTraits = preyUnit.Unit.HiddenUnit.GetTraits
                     .Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
                 if (possibleTraits.Any())
                 {
@@ -1609,7 +1609,7 @@ public class PredatorComponent
                                 callback.OnRemove(preyUnit, actor, location);
                         }
 
-                        UpdateUnitTraits();
+                        unit.UpdateUnitTraits();
                     }
                 }
                 else
@@ -1618,7 +1618,8 @@ public class PredatorComponent
                     actor.UnitSprite.DisplayDamage(5, false, true);
                 }
 
-                preyUnit.Unit.RemoveTrait(trait);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(trait);
+                preyUnit.Unit.UpdateUnitTraits();
             }
         }
 
@@ -1658,10 +1659,11 @@ public class PredatorComponent
 
         if (preyUnit.Unit.IsThisCloseToDeath(preyDamage))
         {
-            if (preyUnit.Unit.HasTrait(Traits.Corruption))
+            if (preyUnit.Unit.HiddenUnit.HasTrait(Traits.Corruption))
             {
                 actor.AddCorruption(preyUnit.Unit.GetStatTotal(), preyUnit.Unit.FixedSide);
-                preyUnit.Unit.RemoveTrait(Traits.Corruption);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(Traits.Corruption);
+                preyUnit.Unit.UpdateUnitTraits();
             }
 
             foreach (IVoreCallback callback in Callbacks)
@@ -1736,10 +1738,11 @@ public class PredatorComponent
 
             TacticalUtilities.Log.RegisterDigest(unit, preyUnit.Unit, Location(preyUnit));
             preyUnit.Actor.KilledByDigestion = true;
-            if (preyUnit.Unit.HasTrait(Traits.CursedMark))
+            if (preyUnit.Unit.HiddenUnit.HasTrait(Traits.CursedMark))
             {
                 unit.AddPermanentTrait(Traits.CursedMark);
-                preyUnit.Unit.RemoveTrait(Traits.CursedMark);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(Traits.CursedMark);
+                preyUnit.Unit.UpdateUnitTraits();
             }
 
             unit.DigestedUnits++;
@@ -2173,40 +2176,40 @@ public class PredatorComponent
         bool raceUpdated = true;
         if (unit.HasTrait(Traits.Extraction))
         {
-            var possibleTraits = preyUnit.Unit.GetTraits
+            var possibleTraits = preyUnit.Unit.HiddenUnit.GetTraits
                 .Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
             foreach (Traits trait in possibleTraits)
             {
                 unit.AddPermanentTrait(trait);
-                preyUnit.Unit.RemoveTrait(trait);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(trait);
                 updated = true;
             }
 
-            foreach (Traits trait in preyUnit.Unit.GetTraits)
+            foreach (Traits trait in preyUnit.Unit.HiddenUnit.GetTraits)
             {
-                preyUnit.Unit.RemoveTrait(trait);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(trait);
                 unit.GiveRawExp(5);
             }
         }
 
-        if (preyUnit.Unit.HasTrait(Traits.Donor))
+        if (preyUnit.Unit.HiddenUnit.HasTrait(Traits.Donor))
         {
-            int donorIndex = preyUnit.Unit.GetTraits.IndexOf(Traits.Donor);
-            var donorTraits = preyUnit.Unit.GetTraits.SkipWhile((t, index) => index <= donorIndex);
+            int donorIndex = preyUnit.Unit.HiddenUnit.GetTraits.IndexOf(Traits.Donor);
+            var donorTraits = preyUnit.Unit.HiddenUnit.GetTraits.SkipWhile((t, index) => index <= donorIndex);
             var possibleTraits = donorTraits
                 .Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
 
             foreach (Traits trait in possibleTraits)
             {
                 unit.AddPermanentTrait(trait);
-                preyUnit.Unit.RemoveTrait(trait);
+                preyUnit.Unit.HiddenUnit.RemoveTrait(trait);
                 updated = true;
             }
         }
 
         if (unit.HasTrait(Traits.InfiniteAssimilation) || unit.HasTrait(Traits.Assimilate))
         {
-            var possibleTraits = preyUnit.Unit.GetTraits
+            var possibleTraits = preyUnit.Unit.HiddenUnit.GetTraits
                 .Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
 
             if (possibleTraits.Any())
@@ -2229,7 +2232,7 @@ public class PredatorComponent
 
         if (unit.HasTrait(Traits.AdaptiveBiology) && updated == false)
         {
-            var possibleTraits = preyUnit.Unit.GetTraits
+            var possibleTraits = preyUnit.Unit.HiddenUnit.GetTraits
                 .Where(s => unit.GetTraits.Contains(s) == false && State.AssimilateList.CanGet(s)).ToArray();
 
             if (possibleTraits.Any())
@@ -2238,14 +2241,13 @@ public class PredatorComponent
                 updated = true;
             }
         }
+        
+        preyUnit.Unit.UpdateUnitTraits();
 
-        if (updated) UpdateUnitTraits();
-    }
-
-    public void UpdateUnitTraits()
-    {
-        unit.ReloadTraits();
-        unit.InitializeTraits();
+        if (updated)
+        {
+            unit.UpdateUnitTraits();
+        }
     }
 
     public void UpdateRaceTraits()

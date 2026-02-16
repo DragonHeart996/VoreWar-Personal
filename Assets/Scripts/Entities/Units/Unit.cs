@@ -2482,6 +2482,12 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         //        AcquireShape(this, true);
         //}
     }
+    
+    public void UpdateUnitTraits()
+    {
+        ReloadTraits();
+        InitializeTraits();
+    }
 
     public void PreyCheck()
     {
