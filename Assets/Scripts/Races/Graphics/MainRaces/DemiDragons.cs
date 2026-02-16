@@ -20,8 +20,6 @@ class DemiDragons : DefaultRaceData
     readonly DemidragonLeader LeaderClothes;
     readonly DemidragonRags Rags;
 
-    bool oversize = false;
-
     public DemiDragons()
     {
         BodySizes = 3;
@@ -347,11 +345,7 @@ class DemiDragons : DefaultRaceData
             }
         }                         
     }
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
+    
     internal override void RandomCustom(Unit unit)
     {
         base.RandomCustom(unit);
@@ -1609,7 +1603,6 @@ class DemiDragons : DefaultRaceData
 
     protected override Sprite BreastsSprite(Actor_Unit actor)
     {
-        oversize = false;
         if (actor.Unit.HasBreasts == false)
             return null;
         if (actor.Unit.Furry)

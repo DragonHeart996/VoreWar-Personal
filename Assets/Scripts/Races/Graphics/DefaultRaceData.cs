@@ -93,6 +93,7 @@ abstract class DefaultRaceData
 
     /// <summary>Whether a unit has the breast vore system, with extended sizes and the two sides being independent.</summary>
     internal bool ExtendedBreastSprites = false;
+    internal bool oversize = false;
 
     /// <summary>Whether a unit uses the gentler version of the stomach wobble (1/2 to 1/3rd the motion)</summary>
     internal bool GentleAnimation = false;
@@ -904,6 +905,7 @@ abstract class DefaultRaceData
 
     internal virtual void RunFirst(Actor_Unit actor)
     {
+        oversize = false;
     }
 
     protected static Color WhiteColored(Actor_Unit actor) => Color.white;

@@ -8,9 +8,6 @@ class Vargul : DefaultRaceData
     readonly Sprite[] Sprites2 = State.GameManager.SpriteDictionary.Vargul2;
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.Vargul3;
 
-    bool oversize = false;
-
-
     public Vargul()
     {
         BodySizes = 4;
@@ -119,11 +116,6 @@ class Vargul : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
 
     protected override Sprite BodySprite(Actor_Unit actor)
     {

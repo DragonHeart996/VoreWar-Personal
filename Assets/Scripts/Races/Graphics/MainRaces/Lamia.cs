@@ -80,6 +80,7 @@ class Lamia : DefaultRaceData
                  || actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.womb)
                  || actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach2))
                  && (actor.GetCombinedStomachSize() == 15);
+        base.RunFirst(actor);
     }
 
     internal override void SetBaseOffsets(Actor_Unit actor)

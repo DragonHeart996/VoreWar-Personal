@@ -14,8 +14,6 @@ class Gnolls : DefaultRaceData
     int RandomExpression = 0;
     int Hairstyle = 0;
 
-    bool oversize = false;
-
     internal override int BreastSizes => 8;
     internal override int DickSizes => 8;
 
@@ -120,8 +118,8 @@ class Gnolls : DefaultRaceData
 
     internal override void RunFirst(Actor_Unit actor)
     {
-        oversize = false;
         int RandomExpression = State.Rand.Next(3);
+        base.RunFirst(actor);
     }
 
     protected override Sprite EyesSprite(Actor_Unit actor)
@@ -716,7 +714,6 @@ class Gnolls : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

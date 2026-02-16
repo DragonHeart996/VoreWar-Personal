@@ -15,9 +15,6 @@ class Deer : DefaultRaceData
     readonly DeerLeader3 LeaderClothes3;
     readonly DeerRags Rags;
 
-    bool oversize = false;
-
-
     public Deer()
     {
         BodySizes = 4;
@@ -192,11 +189,6 @@ class Deer : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
     
     protected override Sprite BodySprite(Actor_Unit actor)
     {
@@ -584,7 +576,6 @@ class Deer : DefaultRaceData
 
     protected override Sprite BreastsSprite(Actor_Unit actor)
     {
-        oversize = false;
         if (actor.Unit.HasBreasts == false)
             return null;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)

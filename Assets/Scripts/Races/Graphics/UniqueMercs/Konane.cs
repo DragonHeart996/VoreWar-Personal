@@ -44,7 +44,9 @@ class Konane : BlankSlate
     internal override void RunFirst(Actor_Unit actor)
     {
         if (actor.AnimationController.frameLists == null || actor.AnimationController.frameLists.Count() == 0) SetUpAnimations(actor);
+        base.RunFirst(actor);
     }
+    
     internal override void SetBaseOffsets(Actor_Unit actor)
     {
         AddOffset(BodyAccent2, 25 * .625f, 0);

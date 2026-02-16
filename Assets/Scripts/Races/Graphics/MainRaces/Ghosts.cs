@@ -10,8 +10,6 @@ class Ghosts : DefaultRaceData
     readonly Sprite[] Sprites4 = State.GameManager.SpriteDictionary.GhostsVoreSprites;
     readonly Sprite[] Sprites5 = State.GameManager.SpriteDictionary.HumansBodySprites4;
 
-    bool oversize = false;
-
     public Ghosts()
     {
         BodySizes = 6;
@@ -367,7 +365,6 @@ class Ghosts : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

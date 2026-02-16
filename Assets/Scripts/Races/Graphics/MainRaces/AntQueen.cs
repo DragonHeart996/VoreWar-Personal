@@ -9,8 +9,6 @@ class AntQueen : DefaultRaceData
 
     readonly AntLeader LeaderClothes;
 
-    bool oversize = false;
-
     public AntQueen()
     {
         CanBeGender = new List<Gender>() { Gender.Female, Gender.Hermaphrodite };
@@ -79,7 +77,7 @@ class AntQueen : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor) => Sprites[3 + actor.Unit.BodySize]; // Lower Body(black)
 
     protected override Sprite HeadSprite(Actor_Unit actor) => Sprites[0 + actor.Unit.BodySize]; // Upper Body (White)
@@ -227,7 +225,6 @@ class AntQueen : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(31 * 31, 1f));

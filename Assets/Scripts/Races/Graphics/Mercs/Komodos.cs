@@ -7,10 +7,7 @@ class Komodos : DefaultRaceData
     readonly Sprite[] Sprites = State.GameManager.SpriteDictionary.Komodos1;
     readonly Sprite[] Sprites2 = State.GameManager.SpriteDictionary.Komodos2;
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.Komodos3;
-
-    bool oversize = false;
-
-
+    
     public Komodos()
     {
         BodySizes = 4;
@@ -125,11 +122,6 @@ class Komodos : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-    
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
 
     protected override Sprite BodySprite(Actor_Unit actor)
     {
@@ -363,7 +355,6 @@ class Komodos : DefaultRaceData
 
     protected override Sprite BreastsSprite(Actor_Unit actor)
     {
-        oversize = false;
         if (actor.Unit.HasBreasts == false)
             return null;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)

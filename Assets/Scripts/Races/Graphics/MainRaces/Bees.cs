@@ -13,8 +13,6 @@ class Bees : DefaultRaceData
     readonly BeeLeader LeaderClothes;
     readonly BeeRags Rags;
 
-    bool oversize = false;
-
     public Bees()
     {
         BodySizes = 4;
@@ -142,11 +140,6 @@ class Bees : DefaultRaceData
     {
         actor.AnimationController.frameLists = new AnimationController.FrameList[] {
             new AnimationController.FrameList(State.Rand.Next(0, 6), 0, true)};  // Wing controller. Index 0.
-    }
-    
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
     }
 
     protected override Sprite BodySprite(Actor_Unit actor)
@@ -399,7 +392,6 @@ class Bees : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

@@ -11,8 +11,6 @@ class Avians : DefaultRaceData
     readonly AvianLeader LeaderClothes;
     readonly AvianRags Rags;
 
-    bool oversize = false;
-
     public Avians()
     {
         BodySizes = 4;
@@ -112,11 +110,7 @@ class Avians : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
+    
     protected override Sprite BodySprite(Actor_Unit actor) // body (white/ primary)
     {
         if (actor.Unit.HasBreasts)

@@ -11,8 +11,6 @@ class Vipers : DefaultRaceData
 
     readonly float xOffset = -7.5f; //12 pixels * 5/8
 
-    bool oversize = false;
-
     public Vipers()
     {
         BodySizes = 0;
@@ -558,7 +556,6 @@ class Vipers : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(28 * 28, 1f));

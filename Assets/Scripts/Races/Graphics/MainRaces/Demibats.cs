@@ -13,8 +13,6 @@ class Demibats : DefaultRaceData
     readonly DemibatLeader LeaderClothes;
     readonly DemibatRags Rags;
 
-    bool oversize = false;
-
     public Demibats()
     {
         BodySizes = 4;
@@ -170,11 +168,7 @@ class Demibats : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-    }
+    
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         if (actor.AnimationController.frameLists == null) SetUpAnimations(actor);
@@ -403,7 +397,6 @@ class Demibats : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
