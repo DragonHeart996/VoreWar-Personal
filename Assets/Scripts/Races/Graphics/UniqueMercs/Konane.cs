@@ -108,7 +108,7 @@ class Konane : BlankSlate
         if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, PreyLocation.stomach,
                 PreyLocation.womb))
         {
-            size = Selicia.GetSelSize(actor, size, 19, PreyLocation.stomach, PreyLocation.womb);
+            size = Selicia.GetSelSize(actor, size, 27,19, PreyLocation.stomach, PreyLocation.womb);
         }
         else size = Math.Min(19, size);
         

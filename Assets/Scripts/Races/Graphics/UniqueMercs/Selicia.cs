@@ -19,7 +19,7 @@ class Selicia : BlankSlate
         BodySize = new SpriteExtraInfo(4, BodySizeSprite, WhiteColored);
     }
 
-    public static int GetSelSize(Actor_Unit actor, int size, int maxNoSel, params PreyLocation[] locations)
+    public static int GetSelSize(Actor_Unit actor, int size, int maxSel, int maxNoSel, params PreyLocation[] locations)
     {
         bool anyLocation = locations.Length == 0;
         int sizeNoSel = Math.Min(maxNoSel, size);
@@ -45,7 +45,7 @@ class Selicia : BlankSlate
                 SelSize /= Sel.MaxHealth;
             }
 
-            return (int)Math.Max(sizeNoSel, size * SelSize);
+            return (int)Math.Min(size, sizeNoSel + ((maxSel - maxNoSel) * SelSize));
     }
 
     internal override void RandomCustom(Unit unit)
