@@ -1798,6 +1798,9 @@ internal int StartOfTurnExpectedMP()
                 else
                     Mode = DisplayMode.Attacking;
 
+                if (forceBite)
+                    Mode = DisplayMode.OralVore;
+
                 if (Unit.HasTrait(Traits.AwfulAim))
                 {
                     var possibleTargets = TacticalUtilities.UnitsWithinTiles(target.Position, 2);
@@ -1885,12 +1888,15 @@ internal int StartOfTurnExpectedMP()
             if (targetRange < 2)
             {
                 animationUpdateTime = 1.0F;
-                if (forceBite)
-                    Mode = DisplayMode.OralVore;
-                else if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
+                
+                if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
                     Mode = DisplayMode.MeleeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
+                
+                if (forceBite)
+                    Mode = DisplayMode.OralVore;
+                
                 int meleeAttacks = Unit.TraitBoosts.MeleeAttacks;
                 if (Unit.HasTrait(Traits.LightFrame) && PredatorComponent?.PreyCount == 0)
                     meleeAttacks++;
@@ -2363,7 +2369,7 @@ internal int StartOfTurnExpectedMP()
         }
         State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
-            State.GameManager.CameraCall(ranged ? attacker.Position : Position);
+            State.GameManager.CameraCall(ranged || !canKill ? attacker.Position : Position);
         chance = GetAttackChance(attacker, ranged);
 
         float r = (float)State.Rand.NextDouble();

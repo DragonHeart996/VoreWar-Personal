@@ -28,6 +28,7 @@ class Konane : BlankSlate
         BodyAccent3 = new SpriteExtraInfo(7, BodyAccentSprite3, WhiteColored); // Right Arm
         BodyAccent4 = new SpriteExtraInfo(3, BodyAccentSprite4, WhiteColored); // Left Arm
         BodyAccent5 = new SpriteExtraInfo(5, BodyAccentSprite5, WhiteColored); // Chest
+        BodyAccent6 = new SpriteExtraInfo(3, BodyAccentSprite6, WhiteColored); // Hand
         clothingColors = 0;
     }
 
@@ -163,6 +164,11 @@ class Konane : BlankSlate
 
     protected override Sprite BodyAccentSprite5(Actor_Unit actor) // chest
     {
+        if (actor.HasJustVored)
+            return Sprites[17];
+        else return Sprites[16];
+        
+        
         if (actor.HasJustVored) //Swallow Animation
         {
             actor.AnimationController.frameLists[1].currentlyActive = true;
@@ -186,5 +192,14 @@ class Konane : BlankSlate
             return Sprites[KonaneSwallowChest.frames[actor.AnimationController.frameLists[1].currentFrame]];
         }
         return Sprites[16];
+    }
+    
+    protected override Sprite BodyAccentSprite6(Actor_Unit actor) //hand
+    {
+        if (actor.IsAttacking)
+        {
+            return null;
+        } 
+        return Sprites[9];
     }
 }
