@@ -112,6 +112,18 @@ abstract class MainClothing
         Apply(sprite, actor);
     }
 
+    public virtual void ConfigureNatural(CompleteSprite sprite, Actor_Unit actor)
+    {
+        if (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect())
+        {
+            blocksDick = false;
+            clothing2.GetSprite = null;
+        }
+        else blocksDick = true;
+            
+        Apply(sprite, actor);
+    }
+
 
     protected void Apply(CompleteSprite sprite, Actor_Unit actor)
     {

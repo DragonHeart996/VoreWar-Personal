@@ -2623,7 +2623,6 @@ class DemiDragons : DefaultRaceData
             clothing1 = new SpriteExtraInfo(18, null, null);
             clothing2 = new SpriteExtraInfo(7, null, null);
             FixedColor = true;
-            blocksDick = true;
         }
 
         public override void Configure(CompleteSprite sprite, Actor_Unit actor)
@@ -2661,14 +2660,7 @@ class DemiDragons : DefaultRaceData
             clothing1.GetPalette = (s) => FurryColorInner(s);
             clothing2.GetPalette = (s) => FurryColorInner(s);
 
-            if (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect())
-            {
-                blocksDick = false;
-                clothing2.GetSprite = null;
-            }
-            else blocksDick = true;
-            
-            base.ConfigureIgnoreHidingRules(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

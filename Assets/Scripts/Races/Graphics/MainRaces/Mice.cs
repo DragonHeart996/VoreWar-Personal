@@ -2407,7 +2407,7 @@ protected override Sprite EyesSprite(Actor_Unit actor)
             }
             
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

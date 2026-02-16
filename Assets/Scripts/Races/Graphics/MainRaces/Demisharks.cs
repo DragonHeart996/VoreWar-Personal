@@ -1102,7 +1102,7 @@ class Demisharks : DefaultRaceData
                 clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.SharkSkin, actor.Unit.SkinColor);
             }
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

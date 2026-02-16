@@ -982,7 +982,7 @@ class Lupine : DefaultRaceData
                 clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.LupineSkin, actor.Unit.SkinColor);
             }
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

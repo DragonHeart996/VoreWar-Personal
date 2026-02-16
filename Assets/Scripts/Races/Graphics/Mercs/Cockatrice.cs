@@ -892,7 +892,7 @@ class Cockatrice : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.CockatriceSkin, actor.Unit.SkinColor);
             clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Cockatrice3[0 + actor.Unit.BodySize];
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

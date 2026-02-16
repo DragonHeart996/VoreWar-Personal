@@ -964,7 +964,7 @@ class Demibats : DefaultRaceData
                 clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DemibatHumanSkin, actor.Unit.SkinColor);
             }
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 
