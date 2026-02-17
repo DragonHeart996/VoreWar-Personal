@@ -83,6 +83,10 @@ public class PredatorComponent
     [OdinSerialize] List<Prey> deadPrey;
 
     Transition StomachTransition;
+    Transition ExclusiveStomachTransition;
+    Transition Stomach2Transition;
+    Transition TailTransition;
+    Transition WombTransition;
     Transition BallsTransition;
     Transition LeftBreastTransition;
     Transition RightBreastTransition;
@@ -2584,6 +2588,56 @@ public class PredatorComponent
         {
             VisibleFullness = StomachTransition.transitionEnd;
         }
+        
+        if (ExclusiveStomachTransition.transitionTime < ExclusiveStomachTransition.transitionLength)
+        {
+            if (unit.Race == Race.FeralFrogs && actor.IsOralVoring && actor.IsOralVoringHalfOver == false)
+                return;
+            ExclusiveStomachTransition.transitionTime += Time.deltaTime;
+            ExclusiveStomachFullness = Mathf.Lerp(ExclusiveStomachTransition.transitionStart, ExclusiveStomachTransition.transitionEnd,
+                ExclusiveStomachTransition.transitionTime / ExclusiveStomachTransition.transitionLength);
+        }
+        else
+        {
+            ExclusiveStomachFullness = ExclusiveStomachTransition.transitionEnd;
+        }
+        
+        if (Stomach2Transition.transitionTime < Stomach2Transition.transitionLength)
+        {
+            if (unit.Race == Race.FeralFrogs && actor.IsOralVoring && actor.IsOralVoringHalfOver == false)
+                return;
+            Stomach2Transition.transitionTime += Time.deltaTime;
+            Stomach2ndFullness = Mathf.Lerp(Stomach2Transition.transitionStart, Stomach2Transition.transitionEnd,
+                Stomach2Transition.transitionTime / Stomach2Transition.transitionLength);
+        }
+        else
+        {
+            Stomach2ndFullness = Stomach2Transition.transitionEnd;
+        }
+        
+        CombinedStomachFullness = Stomach2ndFullness + VisibleFullness;
+        
+        if (WombTransition.transitionTime < WombTransition.transitionLength)
+        {
+            WombTransition.transitionTime += Time.deltaTime;
+            WombFullness = Mathf.Lerp(WombTransition.transitionStart, WombTransition.transitionEnd,
+                WombTransition.transitionTime / WombTransition.transitionLength);
+        }
+        else
+        {
+            WombFullness = WombTransition.transitionEnd;
+        }
+        
+        if (TailTransition.transitionTime < TailTransition.transitionLength)
+        {
+            TailTransition.transitionTime += Time.deltaTime;
+            TailFullness = Mathf.Lerp(TailTransition.transitionStart, TailTransition.transitionEnd,
+                TailTransition.transitionTime / TailTransition.transitionLength);
+        }
+        else
+        {
+            TailFullness = TailTransition.transitionEnd;
+        }
 
         if (BallsTransition.transitionTime < BallsTransition.transitionLength)
         {
@@ -2692,6 +2746,42 @@ public class PredatorComponent
             StomachTransition = new Transition(0, 0, 0);
             VisibleFullness = 0;
         }
+        
+        float newExclusiveStomach = fullnessFactor * exclusiveStomachFullness / stomachSize;
+        if (newExclusiveStomach > 0 || ExclusiveStomachFullness > 0)
+            ExclusiveStomachTransition = new Transition(Math.Abs(newExclusiveStomach - ExclusiveStomachFullness) / 4, ExclusiveStomachFullness, newExclusiveStomach);
+        else
+        {
+            ExclusiveStomachTransition = new Transition(0, 0, 0);
+            ExclusiveStomachFullness = 0;
+        }
+        
+        float newStomach2 = fullnessFactor * stomach2ndFullness / stomachSize;
+        if (newStomach2 > 0 || Stomach2ndFullness > 0)
+            Stomach2Transition = new Transition(Math.Abs(newStomach2 - Stomach2ndFullness) / 4, Stomach2ndFullness, newStomach2);
+        else
+        {
+            Stomach2Transition = new Transition(0, 0, 0);
+            Stomach2ndFullness = 0;
+        }
+        
+        float newTail = fullnessFactor * tailFullness / stomachSize;
+        if (newTail > 0 || TailFullness > 0)
+            TailTransition = new Transition(Math.Abs(newTail - TailFullness) / 4, TailFullness, newTail);
+        else
+        {
+            TailTransition = new Transition(0, 0, 0);
+            TailFullness = 0;
+        }
+        
+        float newWomb = fullnessFactor * wombFullness / stomachSize;
+        if (newWomb > 0 || WombFullness > 0)
+            WombTransition = new Transition(Math.Abs(newWomb - WombFullness) / 4, WombFullness, newWomb);
+        else
+        {
+            WombTransition = new Transition(0, 0, 0);
+            WombFullness = 0;
+        }
 
         float newBalls = fullnessFactor * ballsFullness / stomachSize;
         if (newBalls > 0 || BallsFullness > 0)
@@ -2703,11 +2793,6 @@ public class PredatorComponent
         }
 
         Fullness = fullnessFactor * fullness / stomachSize;
-        TailFullness = fullnessFactor * tailFullness / stomachSize;
-        WombFullness = fullnessFactor * wombFullness / stomachSize;
-        ExclusiveStomachFullness = fullnessFactor * exclusiveStomachFullness / stomachSize;
-        Stomach2ndFullness = fullnessFactor * stomach2ndFullness / stomachSize;
-        CombinedStomachFullness = fullnessFactor * (stomach2ndFullness + stomachFullness) / stomachSize;
         if (breastFullness <= 0) breastFullness = -1;
         BreastFullness = breastFullness;
 
