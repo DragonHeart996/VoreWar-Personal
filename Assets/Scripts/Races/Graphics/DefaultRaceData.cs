@@ -685,6 +685,8 @@ abstract class DefaultRaceData
             return null;
         if (actor.SquishedBreasts && actor.Unit.BreastSize >= 3 && actor.Unit.BreastSize <= 6)
             return State.GameManager.SpriteDictionary.SquishedBreasts[actor.Unit.BreastSize - 3];
+        if (actor.Unit.BreastSize == 7)
+            AddOffset(Breasts, 0, -3 * .625f);
         return State.GameManager.SpriteDictionary.Breasts[actor.Unit.BreastSize];
     }
 

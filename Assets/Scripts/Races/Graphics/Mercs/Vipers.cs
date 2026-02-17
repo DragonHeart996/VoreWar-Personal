@@ -35,7 +35,7 @@ class Vipers : DefaultRaceData
         Head = new SpriteExtraInfo(3, HeadSprite, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor));
         BodyAccessory = new SpriteExtraInfo(3, AccessorySprite, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // hood
         BodyAccent = new SpriteExtraInfo(6, BodyAccentSprite, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.ExtraColor1)); // extra pattern
-        BodyAccent2 = new SpriteExtraInfo(12, BodyAccentSprite2, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // second stomach
+        BodyAccent2 = new SpriteExtraInfo(16, BodyAccentSprite2, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // second stomach
         BodyAccent3 = new SpriteExtraInfo(11, BodyAccentSprite3, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // default tail
         BodyAccent4 = new SpriteExtraInfo(5, BodyAccentSprite4, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // arms
         BodyAccent5 = new SpriteExtraInfo(10, BodyAccentSprite5, null, (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ViperSkin, s.Unit.SkinColor)); // slit outside

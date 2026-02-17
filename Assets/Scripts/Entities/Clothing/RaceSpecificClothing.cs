@@ -20,6 +20,7 @@ class LizardPeasant : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing4.YOffset = 0;
         int bellySize = actor.GetStomachSize();
         clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ClothingStrict, actor.Unit.ClothingColor);
         clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.ClothingStrict, actor.Unit.ClothingColor);
@@ -99,10 +100,17 @@ class LizardPeasant : MainClothing
             else if (actor.Unit.HasBreasts)
                 {
                 clothing4.layer = 18;
-                if (actor.Unit.BreastSize >= 7)
+                if (actor.Unit.BreastSize >= 6)
                 return State.GameManager.SpriteDictionary.LizardPeasant[8];
-                else if (actor.Unit.BreastSize <= 6)
-                return State.GameManager.SpriteDictionary.LizardPeasant[5 + actor.Unit.BreastSize / 2];
+                else if (actor.Unit.BreastSize <= 5)
+                {
+                    if (actor.Unit.BreastSize >= 3)
+                    {
+                        if (actor.Unit.BreastSize >= 4)
+                            clothing4.YOffset = 3 * 0.625f;
+                        return State.GameManager.SpriteDictionary.LizardPeasant[5 + actor.Unit.BreastSize / 2];
+                    }
+                }
                 else return null;
                 }
             else
@@ -1136,9 +1144,9 @@ class Toga : MainClothing
         OccupiesAllSlots = true;
         //These are there to counteract the lamias natural clothing offset
         clothing1.XOffset = 2.5f;
-        clothing1.YOffset = -3.75f;
+        clothing1.YOffset = -3.125f;
         clothing2.XOffset = 1.875f;
-        clothing2.YOffset = -3.75f;
+        clothing2.YOffset = -3.125f;
 
     }
 

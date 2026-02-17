@@ -248,8 +248,12 @@ class Lizards : DefaultRaceData
                 return null;
             if (actor.Unit.HasBreasts == false)
                 {return null;}
+
             if (actor.SquishedBreasts && actor.Unit.BreastSize >= 3 && actor.Unit.BreastSize <= 6)
-                {return State.GameManager.SpriteDictionary.SquishedBreasts[actor.Unit.BreastSize - 3];}
+            {
+                AddOffset(Breasts, 0, 4*0.625f);
+                return State.GameManager.SpriteDictionary.SquishedBreasts[actor.Unit.BreastSize - 3];
+            }
             return State.GameManager.SpriteDictionary.Lizards[18 + actor.Unit.BreastSize];
         }
         else
