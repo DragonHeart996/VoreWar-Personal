@@ -77,6 +77,32 @@ class Lamia : DefaultRaceData
     {
         if (!actor.Unit.Predator)
             Selicia = false;
+        else
+        {
+            int size = 0;
+            int bonusCap = 0;
+            bonusCap += actor.GetTailSize(3);
+            bonusCap += actor.GetBallSize(3);
+            if (Config.LamiaUseTailAsSecondBelly)
+            {
+                size = Math.Min(bonusCap + actor.GetStomach2Size(3), 3);
+                size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia,
+                    1+size, 3, 4,
+                    PreyLocation.stomach2, PreyLocation.tail);
+            }
+            else
+            {
+                size = Math.Min(bonusCap, 3);
+                size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia,
+                    1+size, 3, 4, 
+                    PreyLocation.tail);
+            }
+
+            Selicia = size == 4;
+        }
+        /*
+        if (!actor.Unit.Predator)
+            Selicia = false;
         else if (!Config.LamiaUseTailAsSecondBelly)
         {
             Selicia = actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true,
@@ -248,34 +274,28 @@ class Lamia : DefaultRaceData
 
     protected override Sprite BodyAccentSprite(Actor_Unit actor)
     {
-        if (Selicia) return State.GameManager.SpriteDictionary.Lamia[16];
+        if (Selicia) 
+            return State.GameManager.SpriteDictionary.Lamia[16];
         return State.GameManager.SpriteDictionary.Lamia[1];
     }
 
     protected override Sprite BodyAccentSprite2(Actor_Unit actor)
     {
-        if (Selicia) return State.GameManager.SpriteDictionary.Lamia[17];
+        if (Selicia)  
+            return State.GameManager.SpriteDictionary.Lamia[17];
         int size = 0;
         int bonusCap = 0;
         if (actor.Unit.Predator && actor.PredatorComponent.TailFullness > 0)
-            bonusCap = 1 + actor.GetTailSize(2);
+            bonusCap += actor.GetTailSize(3);
         if (actor.Unit.Predator && actor.PredatorComponent.BallsFullness > 0)
-            bonusCap = 1 + actor.GetBallSize(2);
+            bonusCap += actor.GetBallSize(3);
         if (Config.LamiaUseTailAsSecondBelly && actor.Unit.Predator)
         {
-            size = Math.Min(
-                bonusCap + (actor.PredatorComponent?.Stomach2ndFullness > 0 ? (1 + actor.GetStomach2Size(2)) : 0),
-                3);
-            size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, true,
-                size, 3, 3,
-                PreyLocation.stomach2, PreyLocation.tail);
+            size = Math.Min(bonusCap + actor.GetStomach2Size(3), 3);
             return State.GameManager.SpriteDictionary.Lamia[10 + size];
         }
 
         size = Math.Min(actor.Unit.BodySize + bonusCap, 3);
-        size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, true,
-            size, 3, 3,
-            PreyLocation.stomach2, PreyLocation.tail);
         return State.GameManager.SpriteDictionary.Lamia[10 + size];
     }
 
@@ -386,7 +406,7 @@ class Lamia : DefaultRaceData
                 }
                 
                 size = actor.GetCombinedStomachSize(17, 1.125f);
-                size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, true,
+                size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia,
                     size, 15, 17, 
                     PreyLocation.stomach, PreyLocation.stomach2, PreyLocation.womb);
                 
@@ -418,7 +438,7 @@ class Lamia : DefaultRaceData
             }
             
             size = actor.GetStomachSize(17, 1.125f);
-            size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, true,
+            size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, 
                 size, 15, 17, 
                 PreyLocation.stomach, PreyLocation.womb);
 
@@ -505,30 +525,21 @@ class Lamia : DefaultRaceData
     protected override Sprite BodySizeSprite(Actor_Unit actor)
     {
         if (Selicia)
-        {
             return State.GameManager.SpriteDictionary.Lamia[14];
-        }
+
+        int size = 0;
         int bonusCap = 0;
-        if (actor.Unit.Predator && actor.PredatorComponent.TailFullness > 0)
-            bonusCap = 1 + actor.GetTailSize(2);
-        if (actor.Unit.Predator && actor.PredatorComponent.BallsFullness > 0)
-            bonusCap = 1 + actor.GetBallSize(2);
+        bonusCap += actor.GetTailSize(3);
+        bonusCap += actor.GetBallSize(3);
 
         if (Config.LamiaUseTailAsSecondBelly && actor.Unit.Predator)
-        {
-            if (actor.PredatorComponent.Stomach2ndFullness > 0 || actor.PredatorComponent.TailFullness > 0 || actor.PredatorComponent.BallsFullness > 0)
-                return State.GameManager.SpriteDictionary.Lamia[Math.Min(2 + actor.GetStomach2Size(2) + bonusCap, 4)];
-            return State.GameManager.SpriteDictionary.Lamia[1];
-        }
+            size = Math.Min(actor.GetStomach2Size(3) + bonusCap, 3);
         else
-        {
-            int effectiveSize = Math.Min(actor.Unit.BodySize + bonusCap, 3);
-            if (effectiveSize == 0)
-                return null;
-            else
-                return State.GameManager.SpriteDictionary.Lamia[1 + effectiveSize];
-        }
+            size = Math.Min(actor.Unit.BodySize + bonusCap, 3);
 
+        return size > 0 
+            ? State.GameManager.SpriteDictionary.Lamia[1+size] 
+            : null;
     }
 
     protected override Sprite BallsSprite(Actor_Unit actor)

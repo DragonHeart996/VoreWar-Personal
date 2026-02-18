@@ -765,14 +765,15 @@ public class PredatorComponent
         {
             SpecialSize *= Special.Health + Special.MaxHealth;
             SpecialSize /= Special.MaxHealth;
+            SpecialSize = Math.Min(SpecialSize, 1);
         }
 
         if (forceTopSpriteIfAlive)
         {
-            return (int)(sizeNoSpecial + ((maxSpecial - sizeNoSpecial) * SpecialSize));
+            return (int)Math.Round(sizeNoSpecial + ((maxSpecial - sizeNoSpecial) * SpecialSize));
         }
         else
-            return (int)Math.Min(size, sizeNoSpecial + ((maxSpecial - maxNoSpecial) * SpecialSize));
+            return (int)Math.Round(Math.Min(size, sizeNoSpecial + ((maxSpecial - maxNoSpecial) * SpecialSize)));
     }
 
     public void FreeAnyAlivePrey()
@@ -2576,11 +2577,23 @@ public class PredatorComponent
 
     internal void UpdateTransition()
     {
+        const float maxTransitionLength = 10;
+        const float exceedenceFactor = 0.25f;
+        float excessTime = 0;
+        
         if (StomachTransition.transitionTime < StomachTransition.transitionLength)
         {
             if (unit.Race == Race.FeralFrogs && actor.IsOralVoring && actor.IsOralVoringHalfOver == false)
                 return;
-            StomachTransition.transitionTime += Time.deltaTime;
+            excessTime = (StomachTransition.transitionLength - StomachTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && StomachTransition.transitionStart > StomachTransition.transitionEnd)
+            {
+                StomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                StomachTransition.transitionTime += Time.deltaTime;
+            }
             VisibleFullness = Mathf.Lerp(StomachTransition.transitionStart, StomachTransition.transitionEnd,
                 StomachTransition.transitionTime / StomachTransition.transitionLength);
         }
@@ -2593,7 +2606,15 @@ public class PredatorComponent
         {
             if (unit.Race == Race.FeralFrogs && actor.IsOralVoring && actor.IsOralVoringHalfOver == false)
                 return;
-            ExclusiveStomachTransition.transitionTime += Time.deltaTime;
+            excessTime = (ExclusiveStomachTransition.transitionLength - ExclusiveStomachTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && ExclusiveStomachTransition.transitionStart > ExclusiveStomachTransition.transitionEnd)
+            {
+                ExclusiveStomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                ExclusiveStomachTransition.transitionTime += Time.deltaTime;
+            }
             ExclusiveStomachFullness = Mathf.Lerp(ExclusiveStomachTransition.transitionStart, ExclusiveStomachTransition.transitionEnd,
                 ExclusiveStomachTransition.transitionTime / ExclusiveStomachTransition.transitionLength);
         }
@@ -2606,7 +2627,15 @@ public class PredatorComponent
         {
             if (unit.Race == Race.FeralFrogs && actor.IsOralVoring && actor.IsOralVoringHalfOver == false)
                 return;
-            Stomach2Transition.transitionTime += Time.deltaTime;
+            excessTime = (Stomach2Transition.transitionLength - Stomach2Transition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && Stomach2Transition.transitionStart > Stomach2Transition.transitionEnd)
+            {
+                Stomach2Transition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                Stomach2Transition.transitionTime += Time.deltaTime;
+            }
             Stomach2ndFullness = Mathf.Lerp(Stomach2Transition.transitionStart, Stomach2Transition.transitionEnd,
                 Stomach2Transition.transitionTime / Stomach2Transition.transitionLength);
         }
@@ -2619,7 +2648,15 @@ public class PredatorComponent
         
         if (WombTransition.transitionTime < WombTransition.transitionLength)
         {
-            WombTransition.transitionTime += Time.deltaTime;
+            excessTime = (WombTransition.transitionLength - WombTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && WombTransition.transitionStart > WombTransition.transitionEnd)
+            {
+                WombTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                WombTransition.transitionTime += Time.deltaTime;
+            }
             WombFullness = Mathf.Lerp(WombTransition.transitionStart, WombTransition.transitionEnd,
                 WombTransition.transitionTime / WombTransition.transitionLength);
         }
@@ -2630,7 +2667,15 @@ public class PredatorComponent
         
         if (TailTransition.transitionTime < TailTransition.transitionLength)
         {
-            TailTransition.transitionTime += Time.deltaTime;
+            excessTime = (TailTransition.transitionLength - TailTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && TailTransition.transitionStart > TailTransition.transitionEnd)
+            {
+                TailTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                TailTransition.transitionTime += Time.deltaTime;
+            }
             TailFullness = Mathf.Lerp(TailTransition.transitionStart, TailTransition.transitionEnd,
                 TailTransition.transitionTime / TailTransition.transitionLength);
         }
@@ -2641,7 +2686,15 @@ public class PredatorComponent
 
         if (BallsTransition.transitionTime < BallsTransition.transitionLength)
         {
-            BallsTransition.transitionTime += Time.deltaTime;
+            excessTime = (BallsTransition.transitionLength - BallsTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && BallsTransition.transitionStart > BallsTransition.transitionEnd)
+            {
+                BallsTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                BallsTransition.transitionTime += Time.deltaTime;
+            }
             BallsFullness = Mathf.Lerp(BallsTransition.transitionStart, BallsTransition.transitionEnd,
                 BallsTransition.transitionTime / BallsTransition.transitionLength);
         }
@@ -2652,7 +2705,15 @@ public class PredatorComponent
 
         if (LeftBreastTransition.transitionTime < LeftBreastTransition.transitionLength)
         {
-            LeftBreastTransition.transitionTime += Time.deltaTime;
+            excessTime = (LeftBreastTransition.transitionLength - LeftBreastTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && LeftBreastTransition.transitionStart > LeftBreastTransition.transitionEnd)
+            {
+                LeftBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                LeftBreastTransition.transitionTime += Time.deltaTime;
+            }
             LeftBreastFullness = Mathf.Lerp(LeftBreastTransition.transitionStart, LeftBreastTransition.transitionEnd,
                 LeftBreastTransition.transitionTime / LeftBreastTransition.transitionLength);
         }
@@ -2663,7 +2724,15 @@ public class PredatorComponent
 
         if (RightBreastTransition.transitionTime < RightBreastTransition.transitionLength)
         {
-            RightBreastTransition.transitionTime += Time.deltaTime;
+            excessTime = (RightBreastTransition.transitionLength - RightBreastTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && RightBreastTransition.transitionStart > RightBreastTransition.transitionEnd)
+            {
+                RightBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+            }
+            else
+            {
+                RightBreastTransition.transitionTime += Time.deltaTime;
+            }
             RightBreastFullness = Mathf.Lerp(RightBreastTransition.transitionStart, RightBreastTransition.transitionEnd,
                 RightBreastTransition.transitionTime / RightBreastTransition.transitionLength);
         }
