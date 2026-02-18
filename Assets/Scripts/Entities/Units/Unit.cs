@@ -2385,50 +2385,90 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         if (Config.RaceTraitsEnabled)
             Tags.AddRange(State.RaceSettings.GetRaceTraits(HiddenUnit.Race));
         
-        
+        var unitTypeTraits = new List<Traits>();
+        var raceUnitTypeTraits = new List<Traits>();
         if (Type == UnitType.Leader)
         {
-            var leaderTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
-            if (Config.LeaderTraits != null) leaderTraits.AddRange(Config.LeaderTraits);
-            if (leaderTraits.Contains(Traits.TraitOverride)) Tags.Clear();
-            Tags.AddRange(leaderTraits);
+            raceUnitTypeTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.LeaderTraits ?? new List<Traits>();
         }
         else if (Type == UnitType.Soldier || Type == UnitType.Summon)
         {
-            var soldierTraits = State.RaceSettings.GetSoldierRaceTraits(HiddenUnit.Race) ?? new List<Traits>();
-            if (Config.SoldierTraits != null) soldierTraits.AddRange(Config.SoldierTraits);
-            if (soldierTraits.Contains(Traits.TraitOverride)) Tags.Clear();
-            Tags.AddRange(soldierTraits);
+            raceUnitTypeTraits = State.RaceSettings.GetSoldierRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.SoldierTraits ?? new List<Traits>();
         }
         else if (Type == UnitType.Spawn)
         {
-            var spawnTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race) ?? new List<Traits>();
-            if (Config.SpawnTraits != null) spawnTraits.AddRange(Config.SpawnTraits);
-            if (spawnTraits.Contains(Traits.TraitOverride)) Tags.Clear();
-            Tags.AddRange(spawnTraits);
+            raceUnitTypeTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.SpawnTraits ?? new List<Traits>();
         }
+
+        if (!raceUnitTypeTraits.Contains(Traits.TraitConfigOverride))
+            unitTypeTraits.AddRange(raceUnitTypeTraits);
         
+        var genderTraits = new List<Traits>();
+        var raceGenderTraits = new List<Traits>();
         if (HiddenUnit.HasBreasts && !HiddenUnit.HasDick)
         {
-            var femaleTraits = State.RaceSettings.GetFemaleRaceTraits(HiddenUnit.Race);
-            if (femaleTraits != null) Tags.AddRange(femaleTraits);
-            femaleTraits = Config.FemaleTraits;
-            if (femaleTraits != null) Tags.AddRange(femaleTraits);
+            raceGenderTraits = State.RaceSettings.GetFemaleRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.FemaleTraits ?? new List<Traits>();
         }
         else if (!HiddenUnit.HasBreasts && HiddenUnit.HasDick)
         {
-            var maleTraits = State.RaceSettings.GetMaleRaceTraits(HiddenUnit.Race);
-            if (maleTraits != null) Tags.AddRange(maleTraits);
-            maleTraits = Config.MaleTraits;
-            if (maleTraits != null) Tags.AddRange(maleTraits);
+            raceGenderTraits = State.RaceSettings.GetMaleRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.MaleTraits ?? new List<Traits>();
         }
         else
         {
-            var hermTraits = State.RaceSettings.GetHermRaceTraits(HiddenUnit.Race);
-            if (hermTraits != null) Tags.AddRange(hermTraits);
-            hermTraits = Config.HermTraits;
-            if (hermTraits != null) Tags.AddRange(hermTraits);
+            raceGenderTraits = State.RaceSettings.GetHermRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.HermTraits ?? new List<Traits>();
         }
+
+        if (!raceGenderTraits.Contains(Traits.TraitConfigOverride))
+            genderTraits.AddRange(raceGenderTraits);
+
+        int donorIndex1 = 0;
+        int donorIndex2 = 0;
+        
+        if (!unitTypeTraits.Contains(Traits.TraitGenderOverride))
+        {
+            donorIndex1 = Tags.IndexOf(Traits.Donor);
+            donorIndex2 = genderTraits.IndexOf(Traits.Donor);
+            if (donorIndex1 != -1)
+            {
+                if (donorIndex2 != -1)
+                {
+                    Tags.InsertRange(donorIndex1, genderTraits.GetRange(0, donorIndex2));
+                    Tags.AddRange(genderTraits.GetRange(donorIndex2, genderTraits.Count - donorIndex2));
+                }
+                else 
+                    Tags.InsertRange(donorIndex1, genderTraits);
+            }
+            else
+                Tags.AddRange(genderTraits);
+        }
+        donorIndex1 = Tags.IndexOf(Traits.Donor);
+        donorIndex2 = unitTypeTraits.IndexOf(Traits.Donor);
+        if (donorIndex1 != -1)
+        {
+            if (donorIndex2 != -1)
+            {
+                Tags.InsertRange(donorIndex1, unitTypeTraits.GetRange(0, donorIndex2));
+                Tags.AddRange(unitTypeTraits.GetRange(donorIndex2, genderTraits.Count - donorIndex2));
+            }
+            else 
+                Tags.InsertRange(donorIndex1, unitTypeTraits);
+        }
+        else
+            Tags.AddRange(unitTypeTraits);
+        
+        Tags.RemoveAll((t) => 
+            t == Traits.TraitOverride 
+            || t == Traits.TraitConfigOverride 
+            || t == Traits.TraitGenderOverride);
+        
+
+
         if (TemporaryTraits != null)
             Tags.AddRange(TemporaryTraits);
         if (SharedTraits != null)
@@ -2453,7 +2493,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         }
         if (!State.TutorialMode)
             RandomizeTraits();
-         Tags = Tags.Distinct().ToList();
+        Tags = Tags.Distinct().ToList();
         foreach (var t in Tags)
         {
             if (t >= (Traits)6000)

@@ -863,6 +863,12 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.TraitOverride:
                 return
                     "Forces the trait list containing it to override base racial traits, rather than adding onto them";
+            case Traits.TraitConfigOverride:
+                return
+                    "Forces the trait list containing it to override its corresponding general config traits, rather than adding onto them";
+            case Traits.TraitGenderOverride:
+                return
+                    "Forces the trait list containing it to override gender-specific traits, rather than adding onto them";
             case Traits.SweepingSwallow:
                 return "Grants SweepingSwallow Attack";
             case Traits.ExtremelyStretchy:

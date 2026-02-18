@@ -652,7 +652,11 @@ public enum Traits
     /// <summary>Can attempt to eat anything so long as it has some space, also prevents overfeeding damage</summary>
     ExtremelyStretchy = 998,
     /// <summary>Forces the trait list containing it to override base racial traits, rather than adding onto them</summary>
-    TraitOverride = 997
+    TraitOverride = 997,
+    /// <summary>Forces the trait list containing it to override its corresponding general config traits, rather than adding onto them</summary>
+    TraitConfigOverride = 996,
+    /// <summary>Forces the trait list containing it to override gender-specific traits, rather than adding onto them</summary>
+    TraitGenderOverride = 995
 
 }
 
