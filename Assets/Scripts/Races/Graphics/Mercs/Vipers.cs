@@ -105,7 +105,7 @@ class Vipers : DefaultRaceData
 
         unit.ExtraColor1 = unit.SkinColor;
 
-        unit.TailType = 0;
+        unit.TailType = State.Rand.Next(1);
     }
 
     internal override void SetBaseOffsets(Actor_Unit actor)
@@ -341,39 +341,40 @@ class Vipers : DefaultRaceData
 
     protected override Sprite BodyAccentSprite5(Actor_Unit actor) // slit outside
     {
-        if (Config.HideCocks) return null;
-
-        if (Config.HideViperSlits) return null;
-
-
         if (actor.Unit.HasDick == false)
         {
+            if (Config.HideViperSlits)
+                return null;
             if (actor.IsUnbirthing)
                 return Sprites[49];
             return Sprites[48];
         }
         else
         {
+            if (Config.HideCocks) 
+                return null;
             if (actor.IsErect() || actor.IsCockVoring)
                 return Sprites[52];
+            if (Config.HideViperSlits)
+                return null;
             return Sprites[51];
         }
     }
 
     protected override Sprite BodyAccentSprite6(Actor_Unit actor) // slit inside
     {
-        if (Config.HideCocks) return null;
-
-        if (Config.HideViperSlits) return null;
-
         if (actor.Unit.HasDick == false)
         {
+            if (Config.HideViperSlits) 
+                return null;
             if (actor.IsUnbirthing)
                 return Sprites[50];
             return null;
         }
         else
         {
+            if (Config.HideCocks) 
+                return null;
             if (actor.IsErect() || actor.IsCockVoring)
                 return Sprites[53];
             return null;
@@ -382,6 +383,41 @@ class Vipers : DefaultRaceData
 
     protected override Sprite BodyAccentSprite7(Actor_Unit actor) // middle tail
     {
+        int size = actor.GetStomachSize(15);
+        if (actor.Unit.TailType == 0)
+        {
+            switch (size)
+            {
+                case 15:
+                    return Sprites[99];
+                case 14:
+                    return Sprites[98];
+                case 13:
+                    return Sprites[97];
+                case 12:
+                    return Sprites[96];
+            }
+        }
+        else
+        {
+            switch (size)
+            {
+                case 15:
+                    return Sprites4[27];
+                case 14:
+                    return Sprites4[26];
+                case 13:
+                    return Sprites4[25];
+                case 12:
+                    return Sprites4[24];
+            }
+        }
+        return null;
+
+
+
+
+
         if (actor.Unit.TailType == 0)
         {
             if (actor.GetStomachSize(15) == 15 && actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach, PreyLocation.womb))

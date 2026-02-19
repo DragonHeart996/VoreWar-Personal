@@ -3304,7 +3304,7 @@ internal int StartOfTurnExpectedMP()
             return false;
         if (Config.ErectionsFromVore)
         {
-            if (PredatorComponent?.VisibleFullness > 0)
+            if (PredatorComponent?.CombinedStomachFullness > 0)
                 return true;
         }
         if (Config.ErectionsFromCockVore)
