@@ -1231,11 +1231,11 @@ public class PredatorComponent
     {
         AlivePrey = 0;
         int totalHeal = 0;
-        foreach (Prey preyUnit in prey.ToList())
+        foreach (Prey preyUnit in prey.OrderBy((p) => p.Actor.Bulk()).ToList())
         {
-            if ((preyUnit.Location != PreyLocation.breasts && feedType == "breastfeed")
-                || (preyUnit.Location != PreyLocation.leftBreast && feedType == "breastfeedL")
-                || (preyUnit.Location != PreyLocation.rightBreast && feedType == "breastfeedR")
+            if (((preyUnit.Location != PreyLocation.breasts && feedType == "breastfeed") 
+                 && (preyUnit.Location != PreyLocation.leftBreast && feedType == "breastfeed") 
+                 && (preyUnit.Location != PreyLocation.rightBreast && feedType == "breastfeed")) 
                 || (preyUnit.Location != PreyLocation.balls && feedType == "cumfeed"))
                 continue;
             if (unit.HasTrait(Traits.EnthrallingDepths) ||
@@ -1272,15 +1272,23 @@ public class PredatorComponent
             {
                 if (stomach.Contains(preyUnit))
                 {
-                    if (preyUnit.TurnsBeingSwallowed >= 2)
+                    float stomachBulk = stomach.Sum(p => p.Actor.Bulk());
+                    float stomach2Bulk = stomach2.Sum(p => p.Actor.Bulk());
+                    float preyBulk = preyUnit.Actor.Bulk();
+                    if (stomachBulk - preyBulk >= stomach2Bulk)
                     {
-                        stomach.Remove(preyUnit);
-                        stomach2.Add(preyUnit);
+                        if (preyUnit.TurnsBeingSwallowed >= 2)
+                        {
+                            stomach.Remove(preyUnit);
+                            stomach2.Add(preyUnit);
+                        }
+                        else
+                        {
+                            preyUnit.TurnsBeingSwallowed++;
+                        }
                     }
-                    else
-                    {
-                        preyUnit.TurnsBeingSwallowed++;
-                    }
+                    else if (preyUnit.TurnsBeingSwallowed > 0)
+                        preyUnit.TurnsBeingSwallowed--;
                 }
             }
 
@@ -2577,8 +2585,8 @@ public class PredatorComponent
 
     internal void UpdateTransition()
     {
-        const float maxTransitionLength = 10;
-        const float exceedenceFactor = 0.25f;
+        const float maxTransitionLength = 2;
+        const float exceedanceFactor = 1f;
         float excessTime = 0;
         
         if (StomachTransition.transitionTime < StomachTransition.transitionLength)
@@ -2588,7 +2596,7 @@ public class PredatorComponent
             excessTime = (StomachTransition.transitionLength - StomachTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && StomachTransition.transitionStart > StomachTransition.transitionEnd)
             {
-                StomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                StomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2609,7 +2617,7 @@ public class PredatorComponent
             excessTime = (ExclusiveStomachTransition.transitionLength - ExclusiveStomachTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && ExclusiveStomachTransition.transitionStart > ExclusiveStomachTransition.transitionEnd)
             {
-                ExclusiveStomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                ExclusiveStomachTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2630,7 +2638,7 @@ public class PredatorComponent
             excessTime = (Stomach2Transition.transitionLength - Stomach2Transition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && Stomach2Transition.transitionStart > Stomach2Transition.transitionEnd)
             {
-                Stomach2Transition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                Stomach2Transition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2651,7 +2659,7 @@ public class PredatorComponent
             excessTime = (WombTransition.transitionLength - WombTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && WombTransition.transitionStart > WombTransition.transitionEnd)
             {
-                WombTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                WombTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2670,7 +2678,7 @@ public class PredatorComponent
             excessTime = (TailTransition.transitionLength - TailTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && TailTransition.transitionStart > TailTransition.transitionEnd)
             {
-                TailTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                TailTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2689,7 +2697,7 @@ public class PredatorComponent
             excessTime = (BallsTransition.transitionLength - BallsTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && BallsTransition.transitionStart > BallsTransition.transitionEnd)
             {
-                BallsTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                BallsTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2708,7 +2716,7 @@ public class PredatorComponent
             excessTime = (LeftBreastTransition.transitionLength - LeftBreastTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && LeftBreastTransition.transitionStart > LeftBreastTransition.transitionEnd)
             {
-                LeftBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                LeftBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2727,7 +2735,7 @@ public class PredatorComponent
             excessTime = (RightBreastTransition.transitionLength - RightBreastTransition.transitionTime) - maxTransitionLength;
             if (excessTime > 0 && RightBreastTransition.transitionStart > RightBreastTransition.transitionEnd)
             {
-                RightBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedenceFactor;
+                RightBreastTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
             }
             else
             {
@@ -2967,7 +2975,17 @@ public class PredatorComponent
         if (prey.Unit.IsDead == false && unit.HasTrait(Traits.DualStomach) && stomach.Contains(prey))
         {
             if (indent > 0) ret += $"L:{indent} ";
-            ret += $"Pushing {prey.Unit.Name} deeper\n";
+            float stomachBulk = stomach.Sum(p => p.Actor.Bulk());
+            float stomach2Bulk = stomach2.Sum(p => p.Actor.Bulk());
+            if (stomachBulk - prey.Actor.Bulk() >= stomach2Bulk)
+            {
+                ret += $"Pushing {prey.Unit.Name} deeper\n";
+            }
+            else
+            {
+                ret += $"Digesting {prey.Unit.Name}\n";
+            }
+
             if (Config.ExtraTacticalInfo)
             {
                 prey.UpdateEscapeRate();
@@ -4275,10 +4293,10 @@ public class PredatorComponent
                 actor.DigestCheck("breastfeed");
                 break;
             case 1:
-                actor.DigestCheck("breastfeedL");
+                actor.DigestCheck("breastfeed");
                 break;
             case 2:
-                actor.DigestCheck("breastfeedR");
+                actor.DigestCheck("breastfeed");
                 break;
         }
 
