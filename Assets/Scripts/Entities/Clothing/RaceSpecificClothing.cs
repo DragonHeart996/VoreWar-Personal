@@ -167,8 +167,13 @@ class LizardLeaderTop : MainClothing
                     clothing1.layer = 15;
                     return State.GameManager.SpriteDictionary.LizardsBootyArmor[37];
                 }
-            else 
-            sprite.ChangeLayer(SpriteType.Breasts, 15);
+            else if (actor.Unit.HasBreasts)
+                {
+                    clothing1.layer = 17;
+                    coversBreasts = false;
+                }
+            else
+            coversBreasts = true;
             return State.GameManager.SpriteDictionary.LizardLeader[0 + (attacking ? 1 : 0)];
         };
         base.Configure(sprite, actor);
@@ -409,6 +414,7 @@ class LizardBoneLoins : MainClothing
         Type = 6001;
         coversBreasts = false;
         blocksDick = false;
+        inFrontOfDick = true;
         leaderOnly = false;
         FixedColor = true;
         DiscardSprite = State.GameManager.SpriteDictionary.LizardBone[10];
@@ -625,6 +631,7 @@ class LizardLeatherLoins : MainClothing
         Type = 6001;
         coversBreasts = false;
         blocksDick = false;
+        inFrontOfDick = true;
         leaderOnly = false;
         FixedColor = false;
         DiscardSprite = State.GameManager.SpriteDictionary.LizardLeather[17];
@@ -831,6 +838,7 @@ class LizardClothLoins : MainClothing
         Type = 6001;
         coversBreasts = false;
         blocksDick = false;
+        inFrontOfDick = true;
         leaderOnly = false;
         FixedColor = true;
         DiscardSprite = State.GameManager.SpriteDictionary.LizardCloth[11];
