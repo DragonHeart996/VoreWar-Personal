@@ -572,7 +572,7 @@ It should be fairly stable though.  There are a few places that are still keyed 
                 return "When enabled, preds can transfer units they have 'cumgested' through cock vore to strengthen a target unit. The target unit must be unbirthed by one of the pred's allies, as well as either be on the pred's side themselves, or have already been digested inside the pred's ally's womb.";
             case 223:
                 return @"When enabled, converting a unit with a conversion trait or KuroTenko will randomize their name and gender every time.
-If disabled, converting will only randomize anme and gender if the two races don't have the same set of allowed genders (e.g. humanoid -> most monsters or vice versa).";
+If disabled, converting will only randomize name and gender if the two races don't have the same set of allowed genders (e.g. humanoid -> most monsters or vice versa).";
             case 224:
                 return "When enabled, special mercenaries can convert other units to copies of themselves through KuroTenko rebirth or a rebirth trait.";
             case 225:
@@ -838,6 +838,9 @@ Does not retroactively affect already created units.";
 The weights affect how often the AI will choose one in comparison to the others.  
 (I.e. if unbirth is high, and everything else is low, unbirth will be a high % of what they choose, provided that the race is capable of it.)";
             case 349:
+                return @"Controls how many ancient teleporters the generator will spawn.
+Places them in a simple manner, unconcerned with things like fairness";
+            case 350:
                 return "Traits in here will be automatically added to generic Units when created\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
             default:
                 return "";
