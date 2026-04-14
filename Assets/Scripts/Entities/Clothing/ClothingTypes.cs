@@ -422,7 +422,7 @@ class Rags : MainClothing
             clothing1.GetSprite = null;        
         else
             clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[spr];
-
+        
         clothing2.layer = 10;
         if (actor.Unit.Race == Race.Imps || actor.Unit.Race == Race.Goblins)
         {

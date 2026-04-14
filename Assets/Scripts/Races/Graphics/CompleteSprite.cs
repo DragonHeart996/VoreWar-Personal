@@ -129,7 +129,7 @@ class CompleteSprite
             return sprites[typeInt];
         if (spriteType == SpriteType.Belly && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);
-            else if (spriteType == SpriteType.SecondaryBelly && animatedType != null)
+        else if (spriteType == SpriteType.SecondaryBelly && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);
         else if (spriteType == SpriteType.Balls && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);

@@ -102,6 +102,7 @@ public class PredatorComponent
     Transition TailTransition;
     Transition WombTransition;
     Transition BallsTransition;
+    Transition BladderTransition;
     Transition LeftBreastTransition;
     Transition RightBreastTransition;
 
@@ -1461,10 +1462,10 @@ public class PredatorComponent
         UpdateFullness();
     }
 
-    int ApplySettingsToDamage(int incoming_damage, Prey preyUnit)
+    float ApplySettingsToDamage(float incoming_damage, Prey preyUnit)
     {
         if (Config.DigestionFlatDmg >= 0.01f)
-            return (int)(preyUnit.Unit.MaxHealth * Config.DigestionFlatDmg);
+            return preyUnit.Unit.MaxHealth * Config.DigestionFlatDmg;
 
         float outgoing_damage_mod = Config.DigestionSpeedMult;
         outgoing_damage_mod += Config.DigestionRamp *
@@ -1473,7 +1474,7 @@ public class PredatorComponent
                                    : (float)Math.Floor(actor.RampStacks));
         if (actor.BeingRubbed)
             outgoing_damage_mod *= Config.BellyRubEffMult;
-        int outgoing_damage = (int)(incoming_damage * outgoing_damage_mod);
+        float outgoing_damage = incoming_damage * outgoing_damage_mod;
 
         if (Config.DigestionDamageDivision)
         {
@@ -1481,9 +1482,9 @@ public class PredatorComponent
             outgoing_damage /= prey_in_loc > 0 ? prey_in_loc : 1;
         }
 
-        if (outgoing_damage > (int)(preyUnit.Unit.MaxHealth * Config.DigestionCap) && Config.DigestionCap > 0)
+        if (outgoing_damage > preyUnit.Unit.MaxHealth * Config.DigestionCap && Config.DigestionCap > 0)
         {
-            outgoing_damage = (int)(preyUnit.Unit.MaxHealth * Config.DigestionCap);
+            outgoing_damage = preyUnit.Unit.MaxHealth * Config.DigestionCap;
         }
 
         return outgoing_damage;
@@ -1506,22 +1507,23 @@ public class PredatorComponent
                           (1 + preyUnit.TurnsDigested / 5f);
         predScore *= unit.TraitBoosts.Outgoing.DigestionRate;
         preyScore /= preyUnit.Unit.TraitBoosts.Incoming.DigestionRate;
-        int damage = (int)Math.Round(predScore / preyScore);
-        damage = (int)(damage *
+        float damage = predScore / preyScore;
+        damage = (damage *
                        TagConditionChecker.ApplyTagEffect(unit, preyUnit.Unit,
                            UnitTagModifierEffect.DigestionRateMult));
         damage = ApplySettingsToDamage(damage, preyUnit);
         if (unit.HasTrait(Traits.SleepItOff) && unit.GetStatusEffect(StatusEffectType.Sleeping) != null)
             damage *= 2;
         if (preyUnit.Unit.GetStatusEffect(StatusEffectType.Erosion) != null)
-            damage += (int)(damage * (preyUnit.Unit.GetStatusEffect(StatusEffectType.Erosion).Strength / 2));
+            damage += damage * (preyUnit.Unit.GetStatusEffect(StatusEffectType.Erosion).Strength / 2);
         if (unit.GetStatusEffect(StatusEffectType.Diluted) != null)
-            damage -= (int)(damage * (unit.GetStatusEffect(StatusEffectType.Diluted).Strength *
-                                      unit.GetStatusEffect(StatusEffectType.Diluted).Duration));
-        if (damage < 1)
-            damage = 1;
+            damage -= damage * (unit.GetStatusEffect(StatusEffectType.Diluted).Strength *
+                                      unit.GetStatusEffect(StatusEffectType.Diluted).Duration);
+        int finalDamage = (int)Math.Round(damage);
+        if (finalDamage < 1)
+            finalDamage = 1;
 
-        return damage;
+        return finalDamage;
     }
 
     /// <summary>
@@ -1941,6 +1943,8 @@ public class PredatorComponent
 
         if (preyUnit.Unit.IsDead == false)
         {
+            //State.GameManager.TacticalMode.Log.RegisterMiscellaneous(
+            //    $"<color:orange>Debug: {preyDamage}</color>");
             preyUnit.Actor.SubtractHealth(preyDamage);
             preyUnit.TurnsSinceLastDamage = 0;
         }
@@ -2026,7 +2030,7 @@ public class PredatorComponent
 
             totalHeal +=
                 Math.Max(
-                    (int)(healthReduction / 2 * preyUnit.Unit.TraitBoosts.Outgoing.Nutrition *
+                    (int)(healthReduction / 2f * preyUnit.Unit.TraitBoosts.Outgoing.Nutrition *
                           unit.TraitBoosts.Incoming.Nutrition), 1);
             totalHeal = (int)(totalHeal *
                               TagConditionChecker.ApplyTagEffect(unit, preyUnit.Unit,
@@ -2783,6 +2787,25 @@ public class PredatorComponent
         {
             BallsFullness = BallsTransition.transitionEnd;
         }
+        
+        if (BladderTransition.transitionTime < BladderTransition.transitionLength)
+        {
+            excessTime = (BladderTransition.transitionLength - BladderTransition.transitionTime) - maxTransitionLength;
+            if (excessTime > 0 && BladderTransition.transitionStart > BladderTransition.transitionEnd)
+            {
+                BladderTransition.transitionTime += Time.deltaTime + Time.deltaTime*excessTime*exceedanceFactor;
+            }
+            else
+            {
+                BladderTransition.transitionTime += Time.deltaTime;
+            }
+            BladderFullness = Mathf.Lerp(BladderTransition.transitionStart, BladderTransition.transitionEnd,
+                BladderTransition.transitionTime / BladderTransition.transitionLength);
+        }
+        else
+        {
+            BladderFullness = BladderTransition.transitionEnd;
+        }
 
         if (LeftBreastTransition.transitionTime < LeftBreastTransition.transitionLength)
         {
@@ -2944,6 +2967,15 @@ public class PredatorComponent
             BallsTransition = new Transition(0, 0, 0);
             BallsFullness = 0;
         }
+        
+        float newBladder = fullnessFactor * bladderFullness / stomachSize;
+        if (newBladder > 0 || BladderFullness > 0)
+            BladderTransition = new Transition(Math.Abs(newBladder - BladderFullness) / 4, BladderFullness, newBladder);
+        else
+        {
+            BladderTransition = new Transition(0, 0, 0);
+            BladderFullness = 0;
+        }
 
         Fullness = fullnessFactor * fullness / stomachSize;
 
@@ -2954,7 +2986,6 @@ public class PredatorComponent
 
         ExclusiveStomachFullness = fullnessFactor * exclusiveStomachFullness / stomachSize;
 //todo: bladder transition
-
         Stomach2ndFullness = fullnessFactor * stomach2ndFullness / stomachSize;
         CombinedStomachFullness = fullnessFactor * (stomach2ndFullness + stomachFullness) / stomachSize;
         if (breastFullness <= 0) breastFullness = -1;

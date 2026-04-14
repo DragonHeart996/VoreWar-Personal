@@ -136,13 +136,18 @@ class Lamia : DefaultRaceData
         AddOffset(BodyAccent3, xOffset, yOffset);
         AddOffset(BodyAccent4, xOffset, yOffset);
         AddOffset(BodyAccent5, xOffset, yOffset);
-        AddOffset(BodyAccent7, -.625f,0);
+        AddOffset(BodyAccent7, -.625f, 0);
         AddOffset(BodyAccent10, -.625f, 0);
-        
+
         //janky gaps fix (needs better sprites that cover the seam
-        actor.UnitSprite.CompleteSprite.GetSpriteOfType(SpriteType.BodyAccent7).GameObject.transform.localScale = new Vector3(0.99f, 0.99f, 1);
-        actor.UnitSprite.CompleteSprite.GetSpriteOfType(SpriteType.BodyAccent10).GameObject.transform.localScale = new Vector3(0.99f, 0.99f, 1);
-        
+        if (actor.UnitSprite.CompleteSprite != null)
+        {
+            actor.UnitSprite.CompleteSprite.GetSpriteOfType(SpriteType.BodyAccent7).GameObject.transform.localScale =
+                new Vector3(0.99f, 0.99f, 1);
+
+            actor.UnitSprite.CompleteSprite.GetSpriteOfType(SpriteType.BodyAccent10).GameObject.transform.localScale =
+                new Vector3(0.99f, 0.99f, 1);
+        }
         if (actor.Unit.HasBreasts)
         {
             if (actor.Unit.Furry)

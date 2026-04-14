@@ -1442,6 +1442,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
 
     public void Kill()
     {
+        Health = 0;
         TimesKilled++;
         if (SavedCopy != null)
             SavedCopy.TimesKilled++;

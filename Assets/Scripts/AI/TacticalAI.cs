@@ -133,11 +133,13 @@ public abstract class TacticalAI : ITacticalAI
         var preds = actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered && s.Unit.Predator);
         lackPredators = preds.Any() == false;
         bool tooBig = true;
+        //State.GameManager.TacticalMode.IsOnlyOneSideVisible();
         trappedUnits = false;
         veryTrappedUnits = false;
         if (!tookCombatActions)
         {
-            foreach (var actor in actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered))
+            var activeUnits = actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered);
+            foreach (var actor in activeUnits)
             {
                 if (CheckCombatActionsAvailable(actor))
                 {

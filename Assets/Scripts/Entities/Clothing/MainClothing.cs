@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// The main clothing type, suitable for Primary clothing or waist clothing.  Covers breasts and blocks dick by default
@@ -131,44 +132,54 @@ abstract class MainClothing
 
     protected void Apply(CompleteSprite sprite, Actor_Unit actor)
     {
+        int lowestLayer = int.MaxValue;
         if (clothing1 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing1.layer);
             sprite.SetNextClothingSprite(clothing1);
         }
 
         if (clothing2 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing2.layer);
             sprite.SetNextClothingSprite(clothing2);
         }
 
         if (clothing3 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing3.layer);
             sprite.SetNextClothingSprite(clothing3);
         }
 
         if (clothing4 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing4.layer);
             sprite.SetNextClothingSprite(clothing4);
         }
 
         if (clothing5 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing5.layer);
             sprite.SetNextClothingSprite(clothing5);
         }
         if (clothing6 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing6.layer);
             sprite.SetNextClothingSprite(clothing6);
         }
         if (clothing7 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing7.layer);
             sprite.SetNextClothingSprite(clothing7);
         }
         if (clothing8 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing8.layer);
             sprite.SetNextClothingSprite(clothing8);
         }
         if (clothing9 != null)
         {
+            lowestLayer = Math.Max(lowestLayer, clothing9.layer);
             sprite.SetNextClothingSprite(clothing9);
         }
 
@@ -214,10 +225,10 @@ abstract class MainClothing
                 sprite.HideSprite(SpriteType.BodyAccent2); //Used for Dick Ring colors
             }
         }
-        if (inFrontOfDick)
+        else if (inFrontOfDick)
         {
-            sprite.ChangeLayer(SpriteType.Dick, (clothing1.layer - 1));
-            sprite.ChangeLayer(SpriteType.Balls, (clothing1.layer - 1));
+            sprite.ChangeLayer(SpriteType.Dick, lowestLayer - 1);
+            sprite.ChangeLayer(SpriteType.Balls, lowestLayer - 1);
         }
 
         if (colorsBelly)

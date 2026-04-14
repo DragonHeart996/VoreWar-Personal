@@ -4797,9 +4797,9 @@ public class TacticalMode : SceneBase
         if (turboMode == false)
         {
             RebuildInfo();
-            
+            bool advance = IsOnlyOneSideVisible(true);
             autoAdvancing = Config.AutoAdvance > 0 
-                            && IsOnlyOneSideVisible(true);
+                            && advance;
             VictoryCheck();
         }
     }
