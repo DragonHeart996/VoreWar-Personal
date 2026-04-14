@@ -18,6 +18,11 @@ abstract class DefaultRaceData
     internal SpriteExtraInfo BodyAccent8;
     internal SpriteExtraInfo BodyAccent9;
     internal SpriteExtraInfo BodyAccent10;
+    internal SpriteExtraInfo BodyAccent11;
+    internal SpriteExtraInfo BodyAccent12;
+    internal SpriteExtraInfo BodyAccent13;
+    internal SpriteExtraInfo BodyAccent14;
+    internal SpriteExtraInfo BodyAccent15;
     internal SpriteExtraInfo Mouth;
     internal SpriteExtraInfo Hair;
     internal SpriteExtraInfo Hair2;
@@ -88,6 +93,7 @@ abstract class DefaultRaceData
 
     /// <summary>Whether a unit has the breast vore system, with extended sizes and the two sides being independent.</summary>
     internal bool ExtendedBreastSprites = false;
+    internal bool oversize = false;
 
     /// <summary>Whether a unit uses the gentler version of the stomach wobble (1/2 to 1/3rd the motion)</summary>
     internal bool GentleAnimation = false;
@@ -679,6 +685,8 @@ abstract class DefaultRaceData
             return null;
         if (actor.SquishedBreasts && actor.Unit.BreastSize >= 3 && actor.Unit.BreastSize <= 6)
             return State.GameManager.SpriteDictionary.SquishedBreasts[actor.Unit.BreastSize - 3];
+        if (actor.Unit.BreastSize == 7)
+            AddOffset(Breasts, 0, -3 * .625f);
         return State.GameManager.SpriteDictionary.Breasts[actor.Unit.BreastSize];
     }
 
@@ -889,12 +897,17 @@ abstract class DefaultRaceData
     protected virtual Sprite BodyAccentSprite8(Actor_Unit actor) => null;
     protected virtual Sprite BodyAccentSprite9(Actor_Unit actor) => null;
     protected virtual Sprite BodyAccentSprite10(Actor_Unit actor) => null;
+    protected virtual Sprite BodyAccentSprite11(Actor_Unit actor) => null;
+    protected virtual Sprite BodyAccentSprite12(Actor_Unit actor) => null;
+    protected virtual Sprite BodyAccentSprite13(Actor_Unit actor) => null;
+    protected virtual Sprite BodyAccentSprite14(Actor_Unit actor) => null;
+    protected virtual Sprite BodyAccentSprite15(Actor_Unit actor) => null;
     protected virtual Sprite SecondaryBreastsSprite(Actor_Unit actor) => null;
     protected virtual Sprite SecondaryBellySprite(Actor_Unit actor) => null;
 
     internal virtual void RunFirst(Actor_Unit actor)
     {
-
+        oversize = false;
     }
 
     protected static Color WhiteColored(Actor_Unit actor) => Color.white;

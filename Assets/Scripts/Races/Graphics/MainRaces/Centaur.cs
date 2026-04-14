@@ -144,9 +144,6 @@ class Centaur : TaurHumanHalf
             SecondaryBelly.layer = 6;
         }
 
-        if (!actor.HasBelly)
-            return null;
-
         if ( size >= 31 && (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? false))
         {
 			AddOffset(SecondaryBelly, -23 * .625f, -7 * .625f);
@@ -304,7 +301,6 @@ class Centaur : TaurHumanHalf
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

@@ -228,11 +228,8 @@ public static class State
         List<TaggedTrait> newTraits = new List<TaggedTrait>();
         foreach (var newTrait in UntaggedTraits)
         {
-            if (newTrait.Value)
-            {
-                continue;
-            }
-            newTraits.Add(newTrait.Key);
+            if (!newTrait.Value)
+                newTraits.Add(newTrait.Key);
         }
 
         ExternalTraitHandler.AppendTaggedTrait(newTraits);
@@ -1666,7 +1663,6 @@ public static class State
                 if (pureTactical)
                 {
                     GameManager.TacticalMode.RefreshPureTacticalTraits();
-                    GameManager.TacticalMode.ForceUpdate();
                 }
             }
             

@@ -37,6 +37,8 @@ public class Village
 
     [OdinSerialize] internal float Happiness = 100;
 
+    [OdinSerialize] internal float IncomeBoost = 1f;
+
     [OdinSerialize]
     internal List<InvisibleTravelingUnit> travelers;
 
@@ -414,6 +416,8 @@ public class Village
 
         v = (v * NetBoosts.WealthMult) + NetBoosts.WealthAdd;
 
+        v *= IncomeBoost;
+
         return (int)v;
     }
 
@@ -519,6 +523,9 @@ public class Village
             spawnerType = spawner.GetConquestType();
         else
             spawnerType = Config.MonsterConquest;
+        
+        IncomeBoost = 1f; // Reset income boost
+
         if ((army != null && army.Side < 100) || (army != null && (spawnerType == Config.MonsterConquestType.CompleteDevourAndRepopulate || spawnerType == Config.MonsterConquestType.CompleteDevourAndRepopulateFortify)))
         {
             army.Units.ForEach(u =>
@@ -534,6 +541,11 @@ public class Village
                     {
                         namedBreeders -= 0.30;
                     }
+                }
+                // Reapply Unit boost
+                if (u.HasTrait(Traits.Hoarder))
+                {
+                    IncomeBoost += 0.001f;
                 }
             });
         }

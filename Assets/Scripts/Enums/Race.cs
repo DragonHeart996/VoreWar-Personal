@@ -41,6 +41,7 @@
     Lupine = 36,
     Jackals  = 37,
     Ghosts = 38,
+    DemiDragons = 39,
 
     Succubi = 50,
     Tigers = 51,
@@ -123,6 +124,7 @@
     Trex = 159,
     Utahraptor = 160,
     Iliijiith = 161,
+    Pudding = 162,
 
     Selicia = 170,
     Vision = 171,
@@ -148,4 +150,5 @@
     Firefly = 191,
     Nectar = 192,
     Ryan = 193,
+    Konane = 194,
 }

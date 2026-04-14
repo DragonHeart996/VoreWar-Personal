@@ -347,6 +347,9 @@ public class Unit
 
     [OdinSerialize]
     internal List<SpellTypes> SingleUseSpells = new List<SpellTypes>();
+    
+    [OdinSerialize]
+    internal List<SpellTypes> ExpendedSingleUseSpells = new List<SpellTypes>();
 
     [OdinSerialize]
     internal List<SpellTypes> MultiUseSpells = new List<SpellTypes>();  // This is so much more straightforward than adding Special Actions
@@ -449,11 +452,11 @@ public class Unit
         return HasTrait(Traits.AcellularBody) || HasTrait(Traits.ViralBiology);
     }
 
-    internal bool CanUnbirth => Config.Unbirth && HasVagina;
-    internal bool CanCockVore => Config.CockVore && HasDick;
-    internal bool CanBreastVore => Config.BreastVore && HasBreasts;
-    internal bool CanAnalVore => Config.AnalVore;
-    internal bool CanTailVore => Config.TailVore;
+    internal bool CanUnbirth => Config.Unbirth && HasVagina && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.Unbirth);
+    internal bool CanCockVore => Config.CockVore && HasDick && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.CockVore);
+    internal bool CanBreastVore => Config.BreastVore && HasBreasts && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.BreastVore);
+    internal bool CanAnalVore => Config.AnalVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.Anal);
+    internal bool CanTailVore => Config.TailVore && State.RaceSettings.GetVoreTypes(Race).Contains(VoreType.TailVore);
 
     public bool CanVore(PreyLocation location)
     {
@@ -771,6 +774,16 @@ public class Unit
             if (rand == 1) InnateSpells.Add(SpellTypes.Pyre);
             if (rand == 2) InnateSpells.Add(SpellTypes.LightningBolt);
         }
+
+        if (HasTrait(Traits.NaturalCaster))
+        {
+            int rand = State.Rand.Next(5);
+            if (rand == 0) InnateSpells.Add(SpellTypes.Icicle);
+            if (rand == 1) InnateSpells.Add(SpellTypes.Fireball);
+            if (rand == 2) InnateSpells.Add(SpellTypes.LightningBolt);
+            if (rand == 3) InnateSpells.Add(SpellTypes.PowerBolt);
+            if (rand == 4) InnateSpells.Add(SpellTypes.Poison);
+        }
         if (race == Race.Fairies)
         {
             FairyUtil.SetSeason(this, FairyUtil.GetSeason(this)); //To establish the spell properly
@@ -1031,6 +1044,11 @@ public class Unit
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.NectarWeapon);
         }
         else if (race == Race.Ryan)
+        {
+            FixedGear = true;
+            Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RyanWeapon);
+        }
+        else if (race == Race.Konane)
         {
             FixedGear = true;
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RyanWeapon);
@@ -1521,7 +1539,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             return _manaPct;
         }
     }
-    private float _stamPct = 100f;
+    private float _stamPct = 1f;
     public float StamPct
     {
         get
@@ -2010,6 +2028,10 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
 
         PermanentTraits.Add(traitIdToAdd);
         RecalculateStatBoosts();
+        if (traitIdToAdd == Traits.Resourceful)
+        {
+            SetMaxItems();
+        }
         return true;
     }
 
@@ -2348,6 +2370,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
                     if (SharedTraits.Contains((Traits)id))
                         SharedTraits.Remove((Traits)id);
                 }
+                AllConditionalTraits.Remove(toRemove);
             }
             RecalculateStatBoosts();
             PreyCheck();
@@ -2361,40 +2384,91 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             AllConditionalTraits = new Dictionary<ConditionalTraitContainer, bool>();
         if (Config.RaceTraitsEnabled)
             Tags.AddRange(State.RaceSettings.GetRaceTraits(HiddenUnit.Race));
-        if (HiddenUnit.HasBreasts && HiddenUnit.HasDick == false)
-        {
-            var femaleTraits = State.RaceSettings.GetFemaleRaceTraits(HiddenUnit.Race);
-            if (femaleTraits != null) Tags.AddRange(femaleTraits);
-            femaleTraits = Config.FemaleTraits;
-            if (femaleTraits != null) Tags.AddRange(femaleTraits);
-        }
-        else if (!HiddenUnit.HasBreasts && HiddenUnit.HasDick)
-        {
-            var maleTraits = State.RaceSettings.GetMaleRaceTraits(HiddenUnit.Race);
-            if (maleTraits != null) Tags.AddRange(maleTraits);
-            maleTraits = Config.MaleTraits;
-            if (maleTraits != null) Tags.AddRange(maleTraits);
-        }
-        else
-        {
-            var hermTraits = State.RaceSettings.GetHermRaceTraits(HiddenUnit.Race);
-            if (hermTraits != null) Tags.AddRange(hermTraits);
-            hermTraits = Config.HermTraits;
-            if (hermTraits != null) Tags.AddRange(hermTraits);
-        }
+        
+        var unitTypeTraits = new List<Traits>();
+        var raceUnitTypeTraits = new List<Traits>();
         if (Type == UnitType.Leader)
         {
-            var leaderTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race);
-            if (leaderTraits != null) Tags.AddRange(leaderTraits);
-            if (Config.LeaderTraits != null) Tags.AddRange(Config.LeaderTraits);
+            raceUnitTypeTraits = State.RaceSettings.GetLeaderRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.LeaderTraits ?? new List<Traits>();
+        }
+        else if (Type == UnitType.Soldier || Type == UnitType.Summon)
+        {
+            raceUnitTypeTraits = State.RaceSettings.GetSoldierRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.SoldierTraits ?? new List<Traits>();
         }
         else if (Type == UnitType.Spawn)
         {
-            var spawnTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race);
-            if (spawnTraits != null) Tags.AddRange(spawnTraits);
-            spawnTraits = Config.SpawnTraits;
-            if (spawnTraits != null) Tags.AddRange(spawnTraits);
+            raceUnitTypeTraits = State.RaceSettings.GetSpawnRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            unitTypeTraits = Config.SpawnTraits ?? new List<Traits>();
         }
+
+        if (!raceUnitTypeTraits.Contains(Traits.TraitConfigOverride))
+            unitTypeTraits.AddRange(raceUnitTypeTraits);
+        
+        var genderTraits = new List<Traits>();
+        var raceGenderTraits = new List<Traits>();
+        if (HiddenUnit.HasBreasts && !HiddenUnit.HasDick)
+        {
+            raceGenderTraits = State.RaceSettings.GetFemaleRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.FemaleTraits ?? new List<Traits>();
+        }
+        else if (!HiddenUnit.HasBreasts && HiddenUnit.HasDick)
+        {
+            raceGenderTraits = State.RaceSettings.GetMaleRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.MaleTraits ?? new List<Traits>();
+        }
+        else
+        {
+            raceGenderTraits = State.RaceSettings.GetHermRaceTraits(HiddenUnit.Race) ?? new List<Traits>(); 
+            genderTraits = Config.HermTraits ?? new List<Traits>();
+        }
+
+        if (!raceGenderTraits.Contains(Traits.TraitConfigOverride))
+            genderTraits.AddRange(raceGenderTraits);
+
+        int donorIndex1 = 0;
+        int donorIndex2 = 0;
+        
+        if (!unitTypeTraits.Contains(Traits.TraitGenderOverride))
+        {
+            donorIndex1 = Tags.IndexOf(Traits.Donor);
+            donorIndex2 = genderTraits.IndexOf(Traits.Donor);
+            if (donorIndex1 != -1)
+            {
+                if (donorIndex2 != -1)
+                {
+                    Tags.InsertRange(donorIndex1, genderTraits.GetRange(0, donorIndex2));
+                    Tags.AddRange(genderTraits.GetRange(donorIndex2, genderTraits.Count - donorIndex2));
+                }
+                else 
+                    Tags.InsertRange(donorIndex1, genderTraits);
+            }
+            else
+                Tags.AddRange(genderTraits);
+        }
+        donorIndex1 = Tags.IndexOf(Traits.Donor);
+        donorIndex2 = unitTypeTraits.IndexOf(Traits.Donor);
+        if (donorIndex1 != -1)
+        {
+            if (donorIndex2 != -1)
+            {
+                Tags.InsertRange(donorIndex1, unitTypeTraits.GetRange(0, donorIndex2));
+                Tags.AddRange(unitTypeTraits.GetRange(donorIndex2, genderTraits.Count - donorIndex2));
+            }
+            else 
+                Tags.InsertRange(donorIndex1, unitTypeTraits);
+        }
+        else
+            Tags.AddRange(unitTypeTraits);
+        
+        Tags.RemoveAll((t) => 
+            t == Traits.TraitOverride 
+            || t == Traits.TraitConfigOverride 
+            || t == Traits.TraitGenderOverride);
+        
+
+
         if (TemporaryTraits != null)
             Tags.AddRange(TemporaryTraits);
         if (SharedTraits != null)
@@ -2419,7 +2493,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         }
         if (!State.TutorialMode)
             RandomizeTraits();
-         Tags = Tags.Distinct().ToList();
+        Tags = Tags.Distinct().ToList();
         foreach (var t in Tags)
         {
             if (t >= (Traits)6000)
@@ -2439,6 +2513,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         SetMaxItems();
         if (EquippedPotions == null)
             EquippedPotions = new Dictionary<int, int[]>();
+        BoundUnit?.ReloadSpellTraits();
         //if (HasTrait(Traits.Shapeshifter) || HasTrait(Traits.Skinwalker))
         //{
         //    if (ShifterShapes == null)
@@ -2446,6 +2521,12 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         //    if (!ShifterShapes.Contains(this))
         //        AcquireShape(this, true);
         //}
+    }
+    
+    public void UpdateUnitTraits()
+    {
+        ReloadTraits();
+        InitializeTraits();
     }
 
     public void PreyCheck()
@@ -3081,9 +3162,12 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         {
             foreach (var spellType in SingleUseSpells)
             {
-                if (SpellList.SpellDict.TryGetValue(spellType, out Spell spell))
+                if (!(ExpendedSingleUseSpells?.Contains(spellType) ?? false))
                 {
-                    UseableSpells.Add(spell);
+                    if (SpellList.SpellDict.TryGetValue(spellType, out Spell spell))
+                    {
+                        UseableSpells.Add(spell);
+                    }
                 }
             }
 
@@ -3155,8 +3239,11 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
             TriggerMorph(duration);
             return;
         }
-        StatusEffects.Remove(GetStatusEffect(type));                    // if null, nothing happens, otherwise status is effectively overwritten
-        StatusEffects.Add(new StatusEffect(type, strength, duration, applicator, expireEffect));
+
+        StatusEffect old = GetStatusEffect(type);
+        
+        StatusEffects.Remove(old);                    // if null, nothing happens, otherwise status is effectively overwritten
+        StatusEffects.Add(new StatusEffect(type, Math.Max(strength, old?.Strength ?? 0), Math.Max(duration, old?.Duration ?? 0), applicator, expireEffect));
     }
 
     internal StatusEffect GetStatusEffect(StatusEffectType type)
@@ -3166,6 +3253,10 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         return StatusEffects.Where(s => s.Type == type).OrderByDescending(s => s.Strength).ThenByDescending(s => s.Duration).FirstOrDefault();
     }
 
+    internal bool HasEffect(StatusEffectType type)
+    {
+        return GetStatusEffect(type) != null;
+    }
     internal int GetNegativeStatusEffects()
     {
         int ret = 0;
@@ -3182,11 +3273,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         if (HasEffect(StatusEffectType.Staggering)) ret++;
         if (HasEffect(StatusEffectType.Virus)) ret++;
         if (HasEffect(StatusEffectType.Weakness)) ret++;
-
-        bool HasEffect(StatusEffectType type)
-        {
-            return GetStatusEffect(type) != null;
-        }
+        
         return ret;
     }
 

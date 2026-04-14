@@ -12,9 +12,6 @@ class Demifrogs : DefaultRaceData
     readonly DemifrogLeader LeaderClothes;
     readonly DemifrogRags Rags;
 
-    bool oversize = false;
-
-
     public Demifrogs()
     {
         BodySizes = 4;
@@ -128,7 +125,7 @@ class Demifrogs : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         return Sprites[0 + (actor.IsAttacking ? 1 : 0) + (2 * actor.Unit.BodySize)];
@@ -356,7 +353,6 @@ class Demifrogs : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
 
         if (actor.Unit.SpecialAccessoryType == 6)
         {
@@ -969,7 +965,7 @@ class Demifrogs : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DemifrogSkin, actor.Unit.SkinColor);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DemifrogSkin, actor.Unit.SkinColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

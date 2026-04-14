@@ -15,9 +15,6 @@ class Deer : DefaultRaceData
     readonly DeerLeader3 LeaderClothes3;
     readonly DeerRags Rags;
 
-    bool oversize = false;
-
-
     public Deer()
     {
         BodySizes = 4;
@@ -192,7 +189,7 @@ class Deer : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         if (actor.Unit.HasBreasts)
@@ -581,7 +578,6 @@ class Deer : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -1131,7 +1127,7 @@ class Deer : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DeerSkin, actor.Unit.SkinColor);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DeerSkin, actor.Unit.SkinColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

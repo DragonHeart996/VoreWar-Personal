@@ -10,8 +10,6 @@ class Auri : DefaultRaceData
     RaceFrameList EarAnimation = new RaceFrameList(new int[3] { 22, 23, 22 }, new float[3] { .2f, .2f, .2f });
     RaceFrameList FaceAnimation = new RaceFrameList(new int[3] { 18, 19, 18 }, new float[3] { .25f, .25f, .25f });
 
-    bool oversize = false;
-
     internal List<MainClothing> AllClothing;
 
     const float stomachMult = 1.7f;
@@ -115,12 +113,6 @@ class Auri : DefaultRaceData
     }
     internal override int BreastSizes => 7;
     internal override int DickSizes => 1;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-        base.RunFirst(actor);
-    }
 
     internal void SetUpAnimations(Actor_Unit actor)
     {

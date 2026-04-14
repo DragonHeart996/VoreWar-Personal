@@ -145,6 +145,10 @@ public class TacticalMode : SceneBase
     public bool IgnorePseudo = false;
     public bool SkipPseudo = false;
 
+    public bool tookCombatActions;
+    public int attackerTrappedUnitsTimer;
+    public int defenderTrappedUnitsTimer;
+    
     internal int currentTurn = 1;
 
     int lastDiscard = 5;
@@ -510,6 +514,7 @@ public class TacticalMode : SceneBase
 
         foreach (Actor_Unit actor in units)
         {
+            actor.Unit.ExpendedSingleUseSpells.Clear();
             actor.Unit.EnemiesKilledThisBattle = 0;
             actor.allowedToDefect = !actor.DefectedThisTurn && TacticalUtilities.GetPreferredSide(actor.Unit, actor.Unit.Side, actor.Unit.Side == attackerSide ? defenderSide : attackerSide) != actor.Unit.Side;
             actor.DefectedThisTurn = false;
@@ -1535,6 +1540,7 @@ public class TacticalMode : SceneBase
         foreach (Actor_Unit unit in units)
         {
             unit.PredatorComponent?.UpdateAlivePrey();
+            unit.PredatorComponent?.UpdateFullness();
         }
         GeneralSetup();
         Log.RefreshListing();
@@ -1757,6 +1763,10 @@ public class TacticalMode : SceneBase
 
             defenderSide = defenderSide,
             attackerSide = attackerSide,
+            
+            tookCombatActions = tookCombatActions,
+            attackerTrappedUnitsTimer = attackerTrappedUnitsTimer, 
+            defenderTrappedUnitsTimer = defenderTrappedUnitsTimer,
 
             attackersTurn = attackersTurn,
             isAPlayerTurn = IsPlayerTurn,
@@ -1813,6 +1823,10 @@ public class TacticalMode : SceneBase
 
         defenderSide = data.defenderSide;
         attackerSide = data.attackerSide;
+
+        tookCombatActions = data.tookCombatActions;
+        attackerTrappedUnitsTimer = data.attackerTrappedUnitsTimer;
+        defenderTrappedUnitsTimer = data.defenderTrappedUnitsTimer;
 
         currentTurn = data.currentTurn;
 
@@ -3204,6 +3218,7 @@ public class TacticalMode : SceneBase
     {
         if (Config.PromptEndTurn == false)
         {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
             return;
         }
@@ -3219,10 +3234,17 @@ public class TacticalMode : SceneBase
         if (canStillMove)
         {
             var box = Instantiate(State.GameManager.DialogBoxPrefab).GetComponent<DialogBox>();
-            box.SetData(EndTurn, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
+            box.SetData(() => 
+            {
+                tookCombatActions |= !Config.AutoUseAI;
+                EndTurn();
+            }, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
         }
         else
+        {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
+        }
     }
 
     internal void SurrenderAll(bool attacker)
@@ -3425,19 +3447,29 @@ public class TacticalMode : SceneBase
                         if (Config.FairyBVType == FairyBVType.Shared)
                         {
                             unit.UnitSprite.AnimateBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                 * 0.011f);
                             unit.UnitSprite.AnimateSecondBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                * 0.011f);
                         }
                         else
                             unit.UnitSprite.AnimateBoobs(
-                                unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.0022f);
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true)
+                                + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                                * 0.0022f);
                     }
 
                     if (unit.PredatorComponent?.RightBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
                     {
                         unit.UnitSprite.AnimateSecondBoobs(
-                            unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true) * 0.0022f);
+                            (unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                             + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                            * 0.0022f);
                     }
                 }
             }
@@ -3461,7 +3493,7 @@ public class TacticalMode : SceneBase
                         EndTurn();
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
             else if (foreignAI != null || foreignUnits.Count() > 0)
@@ -3487,7 +3519,7 @@ public class TacticalMode : SceneBase
                         foreignAI = null;
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
         }
@@ -3568,7 +3600,7 @@ public class TacticalMode : SceneBase
                 EndTurn();
             }
             if (AITimer <= 0)
-                AITimer = Config.TacticalAIMovementDelay;
+                AITimer = Math.Max(AITimer,Config.TacticalAIMovementDelay);
         }
     }
 
@@ -4126,6 +4158,7 @@ public class TacticalMode : SceneBase
 
     internal void ActionDone()
     {
+        tookCombatActions = true;
         ActionMode = 0;
         PlaceUndoMarker();
         RebuildInfo();
@@ -4594,6 +4627,14 @@ public class TacticalMode : SceneBase
         IsPlayerTurn = true;
         if (attackersTurn)
         {
+            if (!tookCombatActions && currentTurn > 10)
+                attackerTrappedUnitsTimer++;
+            else
+                attackerTrappedUnitsTimer = 0;
+            if (attackerTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Attacker unable to fight for {attackerTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = false;
             attackersTurnCheck = false;
             activeSide = defenderSide;
@@ -4604,6 +4645,14 @@ public class TacticalMode : SceneBase
         }
         else
         {
+            if (!tookCombatActions && currentTurn > 10)
+                defenderTrappedUnitsTimer++;
+            else
+                defenderTrappedUnitsTimer = 0;
+            if (defenderTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Defender unable to fight for {defenderTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = true;
             attackersTurnCheck = true;
             currentTurn++;
@@ -4808,16 +4857,32 @@ public class TacticalMode : SceneBase
 
         bool foodRemaining = false;
         bool oneSideLeft = false;
-        if (visibleAttackers.Count() == 0)
+        if (!visibleAttackers.Any())
         {
-            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing)
+            tookCombatActions = true;
+            if (!turboMode && IsPlayerTurn && attackersTurn &&
+                Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+            {
+                RunningFriendlyAI = true;
+            }
+            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance == Config.AutoAdvanceType.DoNothing)
+            {
                 foodRemaining = CanEatDefeated(visibleDefenders, edibleDefeated);
+            }
             oneSideLeft = !visibleDefenders.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, defenderSide, attackerSide) == attackerSide); // They are probably still fighting in this case
         }
-        if (visibleDefenders.Count() == 0)
+        if (!visibleDefenders.Any())
         {
+            tookCombatActions = true;
+            if (!turboMode && IsPlayerTurn && !attackersTurn &&
+                Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+            {
+                RunningFriendlyAI = true;
+            }
             if (!turboMode && IsPlayerTurn && attackersTurn && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing)
+            {
                 foodRemaining = CanEatDefeated(visibleAttackers, edibleDefeated);
+            }
             oneSideLeft = !visibleAttackers.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, attackerSide, defenderSide) == defenderSide); // They are probably still fighting in this case
         }
 
@@ -4875,18 +4940,18 @@ public class TacticalMode : SceneBase
                     foreach (var prey in actor.PredatorComponent.GetDirectPrey().Where(s => s.Unit.Stamina <= 0).ToList())
                     {
                         actor.PredatorComponent.FreeEndoPrey(prey);
-                        if (actor.Unit.HasTrait(Traits.Friendosoma))
+                        if (actor.Unit.HasTrait(Traits.Friendosoma) && prey.Actor.Unit.IsEnemyOfSide(actor.Unit.Side))
                         {
                             SwitchAlignment(prey.Actor);
                             RetreatUnit(prey.Actor, prey.Unit.Side == defenderSide);
                         }
                         else
                         {
-                            if (remainingAttackers > 0 && !prey.Actor.Unit.IsEnemyOfSide(0))
+                            if (remainingAttackers == 0 && prey.Actor.Unit.IsEnemyOfSide(0))
                             {
                                 continue;
                             }
-                            if (remainingDefenders > 0 && prey.Actor.Unit.IsEnemyOfSide(0))
+                            if (remainingDefenders == 0 && !prey.Actor.Unit.IsEnemyOfSide(0))
                             {
                                 continue;
                             }

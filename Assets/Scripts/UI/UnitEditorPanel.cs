@@ -504,62 +504,28 @@ public class UnitEditorPanel : CustomizerPanel
     {
         if (UnitEditor.Unit == null)
             return;
-        foreach (RandomizeList rl in (State.RandomizeLists))
+
+        List<Traits> traits = RaceEditorPanel.TextToTraitList(TraitsText.text);
+
+        foreach (var t in traits)
         {
-            if (TraitsText.text.ToLower().Contains(rl.name.ToString().ToLower()))
+            var random = State.RandomizeLists.Where((rl) => t.Equals((Traits)rl.id)).ToList();
+                
+            if (random.Any())
             {
-                var resTraits = UnitEditor.Unit.RandomizeOne(rl);
-                foreach (Traits resTrait in resTraits)
+                foreach (var rl in random)
                 {
-                    UnitEditor.AddTrait(resTrait);
-                    if (resTrait == Traits.Resourceful || resTrait == Traits.BookWormI || resTrait == Traits.BookWormII || resTrait == Traits.BookWormIII)
-                    {
-                        UnitEditor.Unit.SetMaxItems();
-                        PopulateItems();
-                    }
+                    var resTraits = UnitEditor.Unit.RandomizeOne(rl);
+                    foreach (Traits resTrait in resTraits)
+                        UnitEditor.AddTrait(resTrait);
                 }
-                UnitEditor.RefreshActor();
-                TraitList.text = UnitEditor.Unit.ListTraits();
-
             }
+            else
+                UnitEditor.AddTrait(t);
         }
-        foreach (CustomTraitBoost ct in (State.CustomTraitList))
-        {
-            if (TraitsText.text.ToLower().Contains(ct.name.ToString().ToLower()))
-            {
-                UnitEditor.AddTrait((Traits)ct.id);
-
-                UnitEditor.RefreshActor();
-                TraitList.text = UnitEditor.Unit.ListTraits();
-
-            }
-        }
-        foreach (ConditionalTraitContainer cdt in (State.ConditionalTraitList))
-        {
-            if (TraitsText.text.ToLower().Contains(cdt.name.ToString().ToLower()))
-            {
-                UnitEditor.AddTrait((Traits)cdt.id);
-
-                UnitEditor.RefreshActor();
-                TraitList.text = UnitEditor.Unit.ListTraits();
-
-            }
-        }
-        foreach (Traits trait in (Stat[])Enum.GetValues(typeof(Traits)))
-        {
-            if (TraitsText.text.ToLower().Contains(trait.ToString().ToLower()))
-            {
-                UnitEditor.AddTrait(trait);
-                if (trait == Traits.Resourceful || trait == Traits.BookWormI || trait == Traits.BookWormII || trait == Traits.BookWormIII)
-                {
-                    UnitEditor.Unit.SetMaxItems();
-                    PopulateItems();
-                }
-                UnitEditor.RefreshActor();
-                TraitList.text = UnitEditor.Unit.ListTraits();
-            }
-        }
-
+        PopulateItems();
+        UnitEditor.RefreshActor();
+        TraitList.text = UnitEditor.Unit.ListTraits();
     }
 
     public void RemoveTrait()

@@ -216,14 +216,17 @@ public class Actor_Unit
             Paralyzed = false;
             Slimed = false;
         }
-        else if ((Unit.GetStatusEffect(StatusEffectType.Petrify) != null) || (Unit.GetStatusEffect(StatusEffectType.Frozen) != null))
+        else if (Unit.HasEffect(StatusEffectType.Petrify) 
+                 || Unit.HasEffect(StatusEffectType.Frozen)
+                 || Unit.HasEffect(StatusEffectType.Sleeping))
         {
             Movement = 0;
             Slimed = false;
         }
-        else if (Unit.GetStatusEffect(StatusEffectType.Glued) != null)
+        else if (TurnsSlacking >= 1) 
         {
-            Movement = 2;
+            Movement = 0;
+            TurnsSlacking--;
             Slimed = false;
         }
         else if ((Unit.GetStatusEffect(StatusEffectType.Webbed) != null) || (Unit.GetStatusEffect(StatusEffectType.Snared) != null))
@@ -231,36 +234,27 @@ public class Actor_Unit
             Movement = 1;
             Slimed = false;
         }
-        else if (Unit.GetStatusEffect(StatusEffectType.Staggering) != null)
+        else if (Unit.GetStatusEffect(StatusEffectType.Glued) != null)
+        {
+            Movement = 2;
+            Slimed = false;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Staggering)
+                 || Slimed)
         {
             Movement = CurrentMaxMovement() / 2;
             Slimed = false;
-        }
-        else if (Unit.GetStatusEffect(StatusEffectType.Sleeping) != null)
-        {
-            Movement = 0;
-            Slimed = false;
-        }
-        else if (Slimed)
-        {
-            Movement = CurrentMaxMovement() / 2;
-            Slimed = false;
-        }
-        else if (TurnsSlacking >= 1) 
-        {
-            Movement = 0;
-            TurnsSlacking--;
         }
         else
             Movement = CurrentMaxMovement();
 
-        if ((Unit.HasTrait(Traits.Slacker) || Unit.HasTrait(Traits.Juggernaut)) && Movement > 0)
+        if (Unit.HasTrait(Traits.Slacker) && Movement > 0)
         {
             TurnsSlacking++;
-            if (Unit.HasTrait(Traits.Slacker) && Unit.HasTrait(Traits.Juggernaut))
-            {
-                TurnsSlacking++;
-            }
+        }
+        if (Unit.HasTrait(Traits.Juggernaut) && Movement > 0)
+        {
+            TurnsSlacking++;
         }
 
         if (Movement > Config.TacticalMovementHardCap && Config.TacticalMovementHardCap > 0)
@@ -280,7 +274,47 @@ public class Actor_Unit
         }
     }
 
+internal int StartOfTurnExpectedMP()
+{
+    int ap = MaxMovement();
+        
+        if (Paralyzed
+                 || Unit.HasEffect(StatusEffectType.Petrify) 
+                 || Unit.HasEffect(StatusEffectType.Frozen)
+                 || (Unit.GetStatusEffect(StatusEffectType.Sleeping)?.Applicator ?? Unit) != Unit)
+        {
+            ap = 0;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Webbed) 
+                 || Unit.HasEffect(StatusEffectType.Snared)
+                 || Unit.HasEffect(StatusEffectType.Glued))
+        {
+            ap = 1;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Staggering)
+                 || Slimed)
+        {
+            ap /= 2;
+        }
 
+        if (ap > Config.TacticalMovementHardCap && Config.TacticalMovementHardCap > 0)
+        {
+            ap = Config.TacticalMovementHardCap;
+        }
+        if (ap > Config.TacticalMovementSoftCap && Config.TacticalMovementSoftCap >= 0)
+        {
+            int excess = ap - Config.TacticalMovementSoftCap;
+            int required = 2;
+            ap = Config.TacticalMovementSoftCap;
+            while (excess >= required) 
+            {
+                ap++;
+                required *= 2;
+            }
+        }
+
+        return ap;
+}
 
     public int MaxMovement()
     {
@@ -296,6 +330,8 @@ public class Actor_Unit
         {
             total = (int)(total * (1 + speed.Strength));
         }
+        if (Unit.HasTrait(Traits.AllOutFirstStrike) && HasAttackedThisCombat) //apply here as well because it is non-reversible
+            total /= 2;
         total = (int)(total * Unit.TraitBoosts.SpeedMultiplier);
         if (total < Unit.TraitBoosts.MinSpeed)
             total = Unit.TraitBoosts.MinSpeed;
@@ -370,68 +406,61 @@ public class Actor_Unit
 
     public void ReloadSpellTraits()
     {
+        if (Unit.ExpendedSingleUseSpells == null)
+        {
+            Unit.ExpendedSingleUseSpells = new List<SpellTypes>();
+        }
+        
         Unit.SingleUseSpells = new List<SpellTypes>();
         Unit.MultiUseSpells = new List<SpellTypes>();
         if (Unit.HasTrait(Traits.MadScience) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(((SpellBook)State.World.ItemRepository.GetRandomBook(1, 4)).ContainedSpell);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.PollenProjector) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.AlraunePuff.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Webber) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Web.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.GlueBomb) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.GlueBomb.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.PoisonSpit) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.ViperPoisonStatus.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Petrifier) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Petrify.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Charmer) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Charm.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.HypnoticGas) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.HypnoGas.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Reanimator) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Reanimate.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.Binder) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.Bind.SpellType);
-            Unit.UpdateSpells();
         }
         // Multi-use section
         if (Unit.HasTrait(Traits.ForceFeeder) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.MultiUseSpells.Add(SpellList.ForceFeed.SpellType);
-            Unit.UpdateSpells();
         }
         if (Unit.HasTrait(Traits.DimensionalAntilock) && State.World?.ItemRepository != null) //protection for the create strat screen
         {
             Unit.SingleUseSpells.Add(SpellList.DimensionShift.SpellType);
-            Unit.UpdateSpells();
         }
         if (State.World?.ItemRepository != null) //protection for the create strat screen
         {
@@ -447,8 +476,8 @@ public class Actor_Unit
                 foreach (SpellTypes spell in callback.GetMultiSpells(Unit))
                     Unit.MultiUseSpells.Add(spell);
             }
-            Unit.UpdateSpells();
         }
+        Unit.UpdateSpells();
     }
 
     public void GenerateSpritePrefab(Transform folder)
@@ -1487,29 +1516,17 @@ public class Actor_Unit
             animationController.frameLists[0].currentlyActive = true;
         }
 
-        Attack(target, false, damageMultiplier: .66f);
-        Actor_Unit tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(1, 0));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(0, 1));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(-1, 0));
-        TestAttack(tempTarget);
-        tempTarget = TacticalUtilities.GetActorAt(target.Position + new Vec2(0, -1));
-        TestAttack(tempTarget);
-        Attack(target, false, damageMultiplier: .66f);
-
+        int[,] targetGrid = { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 } };
+        foreach (Actor_Unit t in TacticalUtilities.UnitsWithinRotatingPattern(Position,
+                     targetGrid, TacticalUtilities.GetRotatingOctant(Position, target.Position)))
+        {
+            if(!TacticalUtilities.MeetsQualifier(targetTypes, this, target))
+                Attack(t, false, damageMultiplier: .66f);
+        }
+        
         Movement = 0;
 
         return true;
-
-        void TestAttack(Actor_Unit sideTarget)
-        {
-            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
-            {
-                Movement = 1;
-                Attack(sideTarget, false, damageMultiplier: .66f);
-            }
-        }
     }
     
     public bool AiSweepAttack(Actor_Unit mainTarget, Actor_Unit self, bool attack_ver)
@@ -1734,7 +1751,7 @@ public class Actor_Unit
                 grazechance = GrazeCheck(this, target);
             }
             grazechance += Unit.TraitBoosts.Outgoing.GrazeRateShift - target.Unit.TraitBoosts.Incoming.GrazeRateShift;
-            grazechance += TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.GrazeRateShift);
+            grazechance *= TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.GrazeRateShift);
 
             if (State.Rand.NextDouble() < grazechance)
             {
@@ -1751,7 +1768,7 @@ public class Actor_Unit
                 critchance = CritCheck(this, target);
             }
             critchance += Unit.TraitBoosts.Outgoing.CritRateShift - target.Unit.TraitBoosts.Incoming.CritRateShift;
-            critchance += TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.CritRateShift);
+            critchance *= TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.CritRateShift);
             if (State.Rand.NextDouble() < critchance)
             {
                 float calculatedCritDamage = Unit.TraitBoosts.Outgoing.CritDamageMult * target.Unit.TraitBoosts.Incoming.CritDamageMult;
@@ -1780,6 +1797,9 @@ public class Actor_Unit
                     Mode = DisplayMode.RangeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
+
+                if (forceBite)
+                    Mode = DisplayMode.OralVore;
 
                 if (Unit.HasTrait(Traits.AwfulAim))
                 {
@@ -1868,10 +1888,15 @@ public class Actor_Unit
             if (targetRange < 2)
             {
                 animationUpdateTime = 1.0F;
+                
                 if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
                     Mode = DisplayMode.MeleeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
+                
+                if (forceBite)
+                    Mode = DisplayMode.OralVore;
+                
                 int meleeAttacks = Unit.TraitBoosts.MeleeAttacks;
                 if (Unit.HasTrait(Traits.LightFrame) && PredatorComponent?.PreyCount == 0)
                     meleeAttacks++;
@@ -1914,7 +1939,7 @@ public class Actor_Unit
                         trait.ApplyStatusEffect(this, target, false, damage);
                     }
                     if (target.Unit.HasTrait(Traits.PoorConstitution) && State.Rand.Next(10) == 0)
-                        target.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 2);
+                        target.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 2, Unit);
                     if (Unit.HasTrait(Traits.WeaponChanneler) && Unit.Mana >= 6)
                         Unit.SpendMana(6);
                     if (Unit.HasTrait(Traits.BladeDance))
@@ -2035,7 +2060,8 @@ public class Actor_Unit
         if (Unit.HasTrait(Traits.InfectiousReproduction) && target.Unit.GetStatusEffect(StatusEffectType.Poisoned) != null)
         {
             Race spawnRace = Unit.DetermineSpawnRace();
-            target.PredatorComponent.CreateSpawn(spawnRace, Unit.Side, Unit.Experience / 2, true);
+            if (target.Unit.Type != UnitType.Spawn)     //prevent infinite spawn loops
+                target.PredatorComponent.CreateSpawn(spawnRace, Unit.Side, Unit.Experience / 2, true);
         }
 
         Unit.GiveScaledExp(4 * target.Unit.ExpMultiplier, Unit.Level - target.Unit.Level);
@@ -2135,8 +2161,10 @@ public class Actor_Unit
 
     internal bool DefendSpellCheck(Spell spell, Actor_Unit attacker, out float chance, float mod = 0, Stat stat = Stat.Mind)
     {
-        State.GameManager.TacticalMode.AITimer = Config.TacticalAttackDelay;
-        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
+        if (State.GameManager.CurrentScene == State.GameManager.TacticalMode &&
+            State.GameManager.TacticalMode.IsPlayerInControl == false &&
+            State.GameManager.TacticalMode.turboMode == false)
             State.GameManager.CameraCall(Position);
         chance = spell.Resistable ? GetMagicChance(attacker, spell, mod, stat) : 1;
         float r = (float)State.Rand.NextDouble();
@@ -2169,13 +2197,19 @@ public class Actor_Unit
             {
                 Unit.TraitBoosts.Incoming.MagicDamage *= 0.75f;
             }
+
             if (Unit.GetStatusEffect(StatusEffectType.Fractured) != null)
             {
                 Unit.TraitBoosts.Incoming.MagicDamage *= 1.50f;
             }
-            damage = (int)(damage * attacker.Unit.TraitBoosts.Outgoing.MagicDamage * Unit.TraitBoosts.Incoming.MagicDamage * TagConditionChecker.ApplyTagEffect(attacker.Unit, Unit, UnitTagModifierEffect.MagicDamageMult));
-            EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.WhenHitBySpellDamage, new object[] { this, attacker, damage });
-            State.GameManager.TacticalMode.TacticalStats.RegisterHit(spell, Mathf.Min(damage, Unit.Health), attacker.Unit.Side);
+
+            damage = (int)(damage * attacker.Unit.TraitBoosts.Outgoing.MagicDamage *
+                           Unit.TraitBoosts.Incoming.MagicDamage * TagConditionChecker.ApplyTagEffect(attacker.Unit,
+                               Unit, UnitTagModifierEffect.MagicDamageMult));
+            EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.WhenHitBySpellDamage,
+                new object[] { this, attacker, damage });
+            State.GameManager.TacticalMode.TacticalStats.RegisterHit(spell, Mathf.Min(damage, Unit.Health),
+                attacker.Unit.Side);
             Damage(damage, true, damageType: spell.DamageType);
             State.GameManager.TacticalMode.Log.RegisterSpellHit(attacker.Unit, Unit, spell.SpellType, damage, chance);
             if (attacker.Unit.FixedSide == TacticalUtilities.GetMindControlSide(Unit))
@@ -2183,26 +2217,31 @@ public class Actor_Unit
                 StatusEffect charm = Unit.GetStatusEffect(StatusEffectType.Charmed);
                 if (charm != null)
                 {
-                    Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
+                    Unit.StatusEffects.Remove(charm); // betrayal dispels charm
                 }
             }
+
             if (Unit.HasTrait(Traits.Crystalline) && State.Rand.Next(4) == 0)
                 Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
             if (attacker.Unit.HasTrait(Traits.ArcaneMagistrate))
             {
                 attacker.Unit.AddFocus((Unit.IsDead ? 5 : 1));
             }
+
             if (Unit.HasTrait(Traits.MagicSynthesis))
             {
+                Unit.ExpendedSingleUseSpells.Remove(spell.SpellType);
                 Unit.SingleUseSpells.Add(spell.SpellType);
                 Unit.RestoreMana((int)(spell.ManaCost * 0.75f));
                 Unit.UpdateSpells();
             }
+
             attacker.Unit.GiveScaledExp(1 * Unit.ExpMultiplier, Unit.Level - Unit.Level);
             if (Unit.IsDead)
             {
                 attacker.Unit.GiveScaledExp(4 * Unit.ExpMultiplier, Unit.Level - Unit.Level);
             }
+
             return true;
         }
         else
@@ -2278,6 +2317,7 @@ public class Actor_Unit
             }
             if (Unit.HasTrait(Traits.MagicSynthesis))
             {
+                Unit.ExpendedSingleUseSpells.Remove(spell.SpellType);
                 Unit.SingleUseSpells.Add(spell.SpellType);
                 Unit.RestoreMana((int)(spell.ManaCost * 0.75f));
                 Unit.UpdateSpells();
@@ -2327,9 +2367,9 @@ public class Actor_Unit
                 attacker.sidesAttackedThisBattle = new List<int>();
             attacker.sidesAttackedThisBattle.Add(Unit.GetApparentSide());
         }
-        State.GameManager.TacticalMode.AITimer = Config.TacticalAttackDelay;
+        State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalAttackDelay);
         if (State.GameManager.CurrentScene == State.GameManager.TacticalMode && State.GameManager.TacticalMode.IsPlayerInControl == false && State.GameManager.TacticalMode.turboMode == false)
-            State.GameManager.CameraCall(Position);
+            State.GameManager.CameraCall(ranged || !canKill ? attacker.Position : Position);
         chance = GetAttackChance(attacker, ranged);
 
         float r = (float)State.Rand.NextDouble();
@@ -2513,7 +2553,7 @@ public class Actor_Unit
             if (Config.BellyRubHands)
                 GameObject.Instantiate(State.GameManager.TacticalMode.HandPrefab, new Vector3(target.Position.x + UnityEngine.Random.Range(-0.2F, 0.2F), target.Position.y + 0.1F + UnityEngine.Random.Range(-0.1F, 0.1F)), new Quaternion());
             State.GameManager.CameraCall(target.Position);
-            State.GameManager.TacticalMode.AITimer = Config.TacticalVoreDelay;
+            State.GameManager.TacticalMode.AITimer = Math.Max(State.GameManager.TacticalMode.AITimer,Config.TacticalVoreDelay);
         }
         target.DigestCheck();
         if (Unit.HasTrait(Traits.PleasurableTouch))
@@ -2784,12 +2824,20 @@ public class Actor_Unit
         NewTurnPreMPTraits();
 
         Unit.RestoreMana(Unit.TraitBoosts.ManaRegen);
+        if (SelfPrey == null)
+        {
+            Unit.RestoreStamPct(0.1f);
+        }
         UnitSprite.UpdateHealthBar(this);
         TurnsSinceLastParalysis++;
         if (Targetable && Visible && Surrendered == false && Fled == false)
             RestoreMP();
         Unit.TickStatusEffects();
-        Unit.Heal(Unit.TraitBoosts.HealthRegen);
+        if (SelfPrey != null)
+        {
+            if (SelfPrey.TurnsDigested <= 100)
+                Unit.Heal(Unit.TraitBoosts.HealthRegen);
+        }
 
         if ((Config.AbsorbLoss ? PredatorComponent?.AlivePrey <= 0 : PredatorComponent.Fullness <= 0))
         {
@@ -3256,7 +3304,7 @@ public class Actor_Unit
             return false;
         if (Config.ErectionsFromVore)
         {
-            if (PredatorComponent?.Fullness > 0)
+            if (PredatorComponent?.CombinedStomachFullness > 0)
                 return true;
         }
         if (Config.ErectionsFromCockVore)
@@ -3771,7 +3819,7 @@ public class Actor_Unit
             AnimationController = new AnimationController();
             Unit.ReloadTraits();
             Unit.InitializeTraits();
-            ReloadSpellTraits();
+            //ReloadSpellTraits();
             State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{Unit.Name} shifted form to resemble {template.Name}");
             Unit.FixedSide = Unit.Side;
             Unit.Side = template.Side;
@@ -3811,7 +3859,7 @@ public class Actor_Unit
             AnimationController = new AnimationController();
             Unit.ReloadTraits();
             Unit.InitializeTraits();
-            ReloadSpellTraits();
+            //ReloadSpellTraits();
             PredatorComponent?.UpdateFullness();
         }
     }

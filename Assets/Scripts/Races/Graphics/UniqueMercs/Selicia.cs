@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 class Selicia : BlankSlate
@@ -72,20 +74,23 @@ class Selicia : BlankSlate
 
     protected override Sprite BodySprite(Actor_Unit actor)
     {
+        Belly.layer = 3;
         int size = actor.GetStomachSize(14, BellyScale);
-        Belly.layer = 6;
         if (size >= 12)
         {
-            Belly.layer = 3;
             return State.GameManager.SpriteDictionary.Selicia[5];
         }
         if (size >= 5)
         {
+            Belly.layer = 6;
             return State.GameManager.SpriteDictionary.Selicia[2];
         }
 
         if (actor.IsAttacking || actor.IsEating)
+        {
+            Belly.layer = 6;
             return State.GameManager.SpriteDictionary.Selicia[2];
+        }
         return State.GameManager.SpriteDictionary.Selicia[1];
 
 

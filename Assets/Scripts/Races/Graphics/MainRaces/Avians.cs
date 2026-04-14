@@ -11,8 +11,6 @@ class Avians : DefaultRaceData
     readonly AvianLeader LeaderClothes;
     readonly AvianRags Rags;
 
-    bool oversize = false;
-
     public Avians()
     {
         BodySizes = 4;
@@ -112,7 +110,7 @@ class Avians : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor) // body (white/ primary)
     {
         if (actor.Unit.HasBreasts)
@@ -375,7 +373,6 @@ class Avians : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -816,7 +813,7 @@ class Avians : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.AviansSkin, actor.Unit.ExtraColor1);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.AviansSkin, actor.Unit.ExtraColor1);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

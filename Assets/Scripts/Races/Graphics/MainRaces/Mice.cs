@@ -17,9 +17,6 @@ class Mice : DefaultRaceData
 
     readonly MiceRags Rags;
 
-    bool oversize = false;
-
-
     public Mice()
     {
         BodySizes = 4;
@@ -181,7 +178,7 @@ class Mice : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         if (actor.Unit.HasBreasts)
@@ -537,7 +534,6 @@ protected override Sprite EyesSprite(Actor_Unit actor)
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -2407,7 +2403,7 @@ protected override Sprite EyesSprite(Actor_Unit actor)
             }
             
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

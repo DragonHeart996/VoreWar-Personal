@@ -98,7 +98,7 @@ abstract class MainClothing
     /// </summary>
     public virtual void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
-        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && actor.PredatorComponent?.BallsFullness > 0)
+        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect()))
             return;
         Apply(sprite, actor);
     }
@@ -109,6 +109,18 @@ abstract class MainClothing
     /// </summary>
     public virtual void ConfigureIgnoreHidingRules(CompleteSprite sprite, Actor_Unit actor)
     {
+        Apply(sprite, actor);
+    }
+
+    public virtual void ConfigureNatural(CompleteSprite sprite, Actor_Unit actor)
+    {
+        if (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect())
+        {
+            blocksDick = false;
+            clothing2.GetSprite = null;
+        }
+        else blocksDick = true;
+            
         Apply(sprite, actor);
     }
 
@@ -171,6 +183,11 @@ abstract class MainClothing
             {
                 sprite.HideSprite(SpriteType.BodyAccent3); //Used for Breast Ring colors
                 sprite.HideSprite(SpriteType.BodyAccent4);
+            }
+            if (actor.Unit.Race == Race.DemiDragons)
+            {
+                sprite.HideSprite(SpriteType.BodyAccent15); //Used for nipple colors
+                sprite.HideSprite(SpriteType.Beard);
             }
 
         }

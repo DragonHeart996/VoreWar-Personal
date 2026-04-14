@@ -107,6 +107,8 @@ public class RightClickMenu : MonoBehaviour
             currentButton++;
         }
         int range = actor.Position.GetNumberOfMovesDistance(location);
+        
+        actor.ReloadSpellTraits();
         foreach (Spell spell in actor.Unit.UseableSpells)
         {
             if (spell.AcceptibleTargets.Contains(AbilityTargets.Tile))
@@ -159,6 +161,7 @@ public class RightClickMenu : MonoBehaviour
 
         if (actor == target)
         {
+            actor.ReloadSpellTraits();
             foreach (Spell spell in actor.Unit.UseableSpells)
             {
                 if (spell.AcceptibleTargets.Contains(AbilityTargets.Ally) || spell.AcceptibleTargets.Contains(AbilityTargets.Self))
@@ -192,6 +195,7 @@ public class RightClickMenu : MonoBehaviour
 
         if (TacticalUtilities.IsUnitControlledByPlayer(target.Unit) || target.Unit.Side == actor.Unit.Side)
         {
+            actor.ReloadSpellTraits();
             foreach (Spell spell in actor.Unit.UseableSpells)
             {
                 if (spell.AcceptibleTargets.Contains(AbilityTargets.Ally))
@@ -268,8 +272,8 @@ public class RightClickMenu : MonoBehaviour
                     Buttons[currentButton].interactable = false;
                 currentButton++;
             }
-
-
+            
+            actor.ReloadSpellTraits();
             if (actor.Unit.UseableSpells != null)
             {
                 foreach (Spell spell in actor.Unit.UseableSpells)

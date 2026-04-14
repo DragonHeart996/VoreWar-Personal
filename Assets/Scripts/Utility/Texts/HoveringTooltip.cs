@@ -613,7 +613,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.AllOutFirstStrike:
                 return "Unit starts battle in a protected state, with high dodge rate.  On their first attack or vore attempt of the battle, they get a significant bonus to damage or vore chance.  After that they become vulnerable, and move slower and have a dodge penalty.";
             case Traits.VenomousBite:
-                return "A missed bite from the biter trait will also poison an enemy, and give them the shaken debuff.";
+                return "If a missed vore from this unit triggers a bite, the target will also be poisoned and inflicted with Shaken.";
             case Traits.Petrifier:
                 return "Gives access to a single use ability that applies the petrified status effect to a target.  It prevents the target from acting, but also makes them resistant to damage and bulky to swallow.";
             case Traits.VenomShock:
@@ -856,8 +856,26 @@ public class HoveringTooltip : MonoBehaviour
                 return "When unit is killed in melee or digested does has a 1/3 chance of hitting with a melee attack against the aggressor, 3/4 hit chance if vored.";
             case Traits.DimensionalAntilock:
                 return "This unit is not completely fixed to the space around it. \n(Allows using the Dimension Shift ability once per battle, which attempts to teleport the User to a random open tile within 20 tiles.)";
+            case Traits.Hoarder:
+                return "Race increase the income of a village by 0.1% per population with this trait.";
+            case Traits.NaturalCaster:
+                return "This unit recives fireball, poison, icicle, power bolt, or lightning bolt as innate spell.";
+            case Traits.TraitOverride:
+                return
+                    "Forces the trait list containing it to override base racial traits, rather than adding onto them";
+            case Traits.TraitConfigOverride:
+                return
+                    "Forces the trait list containing it to override its corresponding general config traits, rather than adding onto them";
+            case Traits.TraitGenderOverride:
+                return
+                    "Forces the trait list containing it to override gender-specific traits, rather than adding onto them";
+            case Traits.SweepingSwallow:
+                return "Grants SweepingSwallow Attack";
+            case Traits.ExtremelyStretchy:
+                return "Can attempt to eat anything so long as it has some space, also prevents overfeeding damage";
+            default:
+                return "<b>This trait needs a tooltip!</b>";
         }  
-        return "<b>This trait needs a tooltip!</b>";
     }
 
     private static string GetTraitName(Traits trait)

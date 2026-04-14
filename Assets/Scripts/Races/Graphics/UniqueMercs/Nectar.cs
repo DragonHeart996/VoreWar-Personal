@@ -7,9 +7,6 @@ using UnityEngine;
 
 class Nectar : BlankSlate
 {
-
-    bool oversize = false;
-
     public Nectar()
     {
         ExtendedBreastSprites = true;

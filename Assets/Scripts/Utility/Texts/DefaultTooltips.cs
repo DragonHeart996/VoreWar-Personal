@@ -833,6 +833,8 @@ Does not retroactively affect already created units.";
                 return "Enables wandering clusters of Iliijiith.";
             case 347:
                 return "Determines how much EXP a single villager provides when devoured by an occupying army.";
+            case 348:
+                return "Traits in here will be automatically added to generic Units when created\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
             default:
                 return "";
         }

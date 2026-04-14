@@ -15,6 +15,11 @@ public enum SpriteType
     BodyAccent8,
     BodyAccent9,
     BodyAccent10,
+    BodyAccent11,
+    BodyAccent12,
+    BodyAccent13,
+    BodyAccent14,
+    BodyAccent15,
     Hair,
     Hair2,
     Hair3,
@@ -311,6 +316,11 @@ class CompleteSprite
         SetSprite(SpriteType.BodyAccent8, race.BodyAccent8);
         SetSprite(SpriteType.BodyAccent9, race.BodyAccent9);
         SetSprite(SpriteType.BodyAccent10, race.BodyAccent10);
+        SetSprite(SpriteType.BodyAccent11, race.BodyAccent11);
+        SetSprite(SpriteType.BodyAccent12, race.BodyAccent12);
+        SetSprite(SpriteType.BodyAccent13, race.BodyAccent13);
+        SetSprite(SpriteType.BodyAccent14, race.BodyAccent14);
+        SetSprite(SpriteType.BodyAccent15, race.BodyAccent15);
         SetSprite(SpriteType.BodyAccessory, race.BodyAccessory);
         SetSprite(SpriteType.Hair, race.Hair);
         SetSprite(SpriteType.Hair2, race.Hair2);
@@ -354,12 +364,41 @@ class CompleteSprite
         if (Config.HideBreasts == false)
         {
             SetSprite(SpriteType.Breasts, race.Breasts);
-        if (actor.Unit.Race == Race.Umbreon && sprites[(int)SpriteType.BodyAccent3] != null && actor.Unit.HasBreasts)
-            sprites[(int)SpriteType.BodyAccent3].GameObject.transform.SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+            if (actor.Unit.Race == Race.Umbreon 
+                && sprites[(int)SpriteType.BodyAccent3] != null 
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent3].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+                
+            }
+            if (actor.Unit.Race == Race.DemiDragons
+                && sprites[(int)SpriteType.BodyAccent15] != null
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent15].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+            }
+            
             SetSprite(SpriteType.BreastShadow, race.BreastShadow);
+            
             SetSprite(SpriteType.SecondaryBreasts, race.SecondaryBreasts);
-        if (actor.Unit.Race == Race.Umbreon && sprites[(int)SpriteType.BodyAccent4] != null && actor.Unit.HasBreasts)
-            sprites[(int)SpriteType.BodyAccent4].GameObject.transform.SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+            if (actor.Unit.Race == Race.Umbreon 
+                && sprites[(int)SpriteType.BodyAccent4] != null 
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent4].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+                
+            }
+            if (actor.Unit.Race == Race.DemiDragons
+                && sprites[(int)SpriteType.Beard] != null
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.Beard].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+            }
+
         }
         else
         {
@@ -401,6 +440,11 @@ class CompleteSprite
         UpdatePosition(SpriteType.BodyAccent8, race.BodyAccent8);
         UpdatePosition(SpriteType.BodyAccent9, race.BodyAccent9);
         UpdatePosition(SpriteType.BodyAccent10, race.BodyAccent10);
+        UpdatePosition(SpriteType.BodyAccent11, race.BodyAccent11);
+        UpdatePosition(SpriteType.BodyAccent12, race.BodyAccent12);
+        UpdatePosition(SpriteType.BodyAccent13, race.BodyAccent13);
+        UpdatePosition(SpriteType.BodyAccent14, race.BodyAccent14);
+        UpdatePosition(SpriteType.BodyAccent15, race.BodyAccent15);
         UpdatePosition(SpriteType.BodyAccessory, race.BodyAccessory);
         UpdatePosition(SpriteType.Hair, race.Hair);
         UpdatePosition(SpriteType.Hair2, race.Hair2);

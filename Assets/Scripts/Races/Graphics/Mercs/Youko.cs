@@ -8,8 +8,6 @@ class Youko : Humans, IVoreRestrictions
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.HumansBodySprites3;
     readonly Sprite[] Tails = State.GameManager.SpriteDictionary.YoukoTails;
 
-    bool oversize = false;
-
     public Youko()
     {
         FurCapable = true;
@@ -69,7 +67,6 @@ class Youko : Humans, IVoreRestrictions
     }
     protected override Sprite HeadSprite(Actor_Unit actor)
     {
-        oversize = false;
         if (actor.PredatorComponent?.RightBreastFullness > 0 || actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             if (actor.Unit.HasBreasts == false){}

@@ -461,6 +461,7 @@ public class CreateTacticalGame : MonoBehaviour
         defender.Empire.ReplacedRace = DefenderRace();
         if (Attacker.HasLeader.isOn)
         {
+            fightersA--;
             attacker.Units.Add(new NPC_unit(levelA, Attacker.RangedPercentage.value >= 50, 3, attackerSide, AttackerRace(), 0, Attacker.CanVore.isOn));
             attacker.Units.Last().ImmuneToDefections = true;
             if (State.Rand.NextDouble() < Attacker.MagicPercentage.value / 100)
@@ -468,6 +469,7 @@ public class CreateTacticalGame : MonoBehaviour
         }
         if (Defender.HasLeader.isOn)
         {
+            fightersB--;
             defender.Units.Add(new NPC_unit(levelB, Defender.RangedPercentage.value >= 50, 3, defenderSide, DefenderRace(), 0, Defender.CanVore.isOn));
             defender.Units.Last().ImmuneToDefections = true;
             if (State.Rand.NextDouble() < Defender.MagicPercentage.value / 100)
