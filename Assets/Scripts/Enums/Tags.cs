@@ -608,6 +608,8 @@ public enum Traits
     DyingStrike  = 316,
     /// <summary>Provides 1 use of Dimension Shift spell.</summary>
     DimensionalAntilock  = 317,
+    /// <summary>Unit can melee attack twice if they have no weapon equiped.</summary>
+    WildFury  = 318,
 
 
     // Growth-related section

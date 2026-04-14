@@ -402,6 +402,7 @@ public class RightClickMenu : MonoBehaviour
             currentButton = AltVore(actor, currentButton, SpecialAction.Unbirth, data);
             currentButton = AltVore(actor, currentButton, SpecialAction.AnalVore, data);
             currentButton = AltVore(actor, currentButton, SpecialAction.TailVore, data);
+            currentButton = AltVore(actor, currentButton, SpecialAction.BladderVore, data);
 
         }
 
@@ -566,6 +567,7 @@ public class RightClickMenu : MonoBehaviour
             currentButton = AltVorePounce(data, SpecialAction.AnalVore, currentButton);
             currentButton = AltVorePounce(data, SpecialAction.Unbirth, currentButton);
             currentButton = AltVorePounce(data, SpecialAction.TailVore, currentButton);
+            currentButton = AltVorePounce(data, SpecialAction.BladderVore, currentButton);
 
         }
         pounceNeedsRefresh = false;

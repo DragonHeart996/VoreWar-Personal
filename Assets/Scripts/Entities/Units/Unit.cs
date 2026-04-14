@@ -454,6 +454,7 @@ public class Unit
     internal bool CanBreastVore => Config.BreastVore && HasBreasts;
     internal bool CanAnalVore => Config.AnalVore;
     internal bool CanTailVore => Config.TailVore;
+    internal bool CanBladderVore => Config.BladderVore && (HasVagina || HasDick);
 
     public bool CanVore(PreyLocation location)
     {
@@ -469,6 +470,8 @@ public class Unit
                 return CanAnalVore;
             case PreyLocation.tail:
                 return CanTailVore;
+            case PreyLocation.bladder:
+                return CanBladderVore;
             default:
                 return true;
         }
@@ -1000,13 +1003,13 @@ public class Unit
             FixedGear = false;
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.TatltuaeWeapon);
         }
-        else if (race == Race.Firefly)
+        else if (race == Race.Seville)
         {
             try
             {
                 FixedGear = true;
-                Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.FireflyMelee);
-                Items[1] = State.World.ItemRepository.GetSpecialItem(SpecialItems.FireflyRange);
+                Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.SevilleMelee);
+                Items[1] = State.World.ItemRepository.GetSpecialItem(SpecialItems.SevilleArmor);
             }
             catch { }
         }
@@ -1019,6 +1022,11 @@ public class Unit
         {
             FixedGear = true;
             Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RyanWeapon);
+        }
+        else if (race == Race.Renamon)
+        {
+            FixedGear = false;
+            Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.RenamonWeapon);
         }
         else
         {
@@ -3258,7 +3266,7 @@ internal void SetGenderRandomizeName(Race race, Gender gender)
         var ten = GetStatusEffect(StatusEffectType.Tenacious);
         if (ten != null)
         {
-            int reduction = 5 - (HasTrait(Traits.Unflinching) && Health * .1f > ten.Strength? 3 : 0);
+            int reduction = 5 - (HasTrait(Traits.Unflinching) && Health * .1f > ten.Strength? 5 : 0);
             ten.Duration -= reduction;
             ten.Strength -= reduction;
             if (ten.Duration <= 0)

@@ -1454,6 +1454,7 @@ static class TacticalUtilities
             if (targetPred.Unit.CanCockVore && State.RaceSettings.GetVoreTypes(targetPred.Unit.Race).Contains(VoreType.CockVore)) possibilities.Add("Cock", PreyLocation.balls);
             if (targetPred.Unit.CanUnbirth && State.RaceSettings.GetVoreTypes(targetPred.Unit.Race).Contains(VoreType.Unbirth)) possibilities.Add("Pussy", PreyLocation.womb);
             if (targetPred.Unit.CanTailVore && State.RaceSettings.GetVoreTypes(targetPred.Unit.Race).Contains(VoreType.TailVore)) possibilities.Add("Tail", PreyLocation.tail);
+            if (targetPred.Unit.CanBladderVore && State.RaceSettings.GetVoreTypes(targetPred.Unit.Race).Contains(VoreType.BladderVore)) possibilities.Add("Bladder", PreyLocation.bladder);
 
             if (State.GameManager.TacticalMode.IsPlayerInControl && State.GameManager.CurrentScene == State.GameManager.TacticalMode && possibilities.Count > 1 && DisablecontrolBypass)
             {
