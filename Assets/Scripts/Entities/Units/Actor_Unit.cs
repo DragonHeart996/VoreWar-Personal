@@ -19,6 +19,7 @@ public class Actor_Unit
         BreastVore,
         AnalVore,
         Unbirth,
+        BladderVore,
         FrogPouncing,
         VoreSuccess,
         VoreFail,
@@ -278,7 +279,48 @@ public class Actor_Unit
             }
         }
     }
+    
+    internal int StartOfTurnExpectedMP()
+    {
+        int ap = MaxMovement();
+        
+        if (Paralyzed
+            || Unit.HasEffect(StatusEffectType.Petrify) 
+            || Unit.HasEffect(StatusEffectType.Frozen)
+            || (Unit.GetStatusEffect(StatusEffectType.Sleeping)?.Applicator ?? Unit) != Unit)
+        {
+            ap = 0;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Webbed) 
+                 || Unit.HasEffect(StatusEffectType.Snared)
+                 || Unit.HasEffect(StatusEffectType.Glued))
+        {
+            ap = 1;
+        }
+        else if (Unit.HasEffect(StatusEffectType.Staggering)
+                 || Slimed)
+        {
+            ap /= 2;
+        }
 
+        if (ap > Config.TacticalMovementHardCap && Config.TacticalMovementHardCap > 0)
+        {
+            ap = Config.TacticalMovementHardCap;
+        }
+        if (ap > Config.TacticalMovementSoftCap && Config.TacticalMovementSoftCap >= 0)
+        {
+            int excess = ap - Config.TacticalMovementSoftCap;
+            int required = 2;
+            ap = Config.TacticalMovementSoftCap;
+            while (excess >= required) 
+            {
+                ap++;
+                required *= 2;
+            }
+        }
+
+        return ap;
+    }
 
 
     public int MaxMovement()
@@ -543,7 +585,7 @@ public class Actor_Unit
         modeQueue.Add(new KeyValuePair<int, float>((int)displayMode, time));
     }
 
-    public void SetAbsorbtionMode()
+    public void SetAbsorptionMode()
     {
         if (Config.BurpOnDigest || Config.BurpFraction < .1f)
         {
@@ -1084,7 +1126,7 @@ public class Actor_Unit
             {
                 damageScalar *= 1.15f;
             }
-            if (target.Unit.GetStatusEffect(StatusEffectType.Fractured) == null && target.Unit.HasTrait(Traits.Crystaline))
+            if (target.Unit.GetStatusEffect(StatusEffectType.Fractured) == null && target.Unit.HasTrait(Traits.Crystalline))
             {
                 damageScalar *= 0.75f;
             }
@@ -1147,7 +1189,7 @@ public class Actor_Unit
             {
                 damageScalar *= 1.15f;
             }
-            if (target.Unit.GetStatusEffect(StatusEffectType.Fractured) == null && target.Unit.HasTrait(Traits.Crystaline))
+            if (target.Unit.GetStatusEffect(StatusEffectType.Fractured) == null && target.Unit.HasTrait(Traits.Crystalline))
             {
                 damageScalar *= 0.75f;
             }
@@ -1155,8 +1197,8 @@ public class Actor_Unit
             {
                 damageScalar *= 1.50f;
             }
-            if (target.Unit.GetStatusEffect(StatusEffectType.Errosion) != null)
-                damageScalar += damageScalar * (target.Unit.GetStatusEffect(StatusEffectType.Errosion).Strength / 5);
+            if (target.Unit.GetStatusEffect(StatusEffectType.Erosion) != null)
+                damageScalar += damageScalar * (target.Unit.GetStatusEffect(StatusEffectType.Erosion).Strength / 5);
 
             if (Unit.GetStatusEffect(StatusEffectType.Valor) != null)
             {
@@ -1829,7 +1871,7 @@ public class Actor_Unit
                         target.Unit.AddTenacious();
                     if (target.Unit.GetStatusEffect(StatusEffectType.Focus) != null)                  
                         target.Unit.RemoveFocus();
-                    if (target.Unit.HasTrait(Traits.Crystaline) && State.Rand.Next(4) == 0)
+                    if (target.Unit.HasTrait(Traits.Crystalline) && State.Rand.Next(4) == 0)
                         target.Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
                     if (Unit.GetStatusEffect(StatusEffectType.Sharpness) != null)                  
                         Unit.RemoveStackStatus(StatusEffectType.Sharpness, Unit.GetStatusEffect(StatusEffectType.Sharpness).Duration / 2);
@@ -1941,7 +1983,7 @@ public class Actor_Unit
                         target.Unit.RemoveFocus();
                     if (target.Unit.HasTrait(Traits.Toxic) && State.Rand.Next(8) == 0)
                         Unit.ApplyStatusEffect(StatusEffectType.Poisoned, 2 + target.Unit.GetStat(Stat.Endurance) / 20, 3);
-                    if (target.Unit.HasTrait(Traits.Crystaline) && State.Rand.Next(4) == 0)
+                    if (target.Unit.HasTrait(Traits.Crystalline) && State.Rand.Next(4) == 0)
                         target.Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
                     if (Unit.HasTrait(Traits.ForcefulBlow))
                         TacticalUtilities.KnockBack(this, target);
@@ -2177,7 +2219,7 @@ public class Actor_Unit
 
         if (DefendSpellCheck(spell, attacker, out float chance))
         {
-            if (Unit.GetStatusEffect(StatusEffectType.Fractured) == null && Unit.HasTrait(Traits.Crystaline))
+            if (Unit.GetStatusEffect(StatusEffectType.Fractured) == null && Unit.HasTrait(Traits.Crystalline))
             {
                 Unit.TraitBoosts.Incoming.MagicDamage *= 0.75f;
             }
@@ -2198,7 +2240,7 @@ public class Actor_Unit
                     Unit.StatusEffects.Remove(charm);                // betrayal dispels charm
                 }
             }
-            if (Unit.HasTrait(Traits.Crystaline) && State.Rand.Next(4) == 0)
+            if (Unit.HasTrait(Traits.Crystalline) && State.Rand.Next(4) == 0)
                 Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
             if (attacker.Unit.HasTrait(Traits.ArcaneMagistrate))
             {
@@ -2498,7 +2540,7 @@ public class Actor_Unit
             case 0:
                 prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.stomach) || p.Location.Equals(PreyLocation.stomach2) || p.Location.Equals(PreyLocation.anal) || p.Location.Equals(PreyLocation.womb));
                 if (prey == null) break;
-                TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, 1f);
+                TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, prey.Location, 1f);
                 break;
             case 1:
                 prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.breasts) || p.Location.Equals(PreyLocation.leftBreast) || p.Location.Equals(PreyLocation.rightBreast));
@@ -2636,8 +2678,20 @@ public class Actor_Unit
         return bulk;
     }
 
+    public float EstimatedFinalBulk(int count = 0)
+    {
+        if (Unit.HasTrait(Traits.Inedible))
+            return float.MaxValue / 100;
+        if (Unit.IsDead)
+            return 0;
+        float bulk = BodySize();
+        if (Unit.HasTrait(Traits.Endosoma))
+        {
+            bulk += PredatorComponent?.GetBulkOfDefeatedEndoPrey(count) ?? 0;
+        }
 
-
+        return bulk;
+    }
 
 
     public bool Move(int direction, TacticalTileType[,] tiles)
