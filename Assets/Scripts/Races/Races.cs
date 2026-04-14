@@ -151,7 +151,7 @@
     static internal Olivia Olivia = new Olivia();
     static internal Skapa Skapa = new Skapa();
     static internal Tatltuae Tatltuae = new Tatltuae();
-    static internal Firefly Firefly = new Firefly();
+    static internal Seville Seville = new Seville();
     static internal Nectar Nectar = new Nectar();
     static internal Ryan Ryan = new Ryan();
     static internal Konane Konane = new Konane();
@@ -434,8 +434,8 @@
                 return Tatltuae;
             case Race.Jackals:
                 return Jackals;
-            case Race.Firefly:
-                return Firefly;
+            case Race.Seville:
+                return Seville;
             case Race.Nectar:
                 return Nectar;
             case Race.Ryan:
