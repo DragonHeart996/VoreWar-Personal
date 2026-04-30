@@ -611,7 +611,7 @@ Note, due to the way this is set up, you have to restart the game client for cha
             case 240:
                 return "Hides the vulva / slits on female vipers. This causes their nethers to look similar to males without their dick out";
             case 241:
-                return "When enabled, cumstains (UB/CV)/milk puddles (BV) are created on the ground when a pred finishes absorbing prey.";
+                return "When enabled, cumstains (UB/CV)/milk puddles (BV)/urine puddles (Bladder Vore)/ honey puddles are created on the ground when a pred finishes absorbing prey.";
             case 242:
                 return "When enabled, burps will occur after digestion, rather than after absorption.";
             case 243:

@@ -344,6 +344,8 @@ internal int StartOfTurnExpectedMP()
             Unit.ApplyStatusEffect(StatusEffectType.Respawns, 1, 1);
         if (Unit.HasTrait(Traits.RespawnerIII) && (State.GameManager.TacticalMode.currentTurn == 1) && State.GameManager.TacticalMode.attackersTurnCheck == true)
             Unit.ApplyStatusEffect(StatusEffectType.Respawns, 3, 3);
+        if (Unit.Race == Race.Seville && !State.GameManager.TacticalMode.turboMode && TacticalUtilities.IsUnitControlledByPlayer(Unit) && (State.GameManager.TacticalMode.currentTurn == 1) && State.GameManager.TacticalMode.attackersTurnCheck == true && State.Rand.Next(20) == 1)
+            MiscUtilities.DelayedInvoke(() => State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Looking upon the battlefield before her, {LogUtilities.GetRandomStringFrom($"<b>{Unit.Name}</b>", $"the {LogUtilities.GetRaceDescSingl(Unit)}")} {LogUtilities.GetRandomStringFrom("smiles", "laughs", "grins")} {LogUtilities.GetRandomStringFrom("devilishly", "mischievously", "maliciously", "wickedly", "naughtily")}. \"Well, you\'ve got my attention. Now let me reward your curiosssity...\""), .2f); //Delayed to let the game fully load before executing
         float sizePenalty = (PredatorComponent?.Fullness ?? 0);                             //multiplicative speed penalty
         sizePenalty = 1 - (sizePenalty * Unit.TraitBoosts.SpeedLossFromWeightMultiplier);   //works better for units with high base AP
         int bonus = 0;
@@ -522,6 +524,9 @@ internal int StartOfTurnExpectedMP()
                 break;
             case PreyLocation.anal:
                 Mode = DisplayMode.AnalVore;
+                break;
+            case PreyLocation.bladder:
+                Mode = DisplayMode.BladderVore;
                 break;
         }
         animationUpdateTime = 1.5F;
@@ -827,15 +832,16 @@ internal int StartOfTurnExpectedMP()
     /// <summary>
     /// This one Covers all forms of consuming
     /// </summary>
-    public bool IsEating => IsOralVoring || IsCockVoring || IsBreastVoring || IsUnbirthing || IsTailVoring || IsAnalVoring;
+    public bool IsEating => IsOralVoring || IsCockVoring || IsBreastVoring || IsUnbirthing || IsTailVoring || IsAnalVoring || IsBladderVoring;
     public bool IsOralVoring => Mode == DisplayMode.OralVore;
     public bool IsOralVoringHalfOver => Mode == DisplayMode.OralVore && animationUpdateTime < .75f;
 
-    public bool IsCockVoring => Mode == DisplayMode.CockVore;
+    public bool IsCockVoring => Mode == DisplayMode.CockVore || IsBladderVoring;
     public bool IsBreastVoring => Mode == DisplayMode.BreastVore;
-    public bool IsUnbirthing => Mode == DisplayMode.Unbirth;
+    public bool IsUnbirthing => Mode == DisplayMode.Unbirth || IsBladderVoring;
     public bool IsTailVoring => Mode == DisplayMode.TailVore;
     public bool IsAnalVoring => Mode == DisplayMode.AnalVore;
+    public bool IsBladderVoring => Mode == DisplayMode.BladderVore;
     public bool IsPouncingFrog => Mode == DisplayMode.FrogPouncing;
     public bool HasJustVored => Mode == DisplayMode.VoreSuccess;
     public bool HasJustFailedToVore => Mode == DisplayMode.VoreFail;
@@ -1424,6 +1430,9 @@ internal int StartOfTurnExpectedMP()
                     case SpecialAction.AnalVore:
                         PredatorComponent.AnalVore(target);
                         break;
+                    case SpecialAction.BladderVore:
+                        PredatorComponent.BladderVore(target);
+                        break;
                     default:
                         PredatorComponent.Devour(target);
                         break;
@@ -1658,6 +1667,9 @@ internal int StartOfTurnExpectedMP()
                     break;
                 case SpecialAction.AnalVore:
                     succeded_attempt = PredatorComponent.AnalVore(target);
+                    break;
+                case SpecialAction.BladderVore:
+                    succeded_attempt = PredatorComponent.BladderVore(target);
                     break;
                 default:
                     succeded_attempt = PredatorComponent.Devour(target);
@@ -2502,7 +2514,7 @@ internal int StartOfTurnExpectedMP()
         {
             possible.Add(1);
         }
-        if (target.PredatorComponent.WombFullness > 0 || target.PredatorComponent.CombinedStomachFullness > 0)
+        if (target.PredatorComponent.CombinedStomachFullness > 0 || target.PredatorComponent.WombFullness > 0 || target.PredatorComponent.BladderFullness > 0)
         {
             possible.Add(0);
         }
@@ -3234,7 +3246,7 @@ internal int StartOfTurnExpectedMP()
             Targetable = false;
             Surrendered = true;
             Movement = 0;
-            if (Config.VisibleCorpses && Unit.Race != Race.Erin && Unit.Race != Race.Iliijiith && Unit.Race != Race.Olivia)
+            if (Config.VisibleCorpses && Unit.Race != Race.Erin && Unit.Race != Race.Iliijiith && !Unit.HasTrait(Traits.CloseCall))
             {
                 float angle = 40 + State.Rand.Next(280);
                 UnitSprite.transform.rotation = Quaternion.Euler(0, 0, angle);
@@ -3243,6 +3255,8 @@ internal int StartOfTurnExpectedMP()
             else
             {
                 Visible = false;
+                if (Unit.HasTrait(Traits.CloseCall))
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Barely hanging on, {Unit.Name} quickly {LogUtilities.GetRandomStringFrom("flees", "bolts", "retreats")} out of combat with {LogUtilities.GPPHis(Unit)} life barely intact");
             }
 
             PredatorComponent?.FreeAnyAlivePrey();

@@ -4455,7 +4455,7 @@ static class RaceParameters
             ExpMultiplier = 1.4f,
             PowerAdjustment = 2f,
             DeployCost = 2,
-            Upkeep = 26f,
+            Upkeep = 32f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 12),
@@ -4473,11 +4473,14 @@ static class RaceParameters
                 Traits.Pounce,
                 Traits.Timid,
                 Traits.Submissive,
-                Traits.Eternal,
+                Traits.BoundWeapon,
                 Traits.TheGreatEscape,
+                Traits.CloseCall,
         },
             InnateSpells = new List<SpellTypes>() { SpellTypes.CrossShock, SpellTypes.ArcBolt },
             RaceDescription = "A small fox with surprisingly strong lightning magic.",
+            CanUseRangedWeapons = false,
+            CanUseMeleeWeapons = false,
         };
 
         Tatltuae = new RaceTraits()
@@ -4486,7 +4489,7 @@ static class RaceParameters
             StomachSize = 27,
             FavoredStat = Stat.Mind,
             HasTail = true,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.BladderVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.BladderVore, VoreType.TailVore },
             ExpMultiplier = 1.4f,
             PowerAdjustment = 7f,
             DeployCost = 2,
@@ -4544,7 +4547,7 @@ static class RaceParameters
             Traits.StrongGullet,
             Traits.Toxic,
         },
-            RaceDescription = "A grand serpent who's power is great and hunger equal in magnitude",
+            RaceDescription = "The turmoil of wars have stirred many lingering threats from slumber or stillness, former allies turn foes and neutral forces turn voracious and violent. Under the shade of stones unturned rises a rumour shared in hisses and secrecy among snakes and lamias. From the mud of swamps wafts a poison queerly potent choking all life in its creeping embrace. \n\n A great witch has chosen to divest from her most passive schemes and mischief to take part in your conflict, whether with or against you to means undisclosed. Her slithers shall be met with fear and rapacity until she is slain or the battlefields of the land lay quiet and her endless gut cacophonous with churning death.",
         };
 
         Nectar = new RaceTraits()
@@ -4698,6 +4701,7 @@ internal class RaceTraits
     /// </summary>
     internal float PowerAdjustment = 1f;
     internal bool CanUseRangedWeapons = true;
+    internal bool CanUseMeleeWeapons = true;
     internal string RaceDescription = "";
 
 }

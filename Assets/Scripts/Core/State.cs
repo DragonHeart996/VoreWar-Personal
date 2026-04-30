@@ -52,7 +52,8 @@ public static class State
             ,"femaleWyvern","maleWyvern","femaleYouko","maleYouko","FeralAnts","FeralFrogs","FeralSharks","FeralWolves","Harvesters","Raptor","RockSlugs","Salamanders","Schiwardez","Serpents","SpitterSlugs","SpringSlugs","Voilin","WarriorAnts","Whisp","femaleBoomBunnies"
             ,"maleBoomBunnies","WyvernMatron","maleFeralOrcas","femaleFeralOrcas","femaleBears","maleBears","femaleCentaur","maleCentaur","femaleGnolls","maleGnolls","femaleMainlandElves","maleMainlandElves","femaleViisels","maleViisels","FeralSlimes","femaleEevee","maleEevee","femaleEqualeon"
             ,"maleEqualeon","femaleUmbreon","maleUmbreon","maleLupine","femaleLupine","femaleMatronsMinions","maleMatronsMinions","femaleJackals","maleJackals","femaleRwuMercenaries","maleRwuMercenaries","TwistedVines","femaleOtachi","maleOtachi","femaleRaiju","maleRaiju","femaleSmudger","maleSmudger","femaleBadgers","maleBadgers"
-            ,"WoodDryad","RiverDryad","EarthDryad","FungalDryad","maleGhosts","femaleGhosts","femaleUtahraptor","maleUtahraptor","femaleTrex","maleTrex","femaleSpaceCroach","maleSpaceCroach","femaleMice","maleMice","Terminid","femaleFeralEevee","maleFeralEevee","femaleFeralEqualeon","maleFeralEqualeon","femaleFeralUmbreon","maleFeralUmbreon","Iliijiith"};
+            ,"WoodDryad","RiverDryad","EarthDryad","FungalDryad","maleGhosts","femaleGhosts","femaleUtahraptor","maleUtahraptor","femaleTrex","maleTrex","femaleSpaceCroach","maleSpaceCroach","femaleMice","maleMice","Terminid","femaleFeralEevee","maleFeralEevee","femaleFeralEqualeon","maleFeralEqualeon","femaleFeralUmbreon","maleFeralUmbreon","Iliijiith","maleRenamon","femaleRenamon"};
+
 
     static State()
     {
@@ -104,6 +105,8 @@ public static class State
             Directory.CreateDirectory(NameFileDirectory.TrimEnd(new char[] { '\\', '/' }));
         }
 
+
+
         string[] systemTextFileNames = new string[] { "customTraits", "events" };
 
         try
@@ -130,6 +133,7 @@ public static class State
         {
             Debug.Log("Name setup failed!");
         }
+
 
         try
         {
@@ -174,7 +178,8 @@ public static class State
                 {
                     count++;
                     RandomizeList custom = new RandomizeList();
-                    line = new string(line.Where(c => !Char.IsWhiteSpace(c)).ToArray());
+                    line = new string(line
+                       .Where(c => !Char.IsWhiteSpace(c)).ToArray());
                     string[] strings = line.Split(',');
                     if (strings.Length == 4)
                     {
@@ -185,8 +190,7 @@ public static class State
                         custom.count = 1;
                         custom.RandomTraits = strings[3].Split('|').ToList().ConvertAll(s => (Traits)int.Parse(s));
                         RandomizeLists.Add(custom);
-                    }
-                    else if (strings.Length == 6)
+                    } else if (strings.Length == 6)
                     {
                         custom.id = int.Parse(strings[0]);
                         custom.name = strings[1];
@@ -233,6 +237,8 @@ public static class State
         }
 
         ExternalTraitHandler.AppendTaggedTrait(newTraits);
+
+
     }
 
     public static void WipeUserdata()
@@ -289,6 +295,8 @@ public static class State
             Directory.CreateDirectory(NameFileDirectory.TrimEnd(new char[] { '\\', '/' }));
         }
 
+
+
         string[] systemTextFileNames = new string[] { "customTraits", "events" };
 
         try
@@ -315,6 +323,7 @@ public static class State
         {
             Debug.Log("Name setup failed!");
         }
+
 
         try
         {
@@ -359,7 +368,8 @@ public static class State
                 {
                     count++;
                     RandomizeList custom = new RandomizeList();
-                    line = new string(line.Where(c => !Char.IsWhiteSpace(c)).ToArray());
+                    line = new string(line
+                       .Where(c => !Char.IsWhiteSpace(c)).ToArray());
                     string[] strings = line.Split(',');
                     if (strings.Length == 4)
                     {
@@ -370,8 +380,7 @@ public static class State
                         custom.count = 1;
                         custom.RandomTraits = strings[3].Split('|').ToList().ConvertAll(s => (Traits)int.Parse(s));
                         RandomizeLists.Add(custom);
-                    }
-                    else if (strings.Length == 6)
+                    } else if (strings.Length == 6)
                     {
                         custom.id = int.Parse(strings[0]);
                         custom.name = strings[1];
@@ -421,6 +430,8 @@ public static class State
         }
 
         ExternalTraitHandler.AppendTaggedTrait(newTraits);
+
+
     }
 
     public static void SaveEditedRaces()
@@ -479,6 +490,7 @@ public static class State
         }
     }
 
+
     public static void ResetNamelists()
     {
         try
@@ -507,6 +519,7 @@ public static class State
     {
         NameGen = new NameGenerator();
     }
+
 
     public static void Save(string filename)
     {
@@ -542,7 +555,9 @@ public static class State
             {
                 GameManager.CreateMessageBox($"Unable to save properly, {filename} didn't work (will no longer warn you this session)");
             }
+
         }
+
     }
 
     public static World PreviewSave(string filename)
@@ -559,6 +574,7 @@ public static class State
             byte[] bytes = File.ReadAllBytes(filename);
             tempWorld = SerializationUtility.DeserializeValue<World>(bytes, DataFormat.Binary);
             return tempWorld;
+
         }
         catch (Exception)
         {
@@ -652,13 +668,14 @@ public static class State
                 }
             }
 
+
             if (World.Claimables == null)
                 World.Claimables = new ClaimableBuilding[0];
             if (World.Constructibles == null)
                 World.Constructibles = new ConstructibleBuilding[0];
             ItemRepository newRepo = new ItemRepository();
             World.ItemRepository = newRepo;
-            //Always runs for new versions
+            //Always runs for new versions           
             if (World.SaveVersion != Version && World.AllActiveEmpires != null)
             {
                 if (World.GetEmpireOfSide(700) == null)
@@ -681,19 +698,17 @@ public static class State
                 {
                     World.GetEmpireOfSide(701).Name = "Bandits";
                 }
-                /*
-                if (World.GetEmpireOfSide(702) == null)
-                {
-                    World.MainEmpires.Add(new Empire(new Empire.ConstructionArgs(702, Color.red, new Color(.6f, 0, 0), 5, StrategyAIType.Basic, TacticalAIType.Full, 702, 16, 16)));
-                    World.RefreshEmpires();
-                }
-                else
-                {
-                    World.GetEmpireOfSide(702).Name = "Outcasts";
-                    if (World.EmpireOrder.Where(s => s.Side == 702).Any() == false)
-                        World.EmpireOrder.Add(World.GetEmpireOfSide(702));
-                }
-                */
+                /*         if (World.GetEmpireOfSide(702) == null)
+                        {
+                            World.MainEmpires.Add(new Empire(new Empire.ConstructionArgs(702, Color.red, new Color(.6f, 0, 0), 5, StrategyAIType.Basic, TacticalAIType.Full, 702, 16, 16)));
+                            World.RefreshEmpires();
+                        }
+                        else
+                        {
+                            World.GetEmpireOfSide(702).Name = "Outcasts";
+                            if (World.EmpireOrder.Where(s => s.Side == 702).Any() == false)
+                                World.EmpireOrder.Add(World.GetEmpireOfSide(702));
+                        } */
                 if (version < 30 + 1)
                 {
                     if (World.AllActiveEmpires != null)
@@ -702,6 +717,7 @@ public static class State
                         {
                             village.ConvertToMultiRace();
                         }
+
                     }
                 }
 
@@ -716,6 +732,7 @@ public static class State
                     {
                         foreach (Unit unit in army.Units)
                         {
+
                             if (unit.Side != army.Side)
                                 unit.Side = army.Side;
                             if (unit.BodySize < 0) //Can take this out later, was a fix for 14H
@@ -723,6 +740,7 @@ public static class State
                         }
                     }
                 }
+
 
                 if (Config.MaxSpellLevelDrop == 0)
                     Config.World.MaxSpellLevelDrop = 4;
@@ -807,6 +825,7 @@ public static class State
                         }
                     }
                 }
+
             }
 
             if (version < 22 + 1)
@@ -854,6 +873,7 @@ public static class State
                                     unit.FixedGear = true;
                                     unit.Items[0] = State.World.ItemRepository.GetSpecialItem(SpecialItems.CierihakaWeapon);
                                 }
+
                             }
                         }
                     }
@@ -902,6 +922,7 @@ public static class State
                                     if (unit.ClothingType2 == 3)
                                         unit.ClothingType2 = 2;
                                 }
+
                             }
                         }
                     }
@@ -939,11 +960,13 @@ public static class State
                             raceData.RandomCustom(unit);
                     }
                 }
+
             }
 
             if (version < 30 + 1)
             {
                 Config.World.AutoSurrenderChance = 1;
+
             }
 
             if (version < 31 + 1)
@@ -996,6 +1019,7 @@ public static class State
                 }
             }
 
+
             if (version < 34 + 1)
             {
                 if (World.AllActiveEmpires != null)
@@ -1047,6 +1071,7 @@ public static class State
                             unit.GeneratePronouns();
                         }
                     }
+
                 }
                 else
                 {
@@ -1060,6 +1085,7 @@ public static class State
                 }
             }
 
+
             if (version < 38 + 1)
             {
                 if (World.AllActiveEmpires != null)
@@ -1072,6 +1098,7 @@ public static class State
                         }
                     }
                 }
+
             }
 
             if (version < 39 + 1)
@@ -1107,8 +1134,10 @@ public static class State
                     {
                         unit.FixedSide = -1;
                     }
+
                 }
             }
+
 
             if (version < 41 + 1)
             {
@@ -1118,9 +1147,11 @@ public static class State
                     {
                         foreach (Army army in emp.Armies)
                         {
-                            army.impassables = new List<StrategicTileType>() { StrategicTileType.mountain, StrategicTileType.snowMountain, StrategicTileType.water, StrategicTileType.lava, StrategicTileType.ocean, StrategicTileType.brokenCliffs};
+                            army.impassables = new List<StrategicTileType>()
+    { StrategicTileType.mountain, StrategicTileType.snowMountain, StrategicTileType.water, StrategicTileType.lava, StrategicTileType.ocean, StrategicTileType.brokenCliffs};
                         }
                     }
+
                 }
             }
 
@@ -1568,6 +1599,8 @@ public static class State
                 }
             }
 
+
+
             if (Config.World.ArmyMP == 0)
                 Config.World.ArmyMP = 3;
 
@@ -1652,6 +1685,7 @@ public static class State
             }
             else //If Pure Tactical
             {
+
                 Config.WatchAIBattles = true;
                 pureTactical = true;
             }
@@ -1663,6 +1697,7 @@ public static class State
                 if (pureTactical)
                 {
                     GameManager.TacticalMode.RefreshPureTacticalTraits();
+                    GameManager.TacticalMode.ForceUpdate();
                 }
             }
             
@@ -1677,5 +1712,9 @@ public static class State
             GameManager.CreateMessageBox("Encountered an error when trying to load the save");
             return;
         }
+
+
     }
 }
+
+

@@ -3437,6 +3437,10 @@ public class TacticalMode : SceneBase
                 {
                     unit.UnitSprite.AnimateSecondBelly(unit.PredatorComponent.PreyNearLocation(PreyLocation.stomach2, true) * 0.0022f);
                 }
+                if (unit.PredatorComponent?.TailFullness > 0 && unit.PredatorComponent?.AlivePrey > 0 && unit.Unit.Race == Race.Tatltuae)//Wiggle the hackles
+                {
+                    unit.UnitSprite.AnimateSecondBelly(unit.PredatorComponent.PreyNearLocation(PreyLocation.tail, true) * 0.0022f);
+                }
                 if (unit.PredatorComponent?.BallsFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
                 {
                     unit.UnitSprite.AnimateBalls(unit.PredatorComponent.PreyNearLocation(PreyLocation.balls, true) * 0.0022f);
@@ -5137,6 +5141,32 @@ public class TacticalMode : SceneBase
                             armies[1]?.Units.Remove(actor.Unit);
                             village?.GetRecruitables().Remove(actor.Unit);
                         }
+                    }
+                    else
+                    {
+                        retreatedAttackers.Add(actor.Unit);
+                        armies[0].Units.Remove(actor.Unit);
+                    }
+                    actor.PredatorComponent?.PurgePrey();
+                    units.Remove(actor);
+                }
+                else if (actor.Unit.IsDead && actor.Unit.Type != UnitType.Summon && (actor.Unit.HasTrait(Traits.CloseCall)) && actor.KilledByDigestion == false)
+                {
+                    actor.Surrendered = false;
+                    actor.Unit.Health = 1;
+                    if (actor.Unit.Side == defenderSide)
+                    {
+                        if (garrison.Contains(actor) && remainingDefenders > 0)
+                        {
+                            actor.Unit.Health = 1;
+                        }
+                        else
+                        {
+                            retreatedDefenders.Add(actor.Unit);
+                            armies[1]?.Units.Remove(actor.Unit);
+                            village?.GetRecruitables().Remove(actor.Unit);
+                        }
+
                     }
                     else
                     {

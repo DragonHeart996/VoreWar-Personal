@@ -341,6 +341,7 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] OliviaVoreSprites;
     public Sprite[] Skapa;
     public Sprite[] Tatltuae;
+    public Sprite[] TatltuaeHackleVore;
     public Sprite[] Seville;
     public Sprite[] SevilleBite;
     public Sprite[] Nectar;
