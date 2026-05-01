@@ -222,91 +222,56 @@ class Tatltuae : DefaultRaceData
 
     protected override Sprite SecondaryBellySprite(Actor_Unit actor) // hackles
     {
-        int sizet = actor.GetTailSize(2);
+        int sizet = actor.GetTailSize(5,2);
         if (actor.Unit.Predator == false || actor.PredatorComponent?.TailFullness == 0 || !facingFront)
             return null;
-        else
-            {
-                if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.tail) && sizet == 2)
-                {
-                    AddOffset(Belly, 0, -34 * .625f);
-                    return Sprites2[5];
-                }
-                else if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, false, PreyLocation.tail) && sizet == 2)
-                {
-                    AddOffset(Belly, 0, -34 * .625f);
-                    return Sprites2[4];
-                }
-                else if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, false, PreyLocation.tail) && sizet == 1)
-                {
-                    AddOffset(Belly, 0, -34 * .625f);
-                    return Sprites2[3];
-                }
-                else
-                    return Sprites2[(sizet)];
-            }
+        sizet = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, sizet, 2, 5, PreyLocation.tail);
+        return Sprites2[(sizet)];
     }
 
 
     internal override Sprite BellySprite(Actor_Unit actor, GameObject belly)
-
     {
         if (facingFront)
         {
-        if (actor.HasBelly)
-        {
-            belly.transform.localScale = new Vector3(1, 1, 1);
-            belly.SetActive(true);
-            Belly.layer = 12;
-            int size = actor.GetStomachSize(31, 0.8f);
-            if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach, PreyLocation.womb) && size == 31)
+            if (actor.HasBelly)
             {
-                AddOffset(Belly, 0, -34 * .625f);
-                return Sprites[62];
-            }
-            else if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, false, PreyLocation.stomach, PreyLocation.womb) && size == 31)
-            {
-                AddOffset(Belly, 0, -34 * .625f);
-                return Sprites[61];
-            }
-            else if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, false, PreyLocation.stomach, PreyLocation.womb) && size == 30)
-            {
-                AddOffset(Belly, 0, -34 * .625f);
-                return Sprites[60];
-            }
-            else if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, false, PreyLocation.stomach, PreyLocation.womb) && size == 29)
-            {
-                AddOffset(Belly, 0, -34 * .625f);
-                return Sprites[59];
-            }
-            switch (size)
-            {
-                case 26:
-                    AddOffset(Belly, 0, -14 * .625f);
-                    break;
-                case 27:
-                    AddOffset(Belly, 0, -17 * .625f);
-                    break;
-                case 28:
-                    AddOffset(Belly, 0, -20 * .625f);
-                    break;
-                case 29:
-                    AddOffset(Belly, 0, -25 * .625f);
-                    break;
-                case 30:
-                    AddOffset(Belly, 0, -27 * .625f);
-                    break;
-                case 31:
-                    AddOffset(Belly, 0, -33 * .625f);
-                    break;
-            }
-
+                belly.transform.localScale = new Vector3(1, 1, 1);
+                belly.SetActive(true);
+                Belly.layer = 12;
+                int size = actor.GetStomachSize(35, 0.8f);
+                size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, size, 31, 34, PreyLocation.stomach, PreyLocation.womb);
+        
+                switch (size)
+                {
+                    case 26:
+                        AddOffset(Belly, 0, -14 * .625f);
+                        break;
+                    case 27:
+                        AddOffset(Belly, 0, -17 * .625f);
+                        break;
+                    case 28:
+                        AddOffset(Belly, 0, -20 * .625f);
+                        break;
+                    case 29:
+                        AddOffset(Belly, 0, -25 * .625f);
+                        break;
+                    case 30:
+                        AddOffset(Belly, 0, -27 * .625f);
+                        break;
+                    case 31:
+                        AddOffset(Belly, 0, -33 * .625f);
+                        break;
+                    case 32:
+                    case 33:
+                    case 34: 
+                    case 35:
+                        AddOffset(Belly, 0, -34 * .625f);
+                        break;
+                }
                 return Sprites[27 + size];
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
         else
         {

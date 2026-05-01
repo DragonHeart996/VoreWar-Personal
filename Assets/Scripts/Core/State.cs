@@ -232,7 +232,7 @@ public static class State
         List<TaggedTrait> newTraits = new List<TaggedTrait>();
         foreach (var newTrait in UntaggedTraits)
         {
-            if (!newTrait.Value)
+            if (!newTrait.Value && newTrait.Key.tags != null)
                 newTraits.Add(newTrait.Key);
         }
 
