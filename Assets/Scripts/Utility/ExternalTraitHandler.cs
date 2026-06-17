@@ -72,7 +72,6 @@ public class ExternalTraitHandler
         JsonConvert.PopulateObject(json, rootObject);
         foreach (TaggedTrait trait in newTrait)
         {
-            if (trait.tags == null) continue;
             TaggedTraitTempClass toBeAdded = new TaggedTraitTempClass();
             toBeAdded.name = trait.name;
             toBeAdded.tier = trait.tier;
