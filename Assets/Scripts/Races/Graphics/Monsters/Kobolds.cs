@@ -391,6 +391,7 @@ class Kobolds : BlankSlate
     {
         public Rags()
         {
+            OccupiesAllSlots = true;
             blocksDick = false;
             clothing1 = new SpriteExtraInfo(10, null, null);
             clothing2 = new SpriteExtraInfo(11, null, null);

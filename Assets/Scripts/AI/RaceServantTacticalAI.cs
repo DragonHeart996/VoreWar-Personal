@@ -7,7 +7,7 @@ public class RaceServantTacticalAI : HedonistTacticalAI
     {
     }
 
-    protected override List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves)
+    protected override List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves, bool spendFinalAP = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
         Race masterRace = GetStrongestFriendlyRaceOnBattlefield(actor);
@@ -21,7 +21,8 @@ public class RaceServantTacticalAI : HedonistTacticalAI
             if (unit.Targetable == true && unit.Unit.Predator && !TacticalUtilities.TreatAsHostile(actor, unit) && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered && unit.PredatorComponent?.PreyCount > 0 && !unit.ReceivedRub)
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
-                if (distance - 1 + (actor.MaxMovement() / 3) <= moves)
+                if (distance + (actor.MaxMovement() / 3) <= moves
+                    || (spendFinalAP && distance <= moves))
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;

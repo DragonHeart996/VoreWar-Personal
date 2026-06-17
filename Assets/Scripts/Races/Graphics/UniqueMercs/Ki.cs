@@ -81,10 +81,20 @@ class Ki : BlankSlate
                 case 21: { bodyAccent2 = 54; bodyAccent = 54; body = 54; break; }
             }
         }
+        
         AddOffset(Body, 0, body * pixelOffset);
         AddOffset(BodyAccent, 0, bodyAccent * pixelOffset);
         AddOffset(BodyAccent2, 0, bodyAccent2 * pixelOffset);
 
+
+        float offset = body * pixelOffset * -0.5f;
+        offset += 27.5f;
+        AddOffset(Body, 0, offset);
+        AddOffset(BodyAccent, 0, offset);
+        AddOffset(BodyAccent2, 0, offset);
+        AddOffset(Dick, 0, offset);
+        AddOffset(Belly, 0, offset);
+        AddOffset(Balls, 0, offset);
     }
 
     internal void SetUpAnimations(Actor_Unit actor)

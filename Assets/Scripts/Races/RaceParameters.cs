@@ -885,6 +885,7 @@ static class RaceParameters
             FavoredStat = Stat.Agility,
             DeployCost = 1,
             Upkeep = 4f,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
 			PowerAdjustment = 1.2f,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
@@ -3299,7 +3300,7 @@ static class RaceParameters
                 Traits.Brainless,
                 Traits.Fearless,
                 Traits.Replaceable,
-                Traits.Crystaline,
+                Traits.Crystalline,
                 Traits.DimensionalAntilock,
                 Traits.DyingStrike,
                 Traits.TotalAbsorption,
@@ -3966,7 +3967,7 @@ static class RaceParameters
                 Traits.ColdTolerance,
             },
             InnateSpells = new List<SpellTypes>() { SpellTypes.IceBlast },
-            RaceDescription = "A hybrid between a dragon and salamander whom excels in climbing and swimming but lacks any wings for flight.",
+            RaceDescription = "A hybrid between a dragon and salamander who excels in climbing and swimming but lacks any wings for flight.",
 
         };
 
@@ -4298,7 +4299,7 @@ static class RaceParameters
             },
             InnateSpells = new List<SpellTypes>()
             { SpellTypes.DivinitysEmbrace },
-            RaceDescription = "Erin belongs to a very rare species known as a Nyangel, the lovechild of an angel and a catgirl.  Thanks to this divine heritage they aremostly all incredible healers... But they're also incredibly tasty.  Every Nyangel has a unique trait to set them apart from eachother, and Erin is no exception to this rule.  Her quirk is total acid resistance, the perfect defense against the raveous predators of this realm.  That doesn't stop her from being devoured, however, and that is unfortunately an all-too-common outcome for the girl.  Regardless of how many times she ends up eaten, the loveable Nyangel still tries her best to heal those she can.",
+            RaceDescription = "Erin belongs to a very rare species known as a Nyangel, the lovechild of an angel and a catgirl.  Thanks to this divine heritage they are mostly all incredible healers... But they're also incredibly tasty.  Every Nyangel has a unique trait to set them apart from eachother, and Erin is no exception to this rule.  Her quirk is total acid resistance, the perfect defense against the raveous predators of this realm.  That doesn't stop her from being devoured, however, and that is unfortunately an all-too-common outcome for the girl.  Regardless of how many times she ends up eaten, the loveable Nyangel still tries her best to heal those she can.",
         };
 
 
@@ -4467,7 +4468,7 @@ static class RaceParameters
                 Traits.Intimidating,
                 Traits.TailStrike,
             },
-            InnateSpells = new List<SpellTypes>() { SpellTypes.IceBlast, SpellTypes.Icicle },
+            //InnateSpells = new List<SpellTypes>() { SpellTypes.IceBlast, SpellTypes.Icicle },
             RaceDescription = "An ice dragoness claiming to hail from a distant city. She seems a bit nicer than the wild dragons, but even hungrier. Her deep experience with her element let's her frequently cast ice breath attacks, and chills the air around nearby foes.",
 
         };
@@ -4830,6 +4831,7 @@ internal class RaceTraits
     internal Stat FavoredStat;
     internal List<Traits> RacialTraits;
     internal List<Traits> LeaderTraits;
+    internal List<Traits> SoldierTraits;
     internal List<Traits> SpawnTraits;
     internal List<int> RacialTags = new List<int>();
     //internal List<Traits> RandomTraits;

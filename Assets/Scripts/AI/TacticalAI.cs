@@ -47,7 +47,17 @@ public abstract class TacticalAI : ITacticalAI
     protected bool onlySurrenderedEnemies;
     protected bool lackPredators;
     protected bool onlyForeignTroopsLeft;
-
+    protected bool trappedUnits;
+    protected bool veryTrappedUnits;
+    public int trappedUnitsTimer;
+    public int enemyTrappedUnitsTimer;
+    
+    protected bool tookCombatActions
+    {
+        get => State.GameManager.TacticalMode.tookCombatActions;
+        set => State.GameManager.TacticalMode.tookCombatActions |= value; 
+    }
+    
     protected bool didAction;
     protected bool foundPath;
     [OdinSerialize]
@@ -98,30 +108,73 @@ public abstract class TacticalAI : ITacticalAI
         this.tiles = tiles;
         this.actors = actors;
         this.defendingVillage = defendingVillage;
-        enemySide = State.GameManager.TacticalMode.GetAttackerSide() == AISide ? State.GameManager.TacticalMode.GetDefenderSide() : State.GameManager.TacticalMode.GetAttackerSide();
+        enemySide = State.GameManager.TacticalMode.GetAttackerSide() == AISide 
+            ? State.GameManager.TacticalMode.GetDefenderSide() 
+            : State.GameManager.TacticalMode.GetAttackerSide();
+        trappedUnitsTimer = State.GameManager.TacticalMode.GetAttackerSide() == AISide 
+            ? State.GameManager.TacticalMode.attackerTrappedUnitsTimer 
+            : State.GameManager.TacticalMode.defenderTrappedUnitsTimer;
+        enemyTrappedUnitsTimer = State.GameManager.TacticalMode.GetAttackerSide() == AISide 
+            ? State.GameManager.TacticalMode.defenderTrappedUnitsTimer 
+            : State.GameManager.TacticalMode.attackerTrappedUnitsTimer;
     }
     public void TurnAI()
     {
         if (actors == null)
             actors = TacticalUtilities.Units;
         path = null;
-        var actorsThatMatter = actors.Where(a => a.Targetable && a.Unit.IsDead == false && a.Surrendered == false && a.Unit.Side == AISide);
-        onlyForeignTroopsLeft = actorsThatMatter.All(a => TacticalUtilities.GetMindControlSide(a.Unit) == -1 && TacticalUtilities.GetPreferredSide(a.Unit, enemySide, AISide) == enemySide);
-        onlySurrenderedEnemies = actors.Where(s => s.Unit.Side != AISide && s.Unit.IsDead == false && s.Surrendered == false && !s.Fled).Any() == false;
-        var preds = actors.Where(s => s.Unit.Side == AISide && s.Unit.IsDead == false && s.Unit.Predator);
+        var actorsThatMatter = actors.Where(a => a.Targetable 
+                                                 && a.Unit.IsDead == false 
+                                                 && a.Surrendered == false 
+                                                 && a.Unit.Side == AISide);
+        onlyForeignTroopsLeft = actorsThatMatter.All(a => TacticalUtilities.GetMindControlSide(a.Unit) == -1 
+                                                          && TacticalUtilities.GetPreferredSide(a.Unit, enemySide, AISide) == enemySide);
+        onlySurrenderedEnemies = !actors.Any(s => s.Unit.Side != AISide && !s.Unit.IsDead && !s.Surrendered && !s.Fled);
+        var preds = actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered && s.Unit.Predator);
         lackPredators = preds.Any() == false;
         bool tooBig = true;
+        //State.GameManager.TacticalMode.IsOnlyOneSideVisible();
+        trappedUnits = false;
+        veryTrappedUnits = false;
+        if (!tookCombatActions)
+        {
+            var activeUnits = actors.Where(s => s.Unit.Side == AISide && !s.Unit.IsDead && !s.Surrendered);
+            foreach (var actor in activeUnits)
+            {
+                if (CheckCombatActionsAvailable(actor))
+                {
+                    tookCombatActions = true;
+                    break;
+                }
+            }
+        }
+        trappedUnits = trappedUnitsTimer >= 5;
+        veryTrappedUnits = trappedUnitsTimer >= 10 
+                           && enemyTrappedUnitsTimer >= 10;
         if (onlySurrenderedEnemies)
         {
             //Array of all opposing live units
-            var enemies = actors.Where(s => s.Unit.Side != AISide && s.Unit.IsDead == false);
+            var enemies = actors.Where(s => (s.Unit.Side != AISide && s.Unit.IsDead == false) 
+                                            || (s.Unit.IsDead
+                                                && s.Visible 
+                                                && Config.EdibleCorpses));
             foreach (var actor in preds)
             {
                 if (tooBig == false)
                     break;
                 foreach (var target in enemies)
                 {
-                    if (actor.PredatorComponent.TotalCapacity() > target.Bulk())
+                    
+                    float bulk = target.Bulk();
+                    float cap = actor.PredatorComponent.TotalCapacity();
+                    if (actor.Unit.HasTrait(Traits.Endosoma))
+                    {
+                        cap -= 2 + actor.PredatorComponent.GetBulkOfDefeatedEndoPrey();
+
+                        if (cap < 0)
+                            continue;
+                    } 
+                    if (cap > bulk || actor.Unit.HasTrait(Traits.ExtremelyStretchy))
                     {
                         tooBig = false;
                         break;
@@ -307,6 +360,7 @@ public abstract class TacticalAI : ITacticalAI
                 {
                     if (onlyForeignTroopsLeft)
                         HandleLeftoverForeigns(actor);
+                    
                     GetNewOrder(actor);
                     return true; 
                 }
@@ -317,6 +371,36 @@ public abstract class TacticalAI : ITacticalAI
     }
 
     protected abstract void GetNewOrder(Actor_Unit actor);
+
+    protected virtual bool CheckCombatActionsAvailable(Actor_Unit actor)
+    {
+        int ap = actor.StartOfTurnExpectedMP();
+        
+        if (ap == 0)
+            return false;
+        
+        Vec2i position = actor.Position;
+        
+        if (actor.Unit.HasTrait(Traits.Pounce) && ap >= 2)
+            if (CheckVorePounce(actor, position, ap, true) > 0
+                || (CheckMeleePounce(actor, position, ap) > 0
+                    && !actor.Unit.HasTrait(Traits.VoreObsession)))
+                return true;
+        
+        if (CheckPred(actor, position, ap, actor.Unit.HasTrait(Traits.VoreObsession), true) > 0)
+            return true;
+        
+        if (!actor.Unit.HasTrait(Traits.VoreObsession))
+        {
+            if (CheckMelee(actor, position, ap) > 0)
+                return true;
+            if (IsRanged(actor))
+                if (CheckRanged(actor, position, ap) > 0)
+                    return true;
+        }
+        
+        return false;
+    }
 
     protected virtual int CheckActionEconomyOfActorFromPositionWithAP(Actor_Unit actor, Vec2i position, int ap)
     {
@@ -377,16 +461,15 @@ public abstract class TacticalAI : ITacticalAI
 
         foreach (Actor_Unit unit in actors)
         {
-            if (unit.Targetable == true && unit.Unit.Predator && unit.Unit.FixedSide == temptation.Strength && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered)
+            if (unit.Targetable == true && unit.Unit.Predator && unit.Unit.FixedSide == temptation?.Applicator?.FixedSide && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered)
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
-                if (distance < ap)
+                if (distance <= ap)
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;
-                targets.Add(new PotentialTarget(unit, 100, distance, 4, -distance));
+                    targets.Add(new PotentialTarget(unit, 100, distance, 4, -distance + (unit.Unit == temptation?.Applicator ? actor.CurrentMaxMovement() / 2 : 0)));
                 }
-
             }
         }
         targets = targets.OrderByDescending(t => t.utility).ToList();
@@ -402,7 +485,7 @@ public abstract class TacticalAI : ITacticalAI
             }
             else
             {
-                if (targets[0].actor.Position.GetNumberOfMovesDistance(position) < ap) //discard the clearly impossible
+                if (targets[0].actor.Position.GetNumberOfMovesDistance(position) <= ap) //discard the clearly impossible
                 {
                     int distance = CheckMoveTo(actor, position, targets[0].actor.Position, 1, ap);
                     if (distance < ap && distance >= 0)
@@ -422,16 +505,15 @@ public abstract class TacticalAI : ITacticalAI
 
         foreach (Actor_Unit unit in actors)
         {
-            if (unit.Targetable == true && unit.Unit.Predator && unit.Unit.FixedSide == temptation.Strength && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered)
+            if (unit.Targetable == true && unit.Unit.Predator && unit.Unit.FixedSide == temptation?.Applicator?.FixedSide && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered)
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(actor.Position);
-                if (distance < actor.Movement)
+                if (distance <= actor.Movement)
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;
                     targets.Add(new PotentialTarget(unit, 100, distance, 4, -distance));
                 }
-
             }
         }
         targets = targets.OrderByDescending(t => t.utility).ToList();
@@ -449,11 +531,13 @@ public abstract class TacticalAI : ITacticalAI
             }
             else
             {
-                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) < actor.Movement) //discard the clearly impossible
+                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) <= actor.Movement) //discard the clearly impossible
                 {
                     MoveToAndAction(actor, targets[0].actor.Position, 1, actor.Movement, () => TacticalUtilities.ForceFeed(actor, targets[0].actor));
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         return;
+                    }
                 }
             }
             targets.RemoveAt(0);
@@ -465,7 +549,9 @@ public abstract class TacticalAI : ITacticalAI
                 //Get as close to the target as you can if you can't reach it
                 MoveToAndAction(actor, reserveTarget.Position, -1, 999, null);
                 if (foundPath)
+                {
                     return;
+                }
                 RandomWalkAndEndTurn(actor);
             }
             else
@@ -475,11 +561,11 @@ public abstract class TacticalAI : ITacticalAI
         }
     }
 
-    protected virtual int CheckVorePounce(Actor_Unit actor, Vec2i position, int ap)
+    protected virtual int CheckVorePounce(Actor_Unit actor, Vec2i position, int ap, bool validationCheck = false)
     {
         if (!actor.Unit.Predator)
             return -1;
-        List<PotentialTarget> targets = GetListOfPotentialVorePouncePrey(actor, position, ap);
+        List<PotentialTarget> targets = GetListOfPotentialVorePouncePrey(actor, position, ap, validationCheck);
         if (!targets.Any())
             return -1;
         Actor_Unit reserveTarget = targets[0].actor;
@@ -504,10 +590,10 @@ public abstract class TacticalAI : ITacticalAI
         return -1;
     }
 
-    protected virtual void RunBellyRub(Actor_Unit actor, int spareAP)
+    protected virtual void RunBellyRub(Actor_Unit actor, int spareAP, bool spendFinalAP = false)
     {
         int cost = actor.MaxMovement() / 3;
-        List<PotentialTarget> targets = GetListOfPotentialRubTargets(actor, actor.Position, spareAP);
+        List<PotentialTarget> targets = GetListOfPotentialRubTargets(actor, actor.Position, spareAP, spendFinalAP);
 
         if (!targets.Any())
         {
@@ -535,6 +621,11 @@ public abstract class TacticalAI : ITacticalAI
                 //targets.RemoveAt(0);
                 //break;
             }
+            else if (spendFinalAP)
+            {
+                MoveToAndAction(actor, targets[0].actor.Position, 1, spareAP, () => actor.BellyRub(targets[0].actor));
+                return;
+            }
             else
             {
                 // at this point we know that we have enough ap for both the distance to an enemy and doing something useful, AND for the distance to an ally and bellyrub, from where we stand. 
@@ -559,7 +650,7 @@ public abstract class TacticalAI : ITacticalAI
         //}
     }
 
-    protected virtual List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves)
+    protected virtual List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves, bool spendFinalAP = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
 
@@ -568,7 +659,8 @@ public abstract class TacticalAI : ITacticalAI
             if (unit.Targetable == true && unit.Unit.Predator && !TacticalUtilities.TreatAsHostile(actor, unit) && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered && unit.PredatorComponent?.PreyCount > 0 && !unit.ReceivedRub) // includes self
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
-                if (distance - 1 + (actor.MaxMovement() / 3) <= moves)
+                if (distance + (actor.MaxMovement() / 3) <= moves
+                    || (spendFinalAP && distance <= moves))
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;
@@ -630,12 +722,12 @@ public abstract class TacticalAI : ITacticalAI
         }
     }
 
-    protected virtual int CheckPred(Actor_Unit actor, Vec2i position, int ap, bool anyDistance = false)
+    protected virtual int CheckPred(Actor_Unit actor, Vec2i position, int ap, bool anyDistance = false, bool validationCheck = false)
     {
         int distance = -1;
         if (!actor.Unit.Predator)
             return -1;
-        List<PotentialTarget> targets = GetListOfPotentialPrey(actor, anyDistance, position, ap);
+        List<PotentialTarget> targets = GetListOfPotentialPrey(actor, anyDistance, position, ap, validationCheck);
         if (!targets.Any())
             return -1;
 
@@ -668,17 +760,36 @@ public abstract class TacticalAI : ITacticalAI
 
     protected virtual void RunPred(Actor_Unit actor, bool anyDistance = false)
     {
-
-        if (actor.Unit.Predator == false)
+        if (!actor.Unit.Predator)
             return;
         List<PotentialTarget> targets = GetListOfPotentialPrey(actor, anyDistance, actor.Position, actor.Movement);
         if (!targets.Any())
             return;
-
+        //State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Debug msg</color>");
         while (targets.Any())
         {
+            //State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Debug msg: {targets[0].distance} {targets[0].chance}</color>");
             if (targets[0].distance < 2)
             {
+                if (!targets[0].actor.Unit.IsDead && !targets[0].actor.Surrendered)
+                {
+                    List<Actor_Unit> testTargets = TacticalUtilities.UnitsWithinPattern(actor.Position,
+                        new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } });
+                    List<AbilityTargets> targetTypes = new List<AbilityTargets> { AbilityTargets.Enemy };
+                    int validTargets = 0;
+                    foreach (var target in testTargets)
+                    {
+                        if (!TacticalUtilities.MeetsQualifier(targetTypes, actor, target))
+                            continue;
+                        validTargets++;
+                    }
+
+                    if (validTargets >= 3 && TacticalActionList.TargetedDictionary[SpecialAction.SweepingSwallow]
+                            .AppearConditional(actor))
+                        if (actor.AiSweepAttack(targets[0].actor, actor, false))
+                            return;
+                }
+
                 if (actor.PredatorComponent.UsePreferredVore(targets[0].actor))
                     targetsEaten++;
                 didAction = true;
@@ -690,53 +801,116 @@ public abstract class TacticalAI : ITacticalAI
                 {
                     MoveToAndAction(actor, targets[0].actor.Position, 1, 999, () =>
                     {
+                        if (actor.Movement == 0)
+                            return;
+                        if (!targets[0].actor.Unit.IsDead && !targets[0].actor.Surrendered)
+                        {
+                            List<Actor_Unit> testTargets = TacticalUtilities.UnitsWithinPattern(actor.Position,
+                                new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } });
+                            List<AbilityTargets> targetTypes = new List<AbilityTargets> { AbilityTargets.Enemy };
+                            int validTargets = 0;
+                            foreach (var target in testTargets)
+                            {
+                                if (!TacticalUtilities.MeetsQualifier(targetTypes, actor, target))
+                                    continue;
+                                validTargets++;
+                            }
+
+                            if (validTargets >= 3 && TacticalActionList
+                                    .TargetedDictionary[SpecialAction.SweepingSwallow]
+                                    .AppearConditional(actor))
+                                if (actor.AiSweepAttack(targets[0].actor, actor, false))
+                                    return;
+                        }
+
                         if (actor.PredatorComponent.UsePreferredVore(targets[0].actor))
                             targetsEaten++;
                     }); //If anydistance is off, this will already be limited to the units move radius
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         break;
+                    }
                     MoveToAndAction(actor, targets[0].actor.Position, 4, 999, () =>
                     {
                         if (actor.PredatorComponent.UsePreferredVore(targets[0].actor))
                             targetsEaten++;
                     }); //If anydistance is off, this will already be limited to the units move radius                                      
                 }
-                else
+                else if (targets[0].actor.InSight || !State.World.IsNight)
+                {
+                    
                     MoveToAndAction(actor, targets[0].actor.Position, 1, 999, () =>
                     {
+                        if (actor.Movement == 0)
+                            return;
+                        if (!targets[0].actor.Unit.IsDead && !targets[0].actor.Surrendered)
+                        {
+                            List<Actor_Unit> testTargets = TacticalUtilities.UnitsWithinPattern(actor.Position,
+                                new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } });
+                            List<AbilityTargets> targetTypes = new List<AbilityTargets> { AbilityTargets.Enemy };
+                            int validTargets = 0;
+                            foreach (var target in testTargets)
+                            {
+                                if (!TacticalUtilities.MeetsQualifier(targetTypes, actor, target))
+                                    continue;
+                                validTargets++;
+                            }
+
+                            if (validTargets >= 3 && TacticalActionList
+                                    .TargetedDictionary[SpecialAction.SweepingSwallow]
+                                    .AppearConditional(actor))
+                                if (actor.AiSweepAttack(targets[0].actor, actor, false))
+                                    return;
+                        }
+
                         if (actor.PredatorComponent.UsePreferredVore(targets[0].actor))
                             targetsEaten++;
                     }); //If anydistance is off, this will already be limited to the units move radius
+                }
+
                 if (foundPath && path.Path.Count() < actor.Movement)
                 {
                     break;
                 }
                 else
                 {
-                    if (anyDistance)
+                    if (foundPath && anyDistance)
+                    {
                         break;
+                    }
                     //If you can't get there in one turn, discard it
                     foundPath = false;
                     path = null;
                 }
             }
+
             targets.RemoveAt(0);
         }
     }
 
-    protected virtual List<PotentialTarget> GetListOfPotentialPrey(Actor_Unit actor, bool anyDistance, Vec2i position, int movement)
+    protected virtual List<PotentialTarget> GetListOfPotentialPrey(Actor_Unit actor, bool anyDistance, Vec2i position, int movement, bool validationCheck = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
         if (State.GameManager.TacticalMode.IsOnlyOneSideVisible() && actor.Unit.IsInfiltratingSide(AISide)) // should prevent aggressive action while within a foreign army when the battle is basically over
             return targets;
         //check if we have at least 1 unit of capacity free
-        float cap = actor.PredatorComponent.FreeCap();
+        float cap = validationCheck 
+            ? actor.PredatorComponent.ExpectedFreeCap()
+            : actor.PredatorComponent.FreeCap();
         if (cap >= 1)
         {
             foreach (Actor_Unit unit in actors)
             {
 
-                if (unit.Targetable && (unit.InSight || !State.World.IsNight) && (TacticalUtilities.TreatAsHostile(actor, unit) || (unit.Unit.GetStatusEffect(StatusEffectType.Hypnotized)?.Duration < 3 && unit != actor)) && unit.Bulk() <= cap)
+                if (unit.Targetable 
+                    && (!unit.Surrendered || trappedUnits)
+                    && (unit.InSight || !State.World.IsNight) 
+                    && (TacticalUtilities.TreatAsHostile(actor, unit) 
+                        || (unit.Surrendered && veryTrappedUnits)
+                        || (unit.Unit.GetStatusEffect(StatusEffectType.Hypnotized)?.Duration < 3 && unit != actor)) 
+                    && (validationCheck
+                        ? actor.PredatorComponent.HasExpectedSpareCap(unit.Bulk()) 
+                        : actor.PredatorComponent.HasSpareCap(unit.Bulk())))
                 {
                     int distance = unit.Position.GetNumberOfMovesDistance(position);
                     if (distance <= movement || anyDistance)
@@ -752,10 +926,33 @@ public abstract class TacticalAI : ITacticalAI
                         }
                     }
                 }
+                else if (!State.GameManager.TacticalMode.turboMode
+                         && ((unit.Unit.IsDead
+                              && Config.EdibleCorpses
+                              && onlySurrenderedEnemies) 
+                             || (unit.Surrendered 
+                                 && !unit.Unit.IsDead
+                                 && (Config.EatSurrenderedAllies
+                                     || TacticalUtilities.TreatAsHostile(actor, unit))))
+                         && unit.Visible
+                         && (validationCheck
+                             ? actor.PredatorComponent.HasExpectedSpareCap(unit.Bulk()) 
+                             : actor.PredatorComponent.HasSpareCap(unit.Bulk()))
+                         && anyDistance
+                         && unit != actor)
+                {
+                    int distance = unit.Position.GetNumberOfMovesDistance(position);
+                    if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false) 
+                        continue;
+                    targets.Add(new PotentialTarget(unit,  -distance + (unit.Unit.IsDead ? -10f : -1f), distance, 4, -1f));
+                }
             }
-            PotentialTarget primeTarget = targets.Where(t => t.distance < 2).OrderByDescending(s => s.chance).FirstOrDefault();
+            PotentialTarget primeTarget = targets.Where(t => t.distance < 2 && t.utility > 0).OrderByDescending(s => s.chance).FirstOrDefault();
             if (primeTarget != null)
+            {
                 return new List<PotentialTarget>() { primeTarget };
+            }
+
             return targets.OrderByDescending(t => t.chance).ToList();
         }
         return targets;
@@ -876,17 +1073,24 @@ public abstract class TacticalAI : ITacticalAI
         }
     }
 
-    protected virtual List<PotentialTarget> GetListOfPotentialVorePouncePrey(Actor_Unit actor, Vec2i position, int moves)
+    protected virtual List<PotentialTarget> GetListOfPotentialVorePouncePrey(Actor_Unit actor, Vec2i position, int moves, bool validationCheck = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
         //check if we have at least 1 unit of capacity free
-        float cap = actor.PredatorComponent.FreeCap();
+        float cap = validationCheck 
+            ? actor.PredatorComponent.ExpectedFreeCap()
+            : actor.PredatorComponent.FreeCap();
         if (cap >= 1 && !(State.GameManager.TacticalMode.IsOnlyOneSideVisible() && actor.Unit.IsInfiltratingSide(AISide)))
         {
             foreach (Actor_Unit unit in actors)
             {
 
-                if (unit.Targetable && (unit.InSight || !State.World.IsNight) && TacticalUtilities.TreatAsHostile(actor, unit) && unit.Bulk() <= cap && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor))
+                if (unit.Targetable && (unit.InSight || !State.World.IsNight) &&
+                    TacticalUtilities.TreatAsHostile(actor, unit)
+                    && (validationCheck 
+                        ? actor.PredatorComponent.HasExpectedSpareCap(unit.Bulk()) 
+                        : actor.PredatorComponent.HasSpareCap(unit.Bulk()))
+                    && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor))
                 {
                     int distance = unit.Position.GetNumberOfMovesDistance(position);
                     if (distance <= 2 + moves)
@@ -968,7 +1172,12 @@ public abstract class TacticalAI : ITacticalAI
             return targets;
         foreach (Actor_Unit unit in actors)
         {
-            if (unit.Targetable == true && (unit.InSight || !State.World.IsNight) && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) && TacticalUtilities.TreatAsHostile(actor, unit) && (unit.Surrendered == false || (onlySurrenderedEnemies && lackPredators) || currentTurn > 150))
+            if (unit.Targetable == true 
+                && (unit.InSight || !State.World.IsNight) 
+                && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) 
+                && TacticalUtilities.TreatAsHostile(actor, unit) 
+                && (unit.Surrendered == false 
+                    || (onlySurrenderedEnemies && lackPredators)))
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
                 if (distance <= 2 + moves)
@@ -1064,7 +1273,12 @@ public abstract class TacticalAI : ITacticalAI
         {
             if (target?.Unit == null) //If this doesn't prevent exceptions I might have to just try/catch this function.  
                 continue;
-            if (target.Targetable == true && TacticalUtilities.TreatAsHostile(actor, target) && (target.Surrendered == false || (onlySurrenderedEnemies && lackPredators) || currentTurn > 150))
+            if (target.Targetable 
+                && (TacticalUtilities.TreatAsHostile(actor, target) 
+                    || (target.Surrendered && veryTrappedUnits)) 
+                && (!target.Surrendered
+                    || trappedUnits
+                    || (onlySurrenderedEnemies && lackPredators)))
             {
                 int distance = target.Position.GetNumberOfMovesDistance(position);
                 float chance = target.GetAttackChance(actor, true, true);
@@ -1089,7 +1303,7 @@ public abstract class TacticalAI : ITacticalAI
             }
             else
             {
-                if (targets[0].actor.Position.GetNumberOfMovesDistance(position) < ap) //discard the clearly impossible
+                if (targets[0].actor.Position.GetNumberOfMovesDistance(position) <= ap) //discard the clearly impossible
                 {
                     int distance = CheckMoveTo(actor, position, targets[0].actor.Position, 1, ap);
                     if (distance < ap && distance >= 0)
@@ -1132,7 +1346,7 @@ public abstract class TacticalAI : ITacticalAI
             }
             else
             {
-                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) < actor.Movement && (targets[0].actor.InSight || !State.World.IsNight)) //discard the clearly impossible
+                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) <= actor.Movement && (targets[0].actor.InSight || !State.World.IsNight)) //discard the clearly impossible
                 {
                     if (actor.Unit.Race == Race.Asura && TacticalActionList.TargetedDictionary[SpecialAction.ShunGokuSatsu].AppearConditional(actor))
                         MoveToAndAction(actor, targets[0].actor.Position, 1, actor.Movement, () => actor.ShunGokuSatsu(targets[0].actor));
@@ -1149,7 +1363,9 @@ public abstract class TacticalAI : ITacticalAI
                     else
                         MoveToAndAction(actor, targets[0].actor.Position, 1, actor.Movement, () => actor.Attack(targets[0].actor, false));
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         return;
+                    }
                 }
             }
             targets.RemoveAt(0);
@@ -1194,11 +1410,16 @@ public abstract class TacticalAI : ITacticalAI
             return targets;
         foreach (Actor_Unit unit in actors)
         {
-            if (unit.Targetable == true && TacticalUtilities.TreatAsHostile(actor, unit) && (unit.Surrendered == false || (onlySurrenderedEnemies && lackPredators) || currentTurn > 150))
+            if (unit.Targetable == true 
+                && (TacticalUtilities.TreatAsHostile(actor, unit) 
+                    || (unit.Surrendered && veryTrappedUnits)) 
+                && (unit.Surrendered == false 
+                    || (onlySurrenderedEnemies && lackPredators)
+                    || trappedUnits))
             {
 
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
-                if (distance < moves)
+                if (distance <= moves)
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;
@@ -1206,8 +1427,6 @@ public abstract class TacticalAI : ITacticalAI
                 int chance = (int)unit.GetAttackChance(actor, false, true);
                 int damage = actor.WeaponDamageAgainstTarget(unit, false);
                 targets.Add(new PotentialTarget(unit, chance, distance, damage, ((unit.InSight && State.World.IsNight) ? 100 : 0)));
-
-
             }
         }
 
@@ -1422,7 +1641,10 @@ public abstract class TacticalAI : ITacticalAI
             if (targets[0].distance <= spell.Range.Max)
             {
                 if (spell.TryCast(actor, targets[0].actor))
+                {
                     didAction = true;
+                }
+
                 return;
             }
             else
@@ -1431,7 +1653,9 @@ public abstract class TacticalAI : ITacticalAI
                 {
                     MoveToAndAction(actor, targets[0].actor.Position, spell.Range.Max, actor.Movement, () => spell.TryCast(actor, targets[0].actor));
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         return;
+                    }
                     else
                     {
                         foundPath = false;
@@ -1521,8 +1745,12 @@ public abstract class TacticalAI : ITacticalAI
         if (actor.Unit.UseableSpells == null || actor.Unit.UseableSpells.Any() == false)
             return -1;
 
-        var availableSpells = actor.Unit.UseableSpells.Where(sp => sp != SpellList.Resurrection && sp != SpellList.Reanimate && sp != SpellList.Bind && sp.ManaCost <= actor.Unit.Mana).ToList();
-
+        var availableSpells = actor.Unit.UseableSpells.Where(sp =>
+            sp != SpellList.Resurrection && sp != SpellList.Reanimate && sp != SpellList.Bind && sp != SpellList.RevertForm && sp != SpellList.AssumeForm
+            && !(actor.Unit.HasTrait(Traits.VoreObsession) 
+                 && sp is DamageSpell) 
+            && sp.ManaCost <= actor.Unit.Mana).ToList();
+        
         if (availableSpells == null || availableSpells.Any() == false)
             return -1;
 
@@ -1551,7 +1779,7 @@ public abstract class TacticalAI : ITacticalAI
             }
             else
             {
-                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) < actor.Movement) //discard the clearly impossible
+                if (targets[0].actor.Position.GetNumberOfMovesDistance(actor.Position) <= actor.Movement) //discard the clearly impossible
                 {
                     var distance = CheckMoveTo(actor, position, targets[0].actor.Position, 1, actor.Movement);
                     if (distance < ap && distance >= 0)
@@ -1567,8 +1795,13 @@ public abstract class TacticalAI : ITacticalAI
     {
         if (actor.Unit.UseableSpells == null || actor.Unit.UseableSpells.Any() == false)
             return;
-        var availableSpells = actor.Unit.UseableSpells.Where(sp => sp != SpellList.Resurrection && sp != SpellList.Reanimate && sp != SpellList.Bind && sp.ManaCost <= actor.Unit.Mana).ToList();
-
+        
+        var availableSpells = actor.Unit.UseableSpells.Where(sp =>
+            sp != SpellList.Resurrection && sp != SpellList.Reanimate && sp != SpellList.Bind && sp != SpellList.RevertForm && sp != SpellList.AssumeForm
+            && !(actor.Unit.HasTrait(Traits.VoreObsession) 
+                 && sp is DamageSpell) 
+            && sp.ManaCost <= actor.Unit.Mana).ToList();
+        
         if (availableSpells == null || availableSpells.Any() == false)
             return;
 
@@ -1605,7 +1838,10 @@ public abstract class TacticalAI : ITacticalAI
             if (targets[0].distance <= spell.Range.Max && (targets[0].actor.InSight || !State.World.IsNight))
             {
                 if (spell.TryCast(actor, targets[0].actor))
+                {
                     didAction = true;
+                }
+
                 return;
             }
             else
@@ -1614,7 +1850,9 @@ public abstract class TacticalAI : ITacticalAI
                 {
                     MoveToAndAction(actor, targets[0].actor.Position, spell.Range.Max, actor.Movement, () => spell.TryCast(actor, targets[0].actor));
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         return;
+                    }
                     else
                     {
                         foundPath = false;
@@ -1730,7 +1968,9 @@ public abstract class TacticalAI : ITacticalAI
             if (targets[0].distance <= 3 && (targets[0].actor.InSight || !State.World.IsNight))
             {
                 if (potion.ActivatePotion(actor, targets[0].actor))
+                {
                     didAction = true;
+                }
                 return;
             }
             else
@@ -1739,7 +1979,9 @@ public abstract class TacticalAI : ITacticalAI
                 {
                     MoveToAndAction(actor, targets[0].actor.Position, 3, actor.Movement, () => potion.ActivatePotion(actor, targets[0].actor));
                     if (foundPath && path.Path.Count() < actor.Movement)
+                    {
                         return;
+                    }
                     else
                     {
                         foundPath = false;
@@ -1849,7 +2091,9 @@ public abstract class TacticalAI : ITacticalAI
                 if (feedType == "cock")
                     MoveToAndAction(actor, targets[0].actor.Position, 1, actor.Movement - 1, () => actor.PredatorComponent.FeedCum(targets[0].actor));
                 if (foundPath && path.Path.Count() < actor.Movement)
+                {
                     break;
+                }
                 else
                 {
                     foundPath = false;
@@ -1868,7 +2112,7 @@ public abstract class TacticalAI : ITacticalAI
             if (unit.Targetable && unit.Unit.Side == AISide && unit.Surrendered == false)
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(actor.Position);
-                if (distance < actor.Movement)
+                if (distance <= actor.Movement)
                 {
                     if ((distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false) || (unit.Unit.HealthPct == 1.0f && !Config.OverhealEXP) || unit == actor)
                         continue;
@@ -1905,7 +2149,9 @@ public abstract class TacticalAI : ITacticalAI
             {
                 MoveToAndAction(actor, targets[0].actor.Position, 1, 999, () => actor.PredatorComponent.Suckle(targets[0].actor));
                 if (foundPath && path.Path.Count() < actor.Movement)
+                {
                     break;
+                }
                 else
                 {
                     foundPath = false;
@@ -1923,18 +2169,19 @@ public abstract class TacticalAI : ITacticalAI
         {
             if (unit.Unit.Predator)
             {
-                if (unit.Targetable && unit.Unit.Side == AISide && (unit.PredatorComponent.CanFeed() || unit.PredatorComponent.CanFeedCum()))
+                if (unit.Targetable && (unit.PredatorComponent.CanFeed() || unit.PredatorComponent.CanFeedCum()))
                 {
                     int distance = unit.Position.GetNumberOfMovesDistance(actor.Position);
-                    if (distance < actor.Movement)
+                    if (distance <= actor.Movement)
                     {
-                        if ((distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false) || (unit.Unit.HealthPct == 1.0f && !Config.OverhealEXP) || unit == actor)
+                        if ((distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false) || (actor.Unit.HealthPct >= 1.0f && !Config.OverhealEXP) || unit == actor)
                             continue;
                         int[] suckling = actor.PredatorComponent.GetSuckle(unit);
-                        if (actor.Unit.HealthPct < 1.0f && suckling[0] == 0)
-                            targets.Add(new PotentialTarget(unit, suckling[0], distance, 4));
-                        if (Config.OverhealEXP && suckling[1] != 0)
-                            targets.Add(new PotentialTarget(unit, suckling[1], distance, 4));
+                        float chance = actor.PredatorComponent.GetSuckleChance(unit);
+                        if (actor.Unit.HealthPct < 1.0f && suckling[0] > 0)
+                            targets.Add(new PotentialTarget(unit, suckling[0] * chance, distance, 4));
+                        if (Config.OverhealEXP && suckling[1] > 0)
+                            targets.Add(new PotentialTarget(unit, suckling[1] * chance, distance, 4));
                     }
                 }
             }

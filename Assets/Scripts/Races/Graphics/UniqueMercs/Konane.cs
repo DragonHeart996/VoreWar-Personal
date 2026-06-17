@@ -28,6 +28,7 @@ class Konane : BlankSlate
         BodyAccent3 = new SpriteExtraInfo(7, BodyAccentSprite3, WhiteColored); // Right Arm
         BodyAccent4 = new SpriteExtraInfo(3, BodyAccentSprite4, WhiteColored); // Left Arm
         BodyAccent5 = new SpriteExtraInfo(5, BodyAccentSprite5, WhiteColored); // Chest
+        BodyAccent6 = new SpriteExtraInfo(3, BodyAccentSprite6, WhiteColored); // Hand
         clothingColors = 0;
     }
 
@@ -44,7 +45,9 @@ class Konane : BlankSlate
     internal override void RunFirst(Actor_Unit actor)
     {
         if (actor.AnimationController.frameLists == null || actor.AnimationController.frameLists.Count() == 0) SetUpAnimations(actor);
+        base.RunFirst(actor);
     }
+    
     internal override void SetBaseOffsets(Actor_Unit actor)
     {
         AddOffset(BodyAccent2, 25 * .625f, 0);
@@ -105,14 +108,18 @@ class Konane : BlankSlate
 
         if (!actor.HasBelly)
             return null;
-        if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, true, PreyLocation.stomach, PreyLocation.womb) && actor.GetStomachSize(27, 1) == 27)
-            return Sprites[45];
-        if (size > 19 && (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)) size = 19;
-
+        if (actor.PredatorComponent.IsUnitOfSpecificationInPrey(Race.Selicia, PreyLocation.stomach,
+                PreyLocation.womb))
+        {
+            size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, size, 19, 27, 
+                PreyLocation.stomach, PreyLocation.womb);
+        }
+        else size = Math.Min(19, size);
+        
         return Sprites[18 + size];
     }
 
-    protected override Sprite BodyAccentSprite(Actor_Unit actor) // Right WIng
+    protected override Sprite BodyAccentSprite(Actor_Unit actor) // Right Wing
     {
         if (SpecialAttack)
         {
@@ -158,6 +165,11 @@ class Konane : BlankSlate
 
     protected override Sprite BodyAccentSprite5(Actor_Unit actor) // chest
     {
+        if (actor.HasJustVored)
+            return Sprites[17];
+        else return Sprites[16];
+        
+        
         if (actor.HasJustVored) //Swallow Animation
         {
             actor.AnimationController.frameLists[1].currentlyActive = true;
@@ -181,5 +193,14 @@ class Konane : BlankSlate
             return Sprites[KonaneSwallowChest.frames[actor.AnimationController.frameLists[1].currentFrame]];
         }
         return Sprites[16];
+    }
+    
+    protected override Sprite BodyAccentSprite6(Actor_Unit actor) //hand
+    {
+        if (actor.IsAttacking)
+        {
+            return null;
+        } 
+        return Sprites[9];
     }
 }

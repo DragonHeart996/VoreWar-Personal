@@ -121,7 +121,7 @@ namespace LegacyAI
                     if (actors[i].InSight == true && actors[i].InSight == true && actors[i].Targetable == true && d < 8)
                     {
                         Actor_Unit unit = actors[i];
-                        if (unit.Unit.Side != AISide && unit.Bulk() <= cap)
+                        if (unit.Unit.Side != AISide && actor.PredatorComponent.HasSpareCap(unit.Bulk()))
                         {
                             int c = (int)(100 * unit.GetDevourChance(actor, true));
                             if (c > 50 && c > chance && TacticalUtilities.FreeSpaceAroundTarget(actors[i].Position, actor) && unit.AIAvoidEat <= 0)

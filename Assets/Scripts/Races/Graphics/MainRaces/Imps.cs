@@ -23,8 +23,6 @@ class Imps : DefaultRaceData
 
     internal List<MainClothing> AllClothing;
 
-    bool oversize = false;
-
     internal Imps()
     {
         SpecialAccessoryCount = 0;
@@ -451,7 +449,6 @@ class Imps : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(22 * 22, 1f));

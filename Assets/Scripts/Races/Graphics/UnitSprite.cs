@@ -39,7 +39,11 @@ public class UnitSprite : MonoBehaviour
 
     int lastHealth = 0;
 
-    internal CompleteSprite CompleteSprite { get => _CompleteSprite; set => _CompleteSprite = value; }
+    internal CompleteSprite CompleteSprite
+    {
+        get => _CompleteSprite;
+        set => _CompleteSprite = value;
+    }
 
     public void Awake()
     {
@@ -50,6 +54,7 @@ public class UnitSprite : MonoBehaviour
             SfxSources[i] = gameObject.AddComponent<AudioSource>();
             SfxSources[i].pitch = pitchMin + ((pitchMax - pitchMin) / SfxSourcesCount) * i;
         }
+
         LoopSource = gameObject.AddComponent<AudioSource>();
     }
 
@@ -68,6 +73,7 @@ public class UnitSprite : MonoBehaviour
             HealthBar.gameObject.SetActive(true);
             HealthBar.value = healthFraction;
         }
+
         lastHealth = unit.Unit.Health;
     }
 
@@ -124,6 +130,7 @@ public class UnitSprite : MonoBehaviour
         DamageIndicator.text = "Dazzled!";
         FinishDisplayedTextSetup();
     }
+
     public void DisplayBlock()
     {
         DamageIndicator.faceColor = Color.white;
@@ -158,12 +165,14 @@ public class UnitSprite : MonoBehaviour
         DamageIndicator.text = "Escaped";
         FinishDisplayedTextSetup();
     }
+
     public void DisplayCrit()
     {
         DamageIndicator.faceColor = Color.red;
         DamageIndicator.text = "CRITICAL!";
         FinishDisplayedTextSetup();
     }
+
     public void DisplayGraze()
     {
         DamageIndicator.faceColor = Color.green;
@@ -186,8 +195,8 @@ public class UnitSprite : MonoBehaviour
             }
             else
             {
-            DamageIndicator.faceColor = Color.red;
-            DamageIndicator.text = $"-{damage}";
+                DamageIndicator.faceColor = Color.red;
+                DamageIndicator.text = $"-{damage}";
             }
         }
         else if (damage < 0)
@@ -203,8 +212,10 @@ public class UnitSprite : MonoBehaviour
             else
                 DamageIndicator.text = "Miss";
         }
+
         FinishDisplayedTextSetup();
     }
+
     void FinishDisplayedTextSetup()
     {
         remainingTimeForDamage = startingTimeForDamage;
@@ -219,7 +230,8 @@ public class UnitSprite : MonoBehaviour
             DamageIndicator.gameObject.SetActive(false);
         else
         {
-            DamageIndicator.faceColor = new Color(startingColor.r, startingColor.g, startingColor.b, 1.5f * remainingTimeForDamage / startingTimeForDamage);
+            DamageIndicator.faceColor = new Color(startingColor.r, startingColor.g, startingColor.b,
+                1.5f * remainingTimeForDamage / startingTimeForDamage);
             DamageIndicator.outlineColor = new Color(0, 0, 0, 1.5f * remainingTimeForDamage / startingTimeForDamage);
         }
     }
@@ -234,7 +246,7 @@ public class UnitSprite : MonoBehaviour
 
         if (lastHealth != actor.Unit.Health)
             UpdateHealthBar(actor);
-     
+
 
         if (goalScale.x > GraphicsFolder.localScale.x)
         {
@@ -268,7 +280,6 @@ public class UnitSprite : MonoBehaviour
         CompleteSprite.UpdateSprite();
         UpdateLevelText(actor);
         ApplyTinting(actor);
-
     }
 
     private void ApplyTinting(Actor_Unit actor)
@@ -285,13 +296,15 @@ public class UnitSprite : MonoBehaviour
             CompleteSprite.RedifySprite(tint);
             if (actor.Surrendered && Config.SurrenderFlag)
             {
-            var obj = Object.Instantiate(State.GameManager.TacticalEffectPrefabList.FadeInFadeOut).GetComponent<FadeInFadeOut>();
-            obj.transform.SetPositionAndRotation(new Vector3(actor.Position.x + .15f, actor.Position.y + .15f, 0), new Quaternion());
-            obj.transform.localScale = new Vector3(2, 2, 1);
-            obj.SpriteRenderer.sprite = State.GameManager.SpriteDictionary.SpellIcons[7];
-            obj.HoldTime = 0;
-            obj.FadeInTime = 0;
-            obj.FadeOutTime = 0;
+                var obj = Object.Instantiate(State.GameManager.TacticalEffectPrefabList.FadeInFadeOut)
+                    .GetComponent<FadeInFadeOut>();
+                obj.transform.SetPositionAndRotation(new Vector3(actor.Position.x + .15f, actor.Position.y + .15f, 0),
+                    new Quaternion());
+                obj.transform.localScale = new Vector3(2, 2, 1);
+                obj.SpriteRenderer.sprite = State.GameManager.SpriteDictionary.SpellIcons[7];
+                obj.HoldTime = 0;
+                obj.FadeInTime = 0;
+                obj.FadeOutTime = 0;
             }
         }
         else if (actor.Unit.GetStatusEffect(StatusEffectType.Petrify) != null)
@@ -315,62 +328,75 @@ public class UnitSprite : MonoBehaviour
     {
         if (Config.AnimatedBellies)
         {
-            CompleteSprite = new CompleteSprite(State.GameManager.SpriteRendererPrefab, State.GameManager.SpriteRenderAnimatedPrefab, GraphicsFolder);
+            CompleteSprite = new CompleteSprite(State.GameManager.SpriteRendererPrefab,
+                State.GameManager.SpriteRenderAnimatedPrefab, GraphicsFolder);
             animator = CompleteSprite.GetSpriteOfType(SpriteType.Belly)?.GameObject.GetComponentInParent<Animator>();
             if (animator != null)
             {
                 var raceData = Races.GetRace(actor.Unit);
                 if (raceData.GentleAnimation)
-                    animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
+                    animator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
                 else
                     animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Actors");
                 animator.enabled = true;
             }
-            
-            belly2Animator = CompleteSprite.GetSpriteOfType(SpriteType.SecondaryBelly)?.GameObject.GetComponentInParent<Animator>();
+
+            belly2Animator = CompleteSprite.GetSpriteOfType(SpriteType.SecondaryBelly)?.GameObject
+                .GetComponentInParent<Animator>();
             if (belly2Animator != null)
             {
                 var raceData = Races.GetRace(actor.Unit);
                 if (raceData.GentleAnimation)
-                    belly2Animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
+                    belly2Animator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
                 else
-                    belly2Animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Actors");
+                    belly2Animator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/Actors");
                 belly2Animator.enabled = true;
             }
 
-            ballsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.Balls)?.GameObject.GetComponentInParent<Animator>();
+            ballsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.Balls)?.GameObject
+                .GetComponentInParent<Animator>();
             if (ballsAnimator != null)
             {
                 var raceData = Races.GetRace(actor.Unit);
                 if (raceData.GentleAnimation)
-                    ballsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
+                    ballsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
                 else
-                    ballsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Actors");
+                    ballsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/Actors");
                 ballsAnimator.enabled = true;
             }
 
-            boobsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.Breasts)?.GameObject.GetComponentInParent<Animator>();
+            boobsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.Breasts)?.GameObject
+                .GetComponentInParent<Animator>();
             if (boobsAnimator != null)
             {
                 var raceData = Races.GetRace(actor.Unit);
                 if (raceData.GentleAnimation)
-                    boobsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
+                    boobsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
                 else
-                    boobsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Actors");
+                    boobsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/Actors");
                 boobsAnimator.enabled = true;
             }
 
-            SecondBoobsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.SecondaryBreasts)?.GameObject.GetComponentInParent<Animator>();
+            SecondBoobsAnimator = CompleteSprite.GetSpriteOfType(SpriteType.SecondaryBreasts)?.GameObject
+                .GetComponentInParent<Animator>();
             if (SecondBoobsAnimator != null)
             {
                 var raceData = Races.GetRace(actor.Unit);
                 if (raceData.GentleAnimation)
-                    SecondBoobsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
+                    SecondBoobsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/ActorsGentle");
                 else
-                    SecondBoobsAnimator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/Actors");
+                    SecondBoobsAnimator.runtimeAnimatorController =
+                        Resources.Load<RuntimeAnimatorController>("Animations/Actors");
                 SecondBoobsAnimator.enabled = true;
             }
-
         }
         else
             CompleteSprite = new CompleteSprite(State.GameManager.SpriteRendererPrefab, null, GraphicsFolder);
@@ -388,8 +414,8 @@ public class UnitSprite : MonoBehaviour
 
         if (actor.Unit.FixedSide != actor.Unit.Side && TacticalUtilities.PlayerCanSeeTrueSide(actor.Unit))
         {
-        if (BlueColored)
-        {
+            if (BlueColored)
+            {
                 {
                     if (Config.AllianceSquaresDarkness == 3)
                     {
@@ -477,6 +503,7 @@ public class UnitSprite : MonoBehaviour
         if (ran == 2) animator.SetTrigger("wriggle2");
         if (ran == 3) animator.SetTrigger("wriggle3");
     }
+
     public void AnimateSecondBelly(float odds)
     {
         if (belly2Animator == null) return;
@@ -518,7 +545,6 @@ public class UnitSprite : MonoBehaviour
 
     void ApplyDeadEffect()
     {
-
         LevelText.gameObject.SetActive(false);
         FlexibleSquare.gameObject.SetActive(false);
         HealthBar.gameObject.SetActive(false);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 class Seville : BlankSlate
@@ -47,19 +48,19 @@ class Seville : BlankSlate
             return State.GameManager.SpriteDictionary.Seville[13];
         if (actor.IsUnbirthing || actor.IsAttacking)
         {
-            actor.AnimationController.frameLists[0].currentlyActive = true;
-            if (actor.AnimationController.frameLists[0].currentTime >= SevilleUBandAttack.times[actor.AnimationController.frameLists[0].currentFrame] && actor.Unit.IsDead == false)
+            actor.AnimationController.frameLists[2].currentlyActive = true;
+            if (actor.AnimationController.frameLists[2].currentTime >= SevilleUBandAttack.times[actor.AnimationController.frameLists[2].currentFrame] && actor.Unit.IsDead == false)
             {
-                actor.AnimationController.frameLists[0].currentFrame++;
-                actor.AnimationController.frameLists[0].currentTime = 0f;
-                if (actor.AnimationController.frameLists[0].currentFrame >= SevilleUBandAttack.frames.Length)
+                actor.AnimationController.frameLists[2].currentFrame++;
+                actor.AnimationController.frameLists[2].currentTime = 0f;
+                if (actor.AnimationController.frameLists[2].currentFrame >= SevilleUBandAttack.frames.Length)
                 {
-                    actor.AnimationController.frameLists[0].currentlyActive = false;
-                    actor.AnimationController.frameLists[0].currentFrame = 0;
-                    actor.AnimationController.frameLists[0].currentTime = 0f;
+                    actor.AnimationController.frameLists[2].currentlyActive = false;
+                    actor.AnimationController.frameLists[2].currentFrame = 0;
+                    actor.AnimationController.frameLists[2].currentTime = 0f;
                 }
             }
-            return State.GameManager.SpriteDictionary.Seville[23 + SevilleUBandAttack.frames[actor.AnimationController.frameLists[0].currentFrame]];
+            return State.GameManager.SpriteDictionary.Seville[23 + SevilleUBandAttack.frames[actor.AnimationController.frameLists[2].currentFrame]];
         } 
         if (actor.HasJustVored) // Handled uniquely for this unit to only work with oral vore successes. Check "actor.SetVoreSuccessMode();" in PredatorComponent.cs
         {
@@ -84,8 +85,9 @@ class Seville : BlankSlate
 
     protected override Sprite BodySprite(Actor_Unit actor)
     {
-        if (actor.HasBelly == false)
-            return State.GameManager.SpriteDictionary.Seville[3];
+        return State.GameManager.SpriteDictionary.Seville[
+            3 + Math.Min(actor.GetStomachSize(5, 1.25f),4)];
+        
         if (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? true)
         {
             if (actor.PredatorComponent.VisibleFullness > 2)
@@ -110,7 +112,7 @@ class Seville : BlankSlate
                     actor.AnimationController.frameLists[1].currentTime = 0f;
                 }
             }
-            return State.GameManager.SpriteDictionary.Seville[18 + SevilleTailUB.frames[actor.AnimationController.frameLists[0].currentFrame]];
+            return State.GameManager.SpriteDictionary.Seville[18 + SevilleTailUB.frames[actor.AnimationController.frameLists[1].currentFrame]];
         } 
         return State.GameManager.SpriteDictionary.Seville[2];
     }
@@ -147,6 +149,8 @@ class Seville : BlankSlate
     {
         if (actor.Unit.SpecialAccessoryType == 1)
         {
+            return State.GameManager.SpriteDictionary.Seville[
+                28 + Math.Min(actor.GetStomachSize(5, 1.25f),4)];
             if (actor.HasBelly == false)
                 return State.GameManager.SpriteDictionary.Seville[28];
             if (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? true)
@@ -162,8 +166,10 @@ class Seville : BlankSlate
 
     internal override Sprite BellySprite(Actor_Unit actor, GameObject belly)
     {
-        if (actor.HasBelly == false)
+        int size = actor.PredatorComponent.GetSpecialPreySize(Race.Selicia, actor.GetStomachSize(5, 1.25f), 4, 5);
+        if (size == 0)
             return null;
+        return State.GameManager.SpriteDictionary.Seville[7 + size];
         if (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? true)
         {
             if (actor.PredatorComponent.VisibleFullness > 2)

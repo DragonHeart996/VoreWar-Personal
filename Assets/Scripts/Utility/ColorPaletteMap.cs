@@ -143,6 +143,7 @@ public static class ColorPaletteMap
         SoulSpriteSkin,
         BadgersSkin,
         RenamonSkin,
+        LamiaTmp,
     }
 
     static Dictionary<SwapType, List<ColorSwapPalette>> Swaps;
@@ -332,7 +333,8 @@ public static class ColorPaletteMap
         List<ColorSwapPalette> SoulSpriteSkinSwaps = WireUp(SwapType.SoulSpriteSkin);
         List<ColorSwapPalette> BadgersSkinSwaps = WireUp(SwapType.BadgersSkin);
         List<ColorSwapPalette> RenamonSkinSwaps = WireUp(SwapType.RenamonSkin);
-
+        List<ColorSwapPalette> LamiaTmpSwaps = WireUp(SwapType.LamiaTmp);
+        
         int[] NormalIndexes = { 81, 153, 198, 229, 255 };
         Texture2D map = State.GameManager.PaletteDictionary.SimpleHair;
         for (int pixelY = 0; pixelY < map.height; pixelY++)
@@ -2788,6 +2790,27 @@ public static class ColorPaletteMap
             ColorSwapPalette swap = new ColorSwapPalette(swapDict);
             IliijiithAttackColorSwaps.Add(swap);
         }
+        
+        map = State.GameManager.PaletteDictionary.Lizards;
+        for (int pixelY = 0; pixelY < map.height; pixelY++)
+        {
+            Dictionary<int, Color> swapDict = new Dictionary<int, Color>
+            {
+                [NormalIndexes[0]] = map.GetPixel(4, pixelY),
+                [NormalIndexes[1]] = map.GetPixel(3, pixelY)/2 + map.GetPixel(4, pixelY)/2,
+                [NormalIndexes[2]] = map.GetPixel(3, pixelY),
+                [NormalIndexes[3]] = map.GetPixel(2, pixelY),
+                [NormalIndexes[4]] = map.GetPixel(1, pixelY)
+            };
+            clear = new bool[256];
+            clear[84] = true;
+            clear[142] = true;
+            clear[196] = true;
+            ColorSwapPalette swap = new ColorSwapPalette(swapDict, clear);
+            LamiaTmpSwaps.Add(swap);
+        }
+
+        
         map = State.GameManager.PaletteDictionary.SoulSpriteSkin;
         for (int pixelY = 0; pixelY < map.height; pixelY++)
         {

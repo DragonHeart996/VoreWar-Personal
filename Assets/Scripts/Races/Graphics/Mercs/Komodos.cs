@@ -7,10 +7,7 @@ class Komodos : DefaultRaceData
     readonly Sprite[] Sprites = State.GameManager.SpriteDictionary.Komodos1;
     readonly Sprite[] Sprites2 = State.GameManager.SpriteDictionary.Komodos2;
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.Komodos3;
-
-    bool oversize = false;
-
-
+    
     public Komodos()
     {
         BodySizes = 4;
@@ -360,7 +357,6 @@ class Komodos : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(30 * 30, 1f));
@@ -685,7 +681,7 @@ class Komodos : DefaultRaceData
 
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.AviansSkin, actor.Unit.ClothingColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

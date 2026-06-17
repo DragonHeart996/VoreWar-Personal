@@ -13,8 +13,6 @@ class Bees : DefaultRaceData
     readonly BeeLeader LeaderClothes;
     readonly BeeRags Rags;
 
-    bool oversize = false;
-
     public Bees()
     {
         BodySizes = 4;
@@ -394,7 +392,6 @@ class Bees : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -838,7 +835,7 @@ class Bees : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.BeeNewSkin, actor.Unit.SkinColor);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.BeeNewSkin, actor.Unit.SkinColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

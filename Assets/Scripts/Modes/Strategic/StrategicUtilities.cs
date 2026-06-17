@@ -189,8 +189,8 @@ static class StrategicUtilities
 
     public static bool IsSpaceOpenForBuild(Vec2i location)
     {
-        if (GetVillageAt(location) == null && 
-            GetMercenaryHouseAt(location) == null && 
+        if (GetVillageAt(location) == null &&
+            GetMercenaryHouseAt(location) == null &&
             GetTeleAt(location)==null &&
             GetClaimableAt(location) == null &&
             GetConstructibleAt(location) == null)
@@ -225,7 +225,6 @@ static class StrategicUtilities
                     RelationsManager.GoldMineTaken(empire, claimable.Owner);
                     claimable.Owner = empire;
                 }
-
             }
             State.GameManager.StrategyMode.RedrawVillages();
         }
@@ -304,7 +303,6 @@ static class StrategicUtilities
                         default:
                             break;
                     }
-
                 }
             }
             State.GameManager.StrategyMode.RedrawVillages();
@@ -385,7 +383,6 @@ static class StrategicUtilities
                 list.Add(State.GameManager.TacticalMode.GetDefenderSide());
             return list;
         }
-
     }
 
     public static int Get80thExperiencePercentile()
@@ -407,7 +404,6 @@ static class StrategicUtilities
         {
             if (village.Empire.IsEnemy(empire))
                 hostileVillages.Add(village);
-
         }
         return hostileVillages.ToArray();
     }
@@ -490,7 +486,6 @@ static class StrategicUtilities
                     {
                         if (village.GetTotalPop() > 0)
                         {
-
                             if (Config.MonsterConquestTurns == 0)
                             {
                                 army.RemainingMP = 1;
@@ -528,10 +523,7 @@ static class StrategicUtilities
         {
             village.ChangeOwner(army.Side);
         }
-
     }
-
-
 
     public static int NumberOfDesiredUpgrades(Army army)
     {
@@ -600,19 +592,15 @@ static class StrategicUtilities
                 case 0:
                     itemToPurchase = State.World.ItemRepository.GetItem(ItemType.Shoes);
                     break;
-
                 case 1:
                     itemToPurchase = State.World.ItemRepository.GetItem(ItemType.Helmet);
                     break;
-
                 case 2:
                     itemToPurchase = State.World.ItemRepository.GetItem(ItemType.BodyArmor);
                     break;
-
                 case 3:
                     itemToPurchase = State.World.ItemRepository.GetItem(ItemType.Gauntlet);
                     break;
-
             }
         }
         if (State.Rand.Next(5) == 0)
@@ -666,7 +654,6 @@ static class StrategicUtilities
         //This system doesn't fully take into account the full exponential power of high powered units
 
         return VillagePower(location) + ArmyPower(location);
-
     }
 
     private static double VillagePower(Vec2i location)
@@ -705,10 +692,8 @@ static class StrategicUtilities
                 if (unit.GetBestRanged() != null) weaponFactor = 1.5 / 4 * unit.GetBestRanged().Damage;
                 else weaponFactor = unit.GetBestMelee().Damage / 4f;
                 power += weaponFactor * racePower * (((unit.GetScale() - 1) * 0.9) + 1) * Math.Pow(1.2, unit.Level - 1 + effectiveLevelBoost + (unit.GetStatBase(Stat.Leadership) > 0 ? 3 : 0));
-
             }
             finalPower = count * power;
-
         }
 
         return finalPower;
@@ -777,7 +762,6 @@ static class StrategicUtilities
                 if (IsVillageOccupied(empire, i) == false)
                 {
                     retVillages.Add(villages[i]);
-
                 }
             }
         }
@@ -790,13 +774,11 @@ static class StrategicUtilities
         List<MercenaryHouse> retMercs = new List<MercenaryHouse>();
         for (int i = 0; i < State.World.MercenaryHouses.Length; i++)
         {
-
             if (mercs[i].Mercenaries.Count < 8)
                 continue;
             if (ArmyAt(mercs[i].Position) == null)
             {
                 retMercs.Add(mercs[i]);
-
             }
         }
         return retMercs.ToArray();
@@ -810,7 +792,6 @@ static class StrategicUtilities
             if (ArmyAt(teles[i].Position) == null)
             {
                 retTeles.Add(teles[i]);
-
             }
         }
         return retTeles.ToArray();
@@ -849,7 +830,7 @@ static class StrategicUtilities
                 return true;
         }
         return false;
-    }    
+    }
 
     internal static List<Army> GetEnemyArmyWithinXTiles(ConstructibleBuilding building, int tiles)
     {
@@ -918,7 +899,7 @@ static class StrategicUtilities
         foreach (ConstructibleBuilding empireBuilding in empire.Buildings)
         {
             if (!empireBuilding.active)
-               continue;
+                continue;
          
             if (empireBuilding.Position.GetNumberOfMovesDistance(position) <= tiles)
                 buildingList.Add(empireBuilding);
@@ -944,7 +925,6 @@ static class StrategicUtilities
             BuyWeapon(village, ItemType.Bow);
             bows -= 1;
         }
-
     }
 
     internal static void BuyWeapon(Village village, ItemType weapon)
@@ -968,7 +948,6 @@ static class StrategicUtilities
             return false;
         if (StrategicTileInfo.CanWalkInto(p.x, p.y))
         {
-
             foreach (Army army in GetAllArmies())
             {
                 if (army.Position.Matches(p.x, p.y))
@@ -983,7 +962,6 @@ static class StrategicUtilities
         }
         return false;
     }
-
 
     internal static void ProcessTravelingUnits(List<Unit> travelingUnits, Army army)
     {
@@ -1013,10 +991,7 @@ static class StrategicUtilities
                 CreateInvisibleTravelingArmy(travelingUnits.Where(s => s.HasTrait(Traits.Pathfinder) || s.HasTrait(Traits.Cartography)).ToList(), village, flightTurns);
             CreateInvisibleTravelingArmy(travelingUnits.Where(s => s.HasTrait(Traits.Pathfinder) == false || s.HasTrait(Traits.Cartography) == false).ToList(), village, turns);
         }
-
-
     }
-
 
     static internal void CreateInvisibleTravelingArmy(List<Unit> travelingUnits, Village village, int turns)
     {
@@ -1083,7 +1058,6 @@ static class StrategicUtilities
 
     static Stat PickBest(Unit unit, Stat[] stats)
     {
-
         float[] weight = new float[(int)Stat.None];
         float[] priority = new float[(int)Stat.None];
 
@@ -1214,7 +1188,6 @@ static class StrategicUtilities
                 highest = i;
         }
         return (Stat)highest;
-
     }
 
     internal static void TryInfiltrateRandom(Army originArmy, Unit unit)
@@ -1322,7 +1295,7 @@ static class StrategicUtilities
     static public bool ArmyCanFitUnit(Army army, Unit unit)
     {
         army.RecalculateSizeValue();
-        if (army.RemainnigSize - (State.RaceSettings.GetDeployCost(unit.Race) * unit.TraitBoosts.DeployCostMult) >= 0)
+        if (army.RemainingSize - (State.RaceSettings.GetDeployCost(unit.Race) * unit.TraitBoosts.DeployCostMult) >= 0)
         {
             return true;
         }
@@ -1350,4 +1323,3 @@ static class StrategicUtilities
         return tile_positions;
     }
 }
-

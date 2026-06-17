@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 abstract class Trait
 {
@@ -12,7 +13,7 @@ abstract class VoreTrait : Trait, IVoreCallback
 
     public abstract bool IsPredTrait { get; }
 
-    public virtual bool OnAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
+    public virtual bool OnAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location, int damageToPrey, int healingToPred) => true;
 
     public virtual bool OnDigestion(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
 
@@ -20,7 +21,7 @@ abstract class VoreTrait : Trait, IVoreCallback
 
     public virtual bool OnFinishAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
 
-    public virtual bool OnFinishDigestion(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
+    public virtual bool OnFinishDigestion(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true; // Returning false here will prevent the digestion kill.
 
     public virtual bool OnRemove(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
 
@@ -35,7 +36,7 @@ abstract class VoreTrait : Trait, IVoreCallback
  *      3a. If you added to DirectionalStat, add both an Outgoing and an Incoming version instead.
  * 4. Add your variable's Name and Description to ChangeToolTip(), following the current implementation.
  * 5. If your variable is a bool, like OnLevelUpAllowAnyStat, add it to IsToggle, so the prefab becomes a toggle instead of an InputField
- * 5. Navigate to Utility/CustomTraitBoost.cs and add your variable to the ToBooster() functinon with the proper modifier.
+ * 6. Navigate to Utility/CustomTraitBoost.cs and add your variable to the ToBooster() functinon with the proper modifier.
  * 
  * I apologize for the extra work, but this WAS a 9 step guide with a lot of moving parts before I spent two days making it as developer friendly as possible, 
  * so I don't want to hear any belly aching. Enjoy.
@@ -180,7 +181,7 @@ abstract class VoreTraitBooster : AbstractBooster, IVoreCallback
 
     public abstract bool IsPredTrait { get; }
 
-    public virtual bool OnAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
+    public virtual bool OnAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location, int damageToPrey, int healingToPred) => true;
 
     public virtual bool OnDigestion(Prey preyUnit, Actor_Unit predUnit, PreyLocation location) => true;
 
@@ -239,6 +240,7 @@ static class TraitList
         [Traits.SpiritPossession] = new SpiritPossession(),
         [Traits.ForcedMetamorphosis] = new ForcedMetamorphosis(),
         [Traits.MetamorphicConversion] = new MetamorphicConversion(),
+		[Traits.Growth] = new Growth(),
         [Traits.Tempered] = new Booster("Reduces damage taken from ranged attacks.\nIncreases damage taken from melee attacks", (s) => { s.Incoming.RangedDamage *= .7f; s.Incoming.MeleeDamage *= 1.3f; s.VirtualDexMult *= 1.1f; }),
         [Traits.GelatinousBody] = new Booster("Takes less damage from attacks, but is easier to vore", (s) => { s.Incoming.RangedDamage *= .75f; s.Incoming.MeleeDamage *= 0.8f; s.Incoming.VoreOddsMult *= 1.15f; }),
         [Traits.MetalBody] = new Booster("Provides vore resistance, and their remains are only worth half as much healing", (s) => { s.Incoming.VoreOddsMult *= .7f; s.Outgoing.Nutrition *= .5f; }),
@@ -340,6 +342,7 @@ static class TraitList
         [Traits.SlowedGrowth] = new Booster("Unit grows 20% less from absorbing prey (Requires the Growth trait)", (s) => { s.Incoming.GrowthRate *= 0.8f; }),
         [Traits.FleetingGrowth] = new Booster("Unit loses its gained growth more quickly (Requires the Growth trait)", (s) => { s.GrowthDecayRate *= 2f; }),
         [Traits.PersistentGrowth] = new Booster("Unit loses its gained growth less quickly (Requires the Growth trait)", (s) => { s.GrowthDecayRate *= 0.5f; }),
+        [Traits.PermanentGrowth] = new Booster("Unit does not lose its gained growth (Requires the Growth trait)", (s) => { s.GrowthDecayRate *= 0f; }),
         [Traits.ProteinRich] = new Booster("Absorbing this unit yields more (2×) healing and (with the growth trait) more growth than usual (1.5×)", (s) => { s.Outgoing.GrowthRate *= 1.5f; s.Outgoing.Nutrition *= 2f; }),
         [Traits.EfficientGuts] = new Booster("Unit receives 50% more healing from absorbing prey", (s) => { s.Incoming.Nutrition *= 1.5f; }),
         [Traits.WastefulProcessing] = new Booster("Unit can't get as much healing out of prey, but they are done with it quicker. (Absorption rate × 1.5, Nutrition received × 0.5 )", (s) => { s.Incoming.Nutrition *= 0.5f; s.Outgoing.AbsorptionRate *= 1.5f; }),
@@ -533,6 +536,32 @@ internal class EasilySatisfied : Trait, IVoreAttackOdds
             voreMult *= .5f;
         }
     }
+}
+
+internal class Growth : VoreTrait
+{
+	public Growth()
+	{
+		Description = "Each absorption makes this unit grow in size, but the effect slowly degrades outside battle.\n(Cheat Trait)";
+	}
+	
+	public override int ProcessingPriority => 50;
+    public override bool IsPredTrait => true;
+	
+	public override bool OnAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location, int damageToPrey, int healingToPred)
+	{
+		float predMass = predUnit.Unit.TraitBoosts.BulkMultiplier * State.RaceSettings.GetBodySize(predUnit.Unit.Race) * predUnit.Unit.GetScale(2);
+		float predBaseMass = predMass / Mathf.Pow((float)predUnit.Unit.BaseScale, 2); // Pred's mass, without Growth factored in.
+		float preyMass = preyUnit.Unit.TraitBoosts.BulkMultiplier * State.RaceSettings.GetBodySize(preyUnit.Unit.Race) * preyUnit.Unit.GetScale(2);
+		float increment = 0.1f * damageToPrey / preyUnit.Unit.MaxHealth;
+		increment *= preyMass;
+		increment *= preyUnit.Unit.TraitBoosts.Outgoing.GrowthRate * predUnit.Unit.TraitBoosts.Incoming.GrowthRate * Config.GrowthMod;
+		float newMass = predMass + increment;
+		float newScale = Mathf.Sqrt(newMass / predBaseMass);
+		predUnit.Unit.BaseScale = newScale;
+		
+		return true;
+	}
 }
 
 internal class UnpleasantDigestion : VoreTrait
@@ -777,7 +806,7 @@ internal class Symbiote : VoreTrait
         }
         predUnit.Unit.ReloadTraits();
         predUnit.Unit.InitializeTraits();
-        predUnit.ReloadSpellTraits();
+        //predUnit.ReloadSpellTraits();
         return true;
     }
 
@@ -811,7 +840,7 @@ internal class TraitBorrower : VoreTrait
         }
         predUnit.Unit.ReloadTraits();
         predUnit.Unit.InitializeTraits();
-        predUnit.ReloadSpellTraits();
+        //predUnit.ReloadSpellTraits();
         return true;
     }
 
@@ -838,11 +867,17 @@ internal class CreateSpawn : VoreTrait
 
     public override bool OnFinishAbsorption(Prey preyUnit, Actor_Unit predUnit, PreyLocation location)
     {
+        int side = predUnit.Unit.Side;
         Race spawnRace = predUnit.Unit.DetermineSpawnRace();
         if (!predUnit.Unit.HasSharedTrait(Traits.CreateSpawn))
+        {
             spawnRace = predUnit.Unit.HiddenUnit.DetermineSpawnRace();
-        // use source race IF changeling already had this ability before transforming
-        predUnit.PredatorComponent.CreateSpawn(spawnRace, predUnit.Unit.Side, predUnit.Unit.Experience / 2);
+            side = predUnit.Unit.HiddenUnit.Side;
+        }
+        // use source race and side IF changeling already had this ability before transforming
+        
+        if (preyUnit.Unit.Type != UnitType.Spawn)   //prevent infinite spawn loops
+            predUnit.PredatorComponent.CreateSpawn(spawnRace, side, predUnit.Unit.Experience / 2);
         return true;
     }
 }

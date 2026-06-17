@@ -11,8 +11,6 @@ class FungalDryad : DefaultRaceData
     readonly Sprite[] Sprites5 = State.GameManager.SpriteDictionary.DryadSprites5;
     readonly Sprite[] Sprites6 = State.GameManager.SpriteDictionary.NiplessVoreSprites;
 
-    bool oversize = false;
-
     public FungalDryad()
     {
         CanBeGender = new List<Gender>() { Gender.Female};
@@ -332,7 +330,6 @@ class FungalDryad : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

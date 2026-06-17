@@ -13,9 +13,6 @@ class Demisharks : DefaultRaceData
     readonly DemisharkLeader LeaderClothes;
     readonly DemisharkRags Rags;
 
-    bool oversize = false;
-
-
     public Demisharks()
     {
         BodySizes = 4;
@@ -460,7 +457,6 @@ class Demisharks : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -1102,7 +1098,7 @@ class Demisharks : DefaultRaceData
                 clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.SharkSkin, actor.Unit.SkinColor);
             }
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

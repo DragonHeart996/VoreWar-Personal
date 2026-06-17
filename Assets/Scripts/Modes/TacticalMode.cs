@@ -65,12 +65,11 @@ public class TacticalMode : SceneBase
 
     Tile[] BuildingTileTypes;
 
-
     public AnimatedTile Pyre;
     public Tile Ice;
 
-    bool[,] BlockedTile;
-    bool[,] BlockedClimberTile;
+    bool[,] BlockedTile; // Blocked for non-climbers
+    bool[,] BlockedClimberTile; // Blocked for climbers and non-climbers
 
     internal void SetBlockedTiles(bool[,] tiles) => BlockedTile = tiles;
 
@@ -132,9 +131,8 @@ public class TacticalMode : SceneBase
     internal DecorationStorage[] DecorationStorage;
     internal PlacedDecoration[] Decorations;
 
-    int defenderSide;
-    int attackerSide; // because sides just got a lot more complex.
-
+    public int defenderSide;
+    public int attackerSide;
 
     internal bool DirtyPack = true;
 
@@ -147,6 +145,10 @@ public class TacticalMode : SceneBase
     public bool IgnorePseudo = false;
     public bool SkipPseudo = false;
 
+    public bool tookCombatActions;
+    public int attackerTrappedUnitsTimer;
+    public int defenderTrappedUnitsTimer;
+    
     internal int currentTurn = 1;
 
     int lastDiscard = 5;
@@ -201,7 +203,7 @@ public class TacticalMode : SceneBase
 
     float autoAdvanceTimer;
     bool autoAdvancing;
-    const float AutoAdvanceRate = .4f;
+    const float AutoAdvanceRate = 0.4f;
 
     PathNodeManager arrowManager;
     List<PathNode> queuedPath;
@@ -243,7 +245,6 @@ public class TacticalMode : SceneBase
                 }
             }
             arrowManager.ClearNodes();
-            MovementGrid.ClearAllTiles();
             if (value == 0) specialType = SpecialAction.None;
             CommandsUI.SelectorIcon.transform.position = new Vector2(2000f, 2000f);
             if (units != null)
@@ -326,7 +327,6 @@ public class TacticalMode : SceneBase
                 RebuildInfo();
                 PlaceUndoMarker();
             }
-
         }
     }
     
@@ -339,7 +339,6 @@ public class TacticalMode : SceneBase
             BuildingTileTypes[i] = ScriptableObject.CreateInstance<Tile>();
             BuildingTileTypes[i].sprite = allSprites[i];
         }
-
     }
 
     void PlaceUndoMarker()
@@ -391,7 +390,6 @@ public class TacticalMode : SceneBase
         }
     }
 
-
     internal bool TacticalSoundBlocked()
     {
         bool ret = false;
@@ -440,11 +438,9 @@ public class TacticalMode : SceneBase
         defenderSide = defender?.Side ?? village.Side;
         attackerSide = invader.Side;
 
-
-
         DefectProcessor defectors = new DefectProcessor(armies[0], armies[1], village);
 
-        //convert armies	
+        //convert armies
 
         List<Actor_Unit> attackers = new List<Actor_Unit>();
         List<Actor_Unit> defenders = new List<Actor_Unit>();
@@ -455,10 +451,10 @@ public class TacticalMode : SceneBase
         AttackerLeader = armies[0].LeaderIfInArmy();
         for (int i = 0; i < armies[0].Units.Count; i++)
         {
-            Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.upper, armies[0].Units[i].GetBestRanged() == null), armies[0].Units[i]);
+            Actor_Unit unit = new Actor_Unit(armies[0].Units[i]);
             units.Add(unit);
             unit.Unit.Side = armies[0].Side;
-			unit.InSight = true; // All units visible by default, for daytime
+            unit.InSight = true; // All units visible by default, for daytime
             unit.Unit.CurrentLeader = AttackerLeader;
             attackers.Add(unit);
         }
@@ -467,10 +463,10 @@ public class TacticalMode : SceneBase
             DefenderLeader = armies[1].LeaderIfInArmy();
             for (int i = 0; i < armies[1].Units.Count; i++)
             {
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lower, armies[1].Units[i].GetBestRanged() == null), armies[1].Units[i]);
+                Actor_Unit unit = new Actor_Unit(armies[1].Units[i]);
                 units.Add(unit);
                 unit.Unit.Side = defenderSide;
-				unit.InSight = true; //All units visible by default, for daytime
+                unit.InSight = true; //All units visible by default, for daytime
                 unit.Unit.CurrentLeader = DefenderLeader;
                 defenders.Add(unit);
             }
@@ -479,10 +475,10 @@ public class TacticalMode : SceneBase
         {
             for (int i = 0; i < grabbedGarrison.Count; i++)
             {
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lower, grabbedGarrison[i].GetBestRanged() == null), grabbedGarrison[i]);
+                Actor_Unit unit = new Actor_Unit(grabbedGarrison[i]);
                 units.Add(unit);
                 unit.Unit.Side = defenderSide;
-				unit.InSight = true; //All units visible by default, for daytime
+                unit.InSight = true; //All units visible by default, for daytime
                 unit.Unit.CurrentLeader = DefenderLeader;
                 garrison.Add(unit);
             }
@@ -495,8 +491,6 @@ public class TacticalMode : SceneBase
         Race attackerRace = invader.Empire?.ReplacedRace ?? (Race)invader.Side;
         if (Config.Defections && !State.GameManager.PureTactical)
         {
-            
-
             foreach (Actor_Unit actor in attackers)
             {
                 defectors.AttackerDefectCheck(actor, defenderRace);
@@ -521,10 +515,10 @@ public class TacticalMode : SceneBase
 
         foreach (Actor_Unit actor in units)
         {
+            actor.Unit.ExpendedSingleUseSpells.Clear();
             actor.Unit.EnemiesKilledThisBattle = 0;
             actor.allowedToDefect = !actor.DefectedThisTurn && TacticalUtilities.GetPreferredSide(actor.Unit, actor.Unit.Side, actor.Unit.Side == attackerSide ? defenderSide : attackerSide) != actor.Unit.Side;
             actor.DefectedThisTurn = false;
-            actor.Unit.Heal(actor.Unit.GetLeaderBonus() * 3); // mainly for the new Stat boosts => maxHealth option, but eh why not have it for everyone anyway?
             foreach (var item in actor.Unit.AllConditionalTraits.Keys.Where(t => t.trigger == TraitConditionTrigger.OnTacticalTurnStart || t.trigger == TraitConditionTrigger.All).ToList())
             {
                 if (ConditionalTraitConditionChecker.TacticalTraitConditionActive(actor, item))
@@ -540,11 +534,9 @@ public class TacticalMode : SceneBase
             EquipmentFunctions.CheckEquipment(actor.Unit, EquipmentActivator.OnTacticalBattleStart, new object[] { actor, armies[actor.Unit.Side == attackerSide ? 0 : 1], null });
         }
 
-
-        int summonedUnits = SummonUnits(mapGen, AttackerLeader, DefenderLeader);
-        int antSummonedUnits = SummonAnts(mapGen, AttackerLeader, DefenderLeader);
+        int summonedUnits = SummonUnits(AttackerLeader, DefenderLeader);
+        int antSummonedUnits = SummonAnts(AttackerLeader, DefenderLeader);
         int DefCampSummonedUnits = 0;
-
 
         activeSide = armies[0].Side;
 
@@ -553,7 +545,6 @@ public class TacticalMode : SceneBase
             armies[1]?.Units.Count ?? 0 + defectors.newDefenders,
             garrison.Count - defectors.DefectedGarrison,
             armies[0].Side, defenderSide);
-
 
         AIDefender = AIdefender != TacticalAIType.None;
         AIAttacker = AIinvader != TacticalAIType.None;
@@ -632,14 +623,11 @@ public class TacticalMode : SceneBase
 
             var defenderEmp = defender?.Empire ?? village.Empire;
             InitRetreatConditions(defenderAI, defenders, defenderEmp, AIDefender);
-
         }
 
         currentAI = attackerAI;
 
-
         Log.RegisterNewTurn(AttackerName, 1);
-
 
         bool skip = (!Config.WatchAIBattles || (Config.IgnoreMonsterBattles && armies[0].Side >= 100 && defenderSide >= 100)) && AIAttacker && AIDefender;
 
@@ -672,7 +660,7 @@ public class TacticalMode : SceneBase
                             if (darkMagicTower.PactLevel >= 2)
                                 durr += Config.BuildConfig.DarkMagicTowerDurationImprovement;
                             break;
-                        case StatusEffectType.Errosion:
+                        case StatusEffectType.Erosion:
                             if (darkMagicTower.PactLevel >= 4)
                                 acc = Config.BuildConfig.DarkMagicTowerAccImprovement;
                             if (darkMagicTower.PactLevel >= 5)
@@ -718,9 +706,9 @@ public class TacticalMode : SceneBase
                             shouldskip = true;
                             blockActive = false;
                         };
-                        box.SetData(action, "No", "Yes", $"Would you like to activate the barrier tower for this battle?\nAvailable Cores: {barrierTower.AvailCores}\nA {barrierTower.CurrentDowntimeValue} turn downtime will be incured if used.", ()=>blockActive = false);
+                        box.SetData(action, "No", "Yes", $"Would you like to activate the barrier tower for this battle?\nAvailable Cores: {barrierTower.AvailCores}\nA {barrierTower.CurrentDowntimeValue} turn downtime will be incurred if used.", () => blockActive = false);
                         if (shouldskip)
-                        {                      
+                        {
                             continue;
                         }
                     }
@@ -759,7 +747,7 @@ public class TacticalMode : SceneBase
                     Unit newUnit = new NPC_unit(10, false, 2, armies[0].Side, Race.Fairies, 0, false);
                     newUnit.Type = UnitType.Summon;
                     newUnit.Name = $"{casterTower.Owner.Name} Tower Mage";
-                    Actor_Unit unit = new Actor_Unit(new Vec2i(Config.TacticalSizeX / 2, Config.TacticalSizeY - 1), newUnit);
+                    Actor_Unit unit = new Actor_Unit(newUnit);
                     unit.Visible = false;
                     unit.Targetable = false;
                     foreach (var spellCasts in casterTower.spellCasts)
@@ -767,7 +755,7 @@ public class TacticalMode : SceneBase
                         if (casterTower.ManaCharges <= 0)
                         {
                             break;
-                        }                        
+                        }
                         int counter = 0;
                         switch (spellCasts.Key)
                         {
@@ -924,14 +912,14 @@ public class TacticalMode : SceneBase
                 {
                     DefenseEncampment defenseEncampment = (DefenseEncampment)building;
                     int summonCount = (int)Math.Ceiling(attackers.Count() * (Config.BuildConfig.DefenseEncampmentArmyPercentage * (defenseEncampment.unitUpgrade.built ? 1.5f : 1)));
-                    while (summonCount > 0 && defenseEncampment.AvailibleDefenders > 0)
+                    while (summonCount > 0 && defenseEncampment.AvailableDefenders > 0)
                     {
                         Empire empire = defender?.Empire ?? village.Empire;
                         float advancedChance = 0.2f * (defenseEncampment.improveUpgrade.built ? 4f : 1);
                         float unitScale = Config.BuildConfig.DefenseEncampmentUnitScale * (defenseEncampment.levelUpgrade.built ? 1.5f : 1);
                         Unit newUnit = new NPC_unit((int)Math.Max(Mathf.Floor((empire.Leader != null ? empire.Leader.Level : 3) * unitScale),1), advancedChance >= State.Rand.NextDouble(), 2, defenders.Concat(garrison).FirstOrDefault().Unit.Side, empire.Race, 0, empire.CanVore);
                         newUnit.Type = UnitType.Reinforcement;
-                        Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lower, newUnit.GetBestRanged() == null), newUnit);
+                        Actor_Unit unit = new Actor_Unit(newUnit);
                         if (defenseEncampment.improveUpgrade.built)
                         {
                             switch (State.Rand.Next(5))
@@ -966,7 +954,7 @@ public class TacticalMode : SceneBase
                         units.Add(unit);
                         unit.Unit.CurrentLeader = DefenderLeader;
                         DefCampSummonedUnits++;
-                        defenseEncampment.AvailibleDefenders--;
+                        defenseEncampment.AvailableDefenders--;
                         summonCount--;
                     }
                 }
@@ -987,7 +975,7 @@ public class TacticalMode : SceneBase
                             shouldskip = true;
                             blockActive = false;
                         };
-                        box.SetData(action, "No", "Yes", $"Would you like to activate the barrier tower for this battle?\nAvailable Cores: {barrierTower.AvailCores}\nA {barrierTower.CurrentDowntimeValue} turn downtime will be incured if used.", () => blockActive = false);
+                        box.SetData(action, "No", "Yes", $"Would you like to activate the barrier tower for this battle?\nAvailable Cores: {barrierTower.AvailCores}\nA {barrierTower.CurrentDowntimeValue} turn downtime will be incurred if used.", () => blockActive = false);
                         if (shouldskip)
                         {
                             continue;
@@ -1035,7 +1023,7 @@ public class TacticalMode : SceneBase
                             if (darkMagicTower.PactLevel >= 2)
                                 durr += Config.BuildConfig.DarkMagicTowerDurationImprovement;
                             break;
-                        case StatusEffectType.Errosion:
+                        case StatusEffectType.Erosion:
                             if (darkMagicTower.PactLevel >= 4)
                                 acc = Config.BuildConfig.DarkMagicTowerAccImprovement;
                             if (darkMagicTower.PactLevel >= 5)
@@ -1069,7 +1057,7 @@ public class TacticalMode : SceneBase
                     Unit newUnit = new NPC_unit(10, false, 2, defenders.Concat(garrison).FirstOrDefault().Unit.Side, Race.Fairies, 0, false);
                     newUnit.Type = UnitType.Summon;
                     newUnit.Name = $"{casterTower.Owner.Name} Tower Mage";
-                    Actor_Unit unit = new Actor_Unit(new Vec2i(Config.TacticalSizeX / 2, 0), newUnit);
+                    Actor_Unit unit = new Actor_Unit(newUnit);
                     unit.Visible = false;
                     unit.Targetable = false;
                     foreach (var spellCasts in casterTower.spellCasts)
@@ -1224,7 +1212,9 @@ public class TacticalMode : SceneBase
                     unit.UnitSprite.OtherFolder.gameObject.SetActive(false);
                 }
             }
-        }       
+        }
+
+        DropAllUnits();
 
         if (skip)
         {
@@ -1250,7 +1240,6 @@ public class TacticalMode : SceneBase
                     State.GameManager.CreateMessageBox(message);
             }
         }
-
     }
 
     private void InitRetreatConditions(ITacticalAI AI, List<Actor_Unit> fighters, Empire empire, bool nonPlayer)
@@ -1282,7 +1271,7 @@ public class TacticalMode : SceneBase
         }
     }
 
-    private int SummonUnits(TacticalMapGenerator mapGen, Unit AttackerLeader, Unit DefenderLeader)
+    private int SummonUnits(Unit AttackerLeader, Unit DefenderLeader)
     {
         int summonedUnits = 0;
         int attackerSummoners = 0;
@@ -1295,8 +1284,6 @@ public class TacticalMode : SceneBase
         List<Race> defenderRaces = new List<Race>();
         foreach (Actor_Unit actor in units.ToList())
         {
-
-
             if (actor.Unit.HasTrait(Traits.AstralCall))
             {
                 if (actor.Unit.Side == defenderSide)
@@ -1328,7 +1315,7 @@ public class TacticalMode : SceneBase
                 attackerRaces.Remove(race);
                 Unit newUnit = new NPC_unit((int)Mathf.Max((0.9f * attackerLevels / attackerSummoners) - 2, 1), false, 2, armies[0].Side, race, 0, attackerPred);
                 newUnit.Type = UnitType.Summon;
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.upperMiddle, newUnit.GetBestRanged() == null), newUnit);
+                Actor_Unit unit = new Actor_Unit(newUnit);
                 units.Add(unit);
                 summonedUnits++;
                 unit.Unit.CurrentLeader = AttackerLeader;
@@ -1347,20 +1334,17 @@ public class TacticalMode : SceneBase
                 defenderRaces.Remove(race);
                 Unit newUnit = new NPC_unit((int)Mathf.Max((0.9f * defenderLevels / defenderSummoners) - 2, 1), false, 2, defenderSide, race, 0, defenderPred);
                 newUnit.Type = UnitType.Summon;
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lowerMiddle, newUnit.GetBestRanged() == null), newUnit);
+                Actor_Unit unit = new Actor_Unit(newUnit);
                 units.Add(unit);
                 summonedUnits++;
                 unit.Unit.CurrentLeader = DefenderLeader;
             }
         }
 
-
-
-
         return summonedUnits;
     }
 
-    private int SummonAnts(TacticalMapGenerator mapGen, Unit AttackerLeader, Unit DefenderLeader)
+    private int SummonAnts(Unit AttackerLeader, Unit DefenderLeader)
     {
         int summonedUnits = 0;
         int attackerSummoners = 0;
@@ -1371,8 +1355,6 @@ public class TacticalMode : SceneBase
         bool defenderPred = false;
         foreach (Actor_Unit actor in units.ToList())
         {
-
-
             if (actor.Unit.HasTrait(Traits.AntPheromones))
             {
                 if (actor.Unit.Side == defenderSide)
@@ -1406,7 +1388,7 @@ public class TacticalMode : SceneBase
                     race = Race.FeralAnts;
                 Unit newUnit = new NPC_unit(level, false, 2, armies[0].Side, race, 0, attackerPred);
                 newUnit.Type = UnitType.Summon;
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.upperMiddle, newUnit.GetBestRanged() == null), newUnit);
+                Actor_Unit unit = new Actor_Unit(newUnit);
                 units.Add(unit);
                 summonedUnits++;
                 unit.Unit.CurrentLeader = AttackerLeader;
@@ -1429,15 +1411,12 @@ public class TacticalMode : SceneBase
                     race = Race.FeralAnts;
                 Unit newUnit = new NPC_unit(level, false, 2, defenderSide, race, 0, defenderPred);
                 newUnit.Type = UnitType.Summon;
-                Actor_Unit unit = new Actor_Unit(mapGen.RandomActorPosition(tiles, BlockedTile, units, TacticalMapGenerator.SpawnLocation.lowerMiddle, newUnit.GetBestRanged() == null), newUnit);
+                Actor_Unit unit = new Actor_Unit(newUnit);
                 units.Add(unit);
                 summonedUnits++;
                 unit.Unit.CurrentLeader = DefenderLeader;
             }
         }
-
-
-
 
         return summonedUnits;
     }
@@ -1502,17 +1481,7 @@ public class TacticalMode : SceneBase
         if (State.Warned == false && Time.realtimeSinceStartup - time > 4f)
         {
             State.Warned = true;
-            State.GameManager.CreateMessageBox($@"Just had a quick simulated battle take more than 4 seconds to resolve (I.e. one your settings are set to not show).
-Smaller army sizes will be faster to process, so if the wait bothers you try playing with smaller max armies.
-This warning will only appear once per session.  
-
-Misc Info:
-Battle took {System.Math.Round(Time.realtimeSinceStartup - time, 2)} seconds
-{units.Count()} Total units {AttackerName} vs {DefenderName}.
-Turns: {currentTurn}
-");
-
-
+            State.GameManager.CreateMessageBox($@"Just had a quick simulated battle take more than 4 seconds to resolve (I.e. one your settings are set to not show).\nSmaller army sizes will be faster to process, so if the wait bothers you try playing with smaller max armies.\nThis warning will only appear once per session.\n\nMisc Info:\nBattle took {System.Math.Round(Time.realtimeSinceStartup - time, 2)} seconds.\n{units.Count()} Total units {AttackerName} vs {DefenderName}.\nTurns: {currentTurn}");
         }
     }
 
@@ -1568,11 +1537,11 @@ Turns: {currentTurn}
             else
                 actor.Unit.CurrentLeader = AttackerLeader;
             actor.Unit.ReloadTraits();
-
         }
         foreach (Actor_Unit unit in units)
         {
             unit.PredatorComponent?.UpdateAlivePrey();
+            unit.PredatorComponent?.UpdateFullness();
         }
         GeneralSetup();
         Log.RefreshListing();
@@ -1604,7 +1573,6 @@ Turns: {currentTurn}
                 }
             }
         }
-
     }
 
     void GeneralSetup()
@@ -1629,7 +1597,6 @@ Turns: {currentTurn}
 
         FledReturn = ChoiceOption.Default;
         waitingForDialog = false;
-
 
         reviewingBattle = false;
 
@@ -1694,8 +1661,6 @@ Turns: {currentTurn}
         StatusUI.SkipToEndButton.interactable = true;
         EnemyTurnText.SetActive(!IsPlayerTurn);
 
-
-
         RedrawTiles();
         CreateActors();
 
@@ -1731,7 +1696,6 @@ Turns: {currentTurn}
         {
             Decorations[i] = new PlacedDecoration(DecorationStorage[i].Position, TacticalDecorationList.DecDict[DecorationStorage[i].Type]);
         }
-
     }
 
     void RebuildBlockedTiles()
@@ -1802,6 +1766,10 @@ Turns: {currentTurn}
 
             defenderSide = defenderSide,
             attackerSide = attackerSide,
+            
+            tookCombatActions = tookCombatActions,
+            attackerTrappedUnitsTimer = attackerTrappedUnitsTimer, 
+            defenderTrappedUnitsTimer = defenderTrappedUnitsTimer,
 
             attackersTurn = attackersTurn,
             isAPlayerTurn = IsPlayerTurn,
@@ -1812,7 +1780,6 @@ Turns: {currentTurn}
 
             StartingAttackerPower = StartingAttackerPower,
             StartingDefenderPower = StartingDefenderPower,
-
 
             AttackerName = AttackerName,
             DefenderName = DefenderName,
@@ -1861,6 +1828,10 @@ Turns: {currentTurn}
         defenderSide = data.defenderSide;
         attackerSide = data.attackerSide;
 
+        tookCombatActions = data.tookCombatActions;
+        attackerTrappedUnitsTimer = data.attackerTrappedUnitsTimer;
+        defenderTrappedUnitsTimer = data.defenderTrappedUnitsTimer;
+
         currentTurn = data.currentTurn;
 
         attackersTurn = data.attackersTurn;
@@ -1886,7 +1857,6 @@ Turns: {currentTurn}
         discardedClothing = data.DiscardedClothing;
         lastDiscard = data.LastDiscard;
 
-
         extraAttackers = data.extraAttackers;
         extraDefenders = data.extraDefenders;
         retreatedAttackers = data.retreatedAttackers;
@@ -1904,7 +1874,6 @@ Turns: {currentTurn}
 
     void UpdateAreaTraits()
     {
-
         for (int i = 0; i < units.Count; i++)
         {
             units[i].Intimidated = false;
@@ -1964,9 +1933,7 @@ Turns: {currentTurn}
             Quaternion quat = Quaternion.Euler(0, 0, angle);
             Instantiate(SwipeEffectPrefab, location, quat);
         }
-
     }
-
 
     void RedrawTiles()
     {
@@ -2075,7 +2042,6 @@ Turns: {currentTurn}
 
                         break;
                 }
-
             }
         }
 
@@ -2172,13 +2138,9 @@ Turns: {currentTurn}
                                     obj.sortingOrder += 30;
                             }
                         }
-
                     }
                 }
-
             }
-
-
 
             //int decNum = Decorations[i, j];
             //if (decNum >= 200)
@@ -2230,17 +2192,15 @@ Turns: {currentTurn}
                         {
                             FrontColorTilemap.SetTile(new Vector3Int(building.LowerLeftPosition.x + x, building.LowerLeftPosition.y + y, 0), BuildingTileTypes[building.FrontColoredTile[y, x]]);
                         }
-
                     }
                 }
             }
         }
-
     }
 
-    internal Actor_Unit AddUnitToBattle(Unit unit,  Actor_Unit reciepient)
+    internal Actor_Unit AddUnitToBattle(Unit unit, Actor_Unit recipient)
     {
-        Actor_Unit actor = new Actor_Unit(unit, reciepient);
+        Actor_Unit actor = new Actor_Unit(unit, recipient);
         units.Add(actor);
         actor.UpdateBestWeapons();
         UpdateActorColor(actor);
@@ -2285,7 +2245,6 @@ Turns: {currentTurn}
 
     void CreateActors()
     {
-
         int children = ActorFolder.childCount;
         for (int i = children - 1; i >= 0; i--)
         {
@@ -2332,7 +2291,6 @@ Turns: {currentTurn}
             return;
         lastDiscard++;
         int sortOrder = lastDiscard;
-
 
         if (Config.CleanDisposal == true)
         {
@@ -2386,7 +2344,6 @@ Turns: {currentTurn}
         int sortOrder = lastDiscard;
         int spriteNum = (int)type;
 
-
         string description = $"Remains of {name}";
         if (type == BoneTypes.CumPuddle)
             miscDiscards.Add(new MiscDiscard(location, MiscDiscardType.Cum, spriteNum, sortOrder, color, description));
@@ -2401,7 +2358,6 @@ Turns: {currentTurn}
         miscDiscards.Last().GenerateSpritePrefab(ActorFolder);
     }
 
-
     void ShowVoreHitPercentages(Actor_Unit actor, PreyLocation location = PreyLocation.stomach)
     {
         foreach (Actor_Unit target in units)
@@ -2412,7 +2368,10 @@ Turns: {currentTurn}
                 continue;
             Vec2i pos = target.Position;
             target.UnitSprite.HitPercentagesDisplayed(true);
-            if (actor.PredatorComponent.FreeCap() < target.Bulk() || (actor.BodySize() < target.BodySize() * 3 && actor.Unit.HasTrait(Traits.TightNethers) && PreyLocationMethods.IsGenital(location)))
+            if (!actor.PredatorComponent.HasSpareCap(target.Bulk())
+                || (actor.Unit.HasTrait(Traits.TightNethers) 
+                    && actor.BodySize() < target.BodySize() * 3 
+                    && PreyLocationMethods.IsGenital(location)))
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true), Color.yellow);
             else if (actor.Unit.CanVore(location) != actor.PredatorComponent.CanVore(location,target))
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true), Color.yellow);
@@ -2441,7 +2400,10 @@ Turns: {currentTurn}
                 continue;
             Vec2i pos = target.Position;
             target.UnitSprite.HitPercentagesDisplayed(true);
-            if (actor.PredatorComponent.FreeCap() < target.Bulk() || (actor.BodySize() < target.BodySize() * 3 && actor.Unit.HasTrait(Traits.TightNethers) && PreyLocationMethods.IsGenital(location)))
+            if (!actor.PredatorComponent.HasSpareCap(target.Bulk())
+                || (actor.Unit.HasTrait(Traits.TightNethers)
+                    && actor.BodySize() < target.BodySize() * 3 
+                    && PreyLocationMethods.IsGenital(location)))
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true, skillBoost), Color.yellow);
             else if (actor.Unit.CanVore(location) != actor.PredatorComponent.CanVore(location,target))
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true, skillBoost), Color.yellow);
@@ -2452,10 +2414,8 @@ Turns: {currentTurn}
         }
     }
 
-
     internal bool TakeSpecialAction(SpecialAction type, Actor_Unit actor, Actor_Unit target)
     {
-
         switch (type)
         {
             case SpecialAction.PounceVore:
@@ -2478,14 +2438,11 @@ Turns: {currentTurn}
             return true;
         }
 
-
-
         return false;
     }
 
     internal bool TakeSpecialActionLocation(SpecialAction type, Actor_Unit actor, Vec2i location)
     {
-
         if (TacticalActionList.TargetedDictionary.TryGetValue(type, out var targetedAction))
         {
             if (targetedAction.OnExecuteLocation != null)
@@ -2493,7 +2450,6 @@ Turns: {currentTurn}
         }
         return false;
     }
-
 
     void ShowSpecialHitPercentages(Actor_Unit actor)
     {
@@ -2554,11 +2510,11 @@ Turns: {currentTurn}
                 break;
             case SpecialAction.SweepingSwallow:
                 ShowVoreHitPercentages(actor, PreyLocation.stomach);
-                UpdateOTargetGrid(actor.Position);
+                UpdateMeleeAOEGrid();
                 break;
             case SpecialAction.GiantSweep:
                 ShowMeleeHitPercentages(actor, .66f);
-                UpdateOTargetGrid(actor.Position);
+                UpdateMeleeAOEGrid();
                 break;
             case SpecialAction.AllInVore:
                 ShowBoostedVoreHitPercentages(actor, 50);
@@ -2567,7 +2523,6 @@ Turns: {currentTurn}
                 ShowMeleeHitPercentages(actor, .75f);
                 break;
         }
-
     }
 
     void ShowRubHitPercentages(Actor_Unit actor)
@@ -2615,7 +2570,8 @@ Turns: {currentTurn}
             {
                 if (actor.PredatorComponent.CanTransfer())
                 {
-                    if (target.PredatorComponent.FreeCap() < actor.PredatorComponent.TransferBulk() && !(target.Unit == actor.Unit))
+                    if (!target.PredatorComponent.HasSpareCap(actor.PredatorComponent.TransferBulk())
+                        && target.Unit != actor.Unit)
                         target.UnitSprite.DisplayHitPercentage(target.GetSpecialChance(SpecialAction.Transfer), Color.yellow);
                     else if (actor.Position.GetNumberOfMovesDistance(target.Position) < 2)
                         target.UnitSprite.DisplayHitPercentage(target.GetSpecialChance(SpecialAction.Transfer), Color.red);
@@ -2625,7 +2581,6 @@ Turns: {currentTurn}
                 continue;
             }
         }
-
     }
     void ShowKissVoreTransferPercentages(Actor_Unit actor)
     {
@@ -2639,7 +2594,8 @@ Turns: {currentTurn}
             {
                 if (actor.PredatorComponent.CanKissTransfer())
                 {
-                    if (target.PredatorComponent.FreeCap() < actor.PredatorComponent.KissTransferBulk() && !(target.Unit == actor.Unit))
+                    if (!target.PredatorComponent.HasSpareCap(actor.PredatorComponent.KissTransferBulk())
+                        && target.Unit != actor.Unit)
                         target.UnitSprite.DisplayHitPercentage(target.GetSpecialChance(SpecialAction.KissTransfer), Color.yellow);
                     else if ((actor.Position.GetNumberOfMovesDistance(target.Position) < 2) && !(target.Unit == actor.Unit))
                         target.UnitSprite.DisplayHitPercentage(target.GetSpecialChance(SpecialAction.KissTransfer), Color.red);
@@ -2649,7 +2605,6 @@ Turns: {currentTurn}
                 continue;
             }
         }
-
     }
 
     void ShowVoreStealPercentages(Actor_Unit actor)
@@ -2658,7 +2613,8 @@ Turns: {currentTurn}
         {
             if (!actor.PredatorComponent.CanVoreSteal(target))
                 continue;
-            if (actor.PredatorComponent.FreeCap() < target.PredatorComponent.StealBulk() && (target.Unit != actor.Unit))
+            if (!actor.PredatorComponent.HasSpareCap(target.PredatorComponent.StealBulk())
+                && target.Unit != actor.Unit)
                 target.UnitSprite.DisplayHitPercentage(target.PredatorComponent.GetVoreStealChance(actor), Color.yellow);
             else if ((actor.Position.GetNumberOfMovesDistance(target.Position) < 2) && (target.Unit != actor.Unit))
                 target.UnitSprite.DisplayHitPercentage(target.PredatorComponent.GetVoreStealChance(actor), Color.red);
@@ -2666,9 +2622,7 @@ Turns: {currentTurn}
                 target.UnitSprite.DisplayHitPercentage(target.PredatorComponent.GetVoreStealChance(actor), Color.black);
             continue;
         }
-
     }
-
 
     void ShowBreastFeedPercentages(Actor_Unit actor)
     {
@@ -2689,7 +2643,6 @@ Turns: {currentTurn}
             }
         }
     }
-
 
     void ShowCumFeedPercentages(Actor_Unit actor)
     {
@@ -2717,14 +2670,13 @@ Turns: {currentTurn}
             return;
         foreach (Actor_Unit target in units)
         {
-            if (actor.PredatorComponent.GetSuckle(target)[0] == 0)
-                continue;
-            else if (actor.Position.GetNumberOfMovesDistance(target.Position) == 1)
+            if (actor.PredatorComponent.GetSuckle(target)[0] + actor.PredatorComponent.GetSuckle(target)[1] == 0)
+                continue; 
+            if (actor.Position.GetNumberOfMovesDistance(target.Position) == 1)
                 target.UnitSprite.DisplayHitPercentage(actor.PredatorComponent.GetSuckleChance(target), Color.red);
             else
                 target.UnitSprite.DisplayHitPercentage(actor.PredatorComponent.GetSuckleChance(target), Color.black);
         }
-
     }
 
     void ShowPounceMeleeHitPercentages(Actor_Unit actor)
@@ -2760,7 +2712,7 @@ Turns: {currentTurn}
                 continue;
             Vec2i pos = target.Position;
             target.UnitSprite.HitPercentagesDisplayed(true);
-            if (actor.PredatorComponent.FreeCap() < target.Bulk())
+            if (!actor.PredatorComponent.HasSpareCap(target.Bulk()))
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true), Color.yellow);
             else if (actor.Position.GetNumberOfMovesDistance(target.Position) <= 4 && actor.Position.GetNumberOfMovesDistance(target.Position) >= 2)
                 target.UnitSprite.DisplayHitPercentage(target.GetDevourChance(actor, true), Color.red);
@@ -2785,7 +2737,6 @@ Turns: {currentTurn}
                 target.UnitSprite.DisplayHitPercentage(target.GetAttackChance(actor, false, true), Color.black, weaponDamage);
         }
     }
-
 
     void ShowRangedHitPercentages(Actor_Unit actor)
     {
@@ -2890,7 +2841,6 @@ Turns: {currentTurn}
 
     void UpdateMovementGrid()
     {
-        MovementGrid.ClearAllTiles();
         for (int x = 0; x <= tiles.GetUpperBound(0); x++)
         {
             for (int y = 0; y <= tiles.GetUpperBound(1); y++)
@@ -2903,8 +2853,6 @@ Turns: {currentTurn}
 
     void UpdateAreaOfEffectGrid(Vec2i mouseLocation)
     {
-        MovementGrid.ClearAllTiles();
-
         int radius = CurrentSpell.AreaOfEffect;
         bool outOfRange = mouseLocation.GetNumberOfMovesDistance(SelectedUnit.Position) > CurrentSpell.Range.Max;
 
@@ -2918,84 +2866,72 @@ Turns: {currentTurn}
                     MovementGrid.SetTile(new Vector3Int(x, y, 0), MovementGridTileTypes[1]);
             }
         }
-
     }
 
-    void UpdateTailStrikeGrid(Vec2i mouseLocation)
+    void UpdateMeleeDirectionalGrid(Vec2i mouseLocation, int[,] targetTiles, int damage = 0)
     {
-        MovementGrid.ClearAllTiles();
-
-        if (SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation.x, mouseLocation.y) != 1)
-            return;
-
-        Vec2 pos = mouseLocation;
-        TestTile(pos);
-        TestTile(pos + new Vec2(1, 0));
-        TestTile(pos + new Vec2(0, 1));
-        TestTile(pos + new Vec2(-1, 0));
-        TestTile(pos + new Vec2(0, -1));
-
-        void TestTile(Vec2 p)
+        if (SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation) == 1)
         {
-            if (SelectedUnit.Position.GetNumberOfMovesDistance(p.x, p.y) == 1)
-                MovementGrid.SetTile(new Vector3Int(p.x, p.y, 0), MovementGridTileTypes[1]);
+            foreach (Vec2 tile_pos in TacticalUtilities.rotateTilePattern(SelectedUnit.Position, targetTiles,
+                         (int)((Math.Sqrt(targetTiles.Length) / 2) - 0.5),
+                         TacticalUtilities.GetRotatingOctant(SelectedUnit.Position, mouseLocation)))
+                    MovementGrid.SetTile(new Vector3Int(tile_pos.x, tile_pos.y, 0), MovementGridTileTypes[1]);
+            if (damage != 0)
+                foreach (Actor_Unit target in TacticalUtilities.UnitsWithinRotatingPattern(SelectedUnit.Position,
+                             targetTiles, TacticalUtilities.GetRotatingOctant(SelectedUnit.Position, mouseLocation)))
+                        target.UnitSprite.ShowDamagedHealthBar(target, damage);
+            
         }
-
     }
-    void UpdateOTargetGrid(Vec2i location)
+    
+    void UpdateMeleeAOEGrid(int damage = 0)
     {
-        MovementGrid.ClearAllTiles();
-        foreach (var item in TacticalUtilities.TilesOnPattern(location, new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } }, 1))
-        {
-            Vec2 pos = item;
-            TestTile(item);
-        }
-        void TestTile(Vec2 p)
-        {
-            if (SelectedUnit.Position.GetNumberOfMovesDistance(p.x, p.y) == 1)
-                MovementGrid.SetTile(new Vector3Int(p.x, p.y, 0), MovementGridTileTypes[1]);
-        }
-
+        int[,] pattern = { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } } ;
+        foreach (var item in TacticalUtilities.TilesOnPattern(SelectedUnit.Position, pattern, 1))
+            MovementGrid.SetTile(new Vector3Int(item.x, item.y, 0), MovementGridTileTypes[1]);
+        if (damage != 0)
+            foreach (Actor_Unit target in TacticalUtilities.UnitsWithinPattern(SelectedUnit.Position, pattern))
+                target.UnitSprite.ShowDamagedHealthBar(target, damage);
     }
 
-    void UpdateFixedCustomeGrid(Vec2i mouseLocation, int[,] targettiles, int range)
+    void UpdateGenericAttackGrid(Actor_Unit target, int damage = 0)
     {
-        MovementGrid.ClearAllTiles();
+        MovementGrid.SetTile(new Vector3Int(target.Position.x, target.Position.y, 0), MovementGridTileTypes[1]);
+        if (damage != 0)
+            target.UnitSprite.ShowDamagedHealthBar(target, damage);
+    }
 
+    void UpdateGenericAttackFailGrid(Actor_Unit target)
+    {
+        MovementGrid.SetTile(new Vector3Int(target.Position.x, target.Position.y, 0), MovementGridTileTypes[0]);
+    }
+
+    void UpdateFixedCustomGrid(Vec2i mouseLocation, int[,] targettiles, int range)
+    {
         int radius = CurrentSpell.AreaOfEffect;
         bool outOfRange = mouseLocation.GetNumberOfMovesDistance(SelectedUnit.Position) > CurrentSpell.Range.Max;
 
         foreach (Vec2 tile_pos in TacticalUtilities.TilesOnPattern(mouseLocation, targettiles, (int)((Math.Sqrt(targettiles.Length) / 2) - 0.5)))
         {
-            if (mouseLocation.GetNumberOfMovesDistance(new Vec2i(mouseLocation.x, mouseLocation.y)) <= range)
-            {
                 if (outOfRange)
                     MovementGrid.SetTile(new Vector3Int(tile_pos.x, tile_pos.y, 0), MovementGridTileTypes[0]);
                 else
                     MovementGrid.SetTile(new Vector3Int(tile_pos.x, tile_pos.y, 0), MovementGridTileTypes[1]);
-            }
         }
-        
     }
 
-    void UpdateRotatingCustomeGrid(Vec2i mouseLocation, int[,] targettiles, int range)
+    void UpdateRotatingCustomGrid(Vec2i mouseLocation, int[,] targettiles, int range)
     {
-        MovementGrid.ClearAllTiles();
-
         int radius = CurrentSpell.AreaOfEffect;
         bool outOfRange = mouseLocation.GetNumberOfMovesDistance(SelectedUnit.Position) > CurrentSpell.Range.Max;
 
         foreach (Vec2 tile_pos in TacticalUtilities.rotateTilePattern(mouseLocation, targettiles, (int)((Math.Sqrt(targettiles.Length) / 2) - 0.5), TacticalUtilities.GetRotatingOctant(SelectedUnit.Position, mouseLocation)))
         {
-            if (mouseLocation.GetNumberOfMovesDistance(new Vec2i(mouseLocation.x, mouseLocation.y)) <= range)
-            {
                 if (outOfRange)
                     MovementGrid.SetTile(new Vector3Int(tile_pos.x, tile_pos.y, 0), MovementGridTileTypes[0]);
                 else
                     MovementGrid.SetTile(new Vector3Int(tile_pos.x, tile_pos.y, 0), MovementGridTileTypes[1]);
-            }
         }
-
     }
 
     void UpdateAttackGrid(Vec2i source)
@@ -3012,14 +2948,11 @@ Turns: {currentTurn}
                     else
                         MovementGrid.SetTile(new Vector3Int(x, y, 0), MovementGridTileTypes[1]);
                 }
-
             }
         }
     }
 
     bool ButtonsInteractable => (IsPlayerTurn || PseudoTurn) == true && (RunningFriendlyAI || foreignAI != null) == false && queuedPath == null && paused == false;
-
-
 
     public void ButtonCallback(int ID)
     {
@@ -3090,6 +3023,7 @@ Turns: {currentTurn}
                         else if (SelectedUnit.Surrendered == false)
                         {
                             SelectedUnit.Surrendered = true;
+                            SelectedUnit.Movement = 0;
                             if (State.Rand.NextDouble() <= Config.SurrenderedPredAutoRegur)
                             {
                                 SelectedUnit.PredatorComponent?.FreeAnyAlivePrey();
@@ -3097,7 +3031,6 @@ Turns: {currentTurn}
                             SelectedUnit.SurrenderedThisTurn = true;
                             RebuildInfo();
                         }
-
                     }
                     break;
                 case 10:
@@ -3108,7 +3041,7 @@ Turns: {currentTurn}
                     }
                     break;
 
-                //case 11-13: Handled Below As they are now independent of player turns                  
+                //case 11-13: Handled Below As they are now independent of player turns
 
                 case 40:
                     UndoMovement();
@@ -3126,7 +3059,6 @@ Turns: {currentTurn}
                         RebuildInfo();
                     }
                     break;
-
             }
         }
         else if (reviewingBattle)
@@ -3163,19 +3095,16 @@ Turns: {currentTurn}
         {
             SkipUI.gameObject.SetActive(false);
             ProcessSkip(SkipUI.Surrender.isOn, SkipUI.WatchRest.isOn);
-
         }
         if (ID == 14)
         {
             if (SelectedUnit != null && SelectedUnit.Targetable)
                 SwitchAlignment(SelectedUnit);
-
         }
         if (ID == 15)
         {
             if (SelectedUnit != null && SelectedUnit.Targetable)
                 SelectedUnit.Unit.hiddenFixedSide = false;
-
         }
         if (ID == 16)
         {
@@ -3286,7 +3215,6 @@ Turns: {currentTurn}
 
     internal void TrySetSpecialMode(SpecialAction mode)
     {
-
         if (TacticalActionList.TargetedDictionary.TryGetValue(mode, out var targetedAction))
         {
             if (SelectedUnit == null || SelectedUnit.Targetable == false || SelectedUnit.Movement < targetedAction.MinimumMP)
@@ -3297,13 +3225,13 @@ Turns: {currentTurn}
             specialType = mode;
             ActionMode = 4;
         }
-
     }
 
     void PromptEndTurn()
     {
         if (Config.PromptEndTurn == false)
         {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
             return;
         }
@@ -3319,10 +3247,17 @@ Turns: {currentTurn}
         if (canStillMove)
         {
             var box = Instantiate(State.GameManager.DialogBoxPrefab).GetComponent<DialogBox>();
-            box.SetData(EndTurn, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
+            box.SetData(() => 
+            {
+                tookCombatActions |= !Config.AutoUseAI;
+                EndTurn();
+            }, "Yes", "No", "You still have units left that are capable of moving, end turn anyway?");
         }
         else
+        {
+            tookCombatActions |= !Config.AutoUseAI;
             EndTurn();
+        }
     }
 
     internal void SurrenderAll(bool attacker)
@@ -3332,6 +3267,7 @@ Turns: {currentTurn}
             if (attacker ? units[i].Unit.Side != defenderSide : units[i].Unit.Side == defenderSide)
             {
                 units[i].Surrendered = true;
+                units[i].Movement = 0;
                 units[i].SurrenderedThisTurn = true;
             }
         }
@@ -3353,7 +3289,6 @@ Turns: {currentTurn}
     {
         if (!fromWarp)
         {
-
             if (currentTurn < actor.Unit.TraitBoosts.TurnCanFlee)
             {
                 if (silent == false) State.GameManager.CreateMessageBox($"Can't retreat before the {actor.Unit.TraitBoosts.TurnCanFlee}th turn");
@@ -3405,7 +3340,7 @@ Turns: {currentTurn}
         }
     }
 
-    void RetreatUnit(Actor_Unit actor, bool defender)
+    public void RetreatUnit(Actor_Unit actor, bool defender)
     {
         if (defender)
         {
@@ -3499,7 +3434,6 @@ Turns: {currentTurn}
                     }
                 }
 
-
                 if (unit.PredatorComponent?.AlivePrey > 0 && unit.PredatorComponent?.Fullness > 0)
                 {
                     if (unit.Unit.Race == Race.EasternDragon)
@@ -3519,25 +3453,41 @@ Turns: {currentTurn}
                 {
                     unit.UnitSprite.AnimateBalls(unit.PredatorComponent.PreyNearLocation(PreyLocation.balls, true) * 0.0022f);
                 }
-                if (unit.PredatorComponent?.BreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
+                if (unit.PredatorComponent?.BreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0 && !Races.GetRace(unit.Unit.Race).ExtendedBreastSprites)
                 {
                     unit.UnitSprite.AnimateBoobs(unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts, true) * 0.0022f);
                 }
-
-                if (unit.PredatorComponent?.LeftBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
+                else
                 {
-                    if (Config.FairyBVType == FairyBVType.Shared)
+                    if (unit.PredatorComponent?.LeftBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
                     {
-                    unit.UnitSprite.AnimateBoobs(unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
-                    unit.UnitSprite.AnimateSecondBoobs(unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.022f);
+                        if (Config.FairyBVType == FairyBVType.Shared)
+                        {
+                            unit.UnitSprite.AnimateBoobs(
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                  + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                 * 0.011f);
+                            unit.UnitSprite.AnimateSecondBoobs(
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) 
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                                 + unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true))
+                                * 0.011f);
+                        }
+                        else
+                            unit.UnitSprite.AnimateBoobs(
+                                (unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true)
+                                + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                                * 0.0022f);
                     }
-                    else
-                    unit.UnitSprite.AnimateBoobs(unit.PredatorComponent.PreyNearLocation(PreyLocation.leftBreast, true) * 0.0022f);
-                }
 
-                if (unit.PredatorComponent?.RightBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
-                {
-                    unit.UnitSprite.AnimateSecondBoobs(unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true) * 0.0022f);
+                    if (unit.PredatorComponent?.RightBreastFullness > 0 && unit.PredatorComponent?.AlivePrey > 0)
+                    {
+                        unit.UnitSprite.AnimateSecondBoobs(
+                            (unit.PredatorComponent.PreyNearLocation(PreyLocation.rightBreast, true)
+                             + (0.5f * unit.PredatorComponent.PreyNearLocation(PreyLocation.breasts,true)))
+                            * 0.0022f);
+                    }
                 }
             }
         }
@@ -3549,9 +3499,7 @@ Turns: {currentTurn}
             if (RunningFriendlyAI)
             {
                 if (AITimer > 0)
-                {
                     AITimer -= dt;
-                }
                 else
                 {
                     RefreshAIIfNecessary();
@@ -3562,7 +3510,7 @@ Turns: {currentTurn}
                         EndTurn();
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
             else if (foreignAI != null || foreignUnits.Count() > 0)
@@ -3579,9 +3527,7 @@ Turns: {currentTurn}
                 }
                 foreignAI.ForeignTurn = true;
                 if (AITimer > 0)
-                {
                     AITimer -= dt;
-                }
                 else
                 {
                     //do AI processing
@@ -3590,7 +3536,7 @@ Turns: {currentTurn}
                         foreignAI = null;
                     }
                     if (AITimer <= 0)
-                        AITimer = Config.TacticalPlayerMovementDelay;
+                        AITimer = Math.Max(AITimer,Config.TacticalPlayerMovementDelay);
                 }
             }
         }
@@ -3598,12 +3544,11 @@ Turns: {currentTurn}
         {
             if (autoAdvancing == false)
                 AI(dt);
-
         }
         if (autoAdvancing)
         {
-            autoAdvanceTimer -= Time.deltaTime;
-            if (autoAdvanceTimer <= 0)
+            AITimer -= dt;
+            if (AITimer <= 0)
             {
                 EndTurn();
                 if (Config.AutoAdvance == Config.AutoAdvanceType.SkipToEnd)
@@ -3616,7 +3561,9 @@ Turns: {currentTurn}
                     }
                 }
                 else
-                    autoAdvanceTimer = AutoAdvanceRate;
+                {
+                    AITimer = Math.Max(AITimer, AutoAdvanceRate);
+                }
             }
         }
 
@@ -3640,13 +3587,11 @@ Turns: {currentTurn}
                     }
                     else
                         queuedPath = null;
-
                 }
                 else
                     queuedPath = null;
             }
         }
-
     }
 
     public Type GetAITypeForMindControledUnit(Unit unit)
@@ -3672,7 +3617,7 @@ Turns: {currentTurn}
                 EndTurn();
             }
             if (AITimer <= 0)
-                AITimer = Config.TacticalAIMovementDelay;
+                AITimer = Math.Max(AITimer,Config.TacticalAIMovementDelay);
         }
     }
 
@@ -3684,8 +3629,8 @@ Turns: {currentTurn}
         bool refreshed = false;
 
         List<string> ClothesFound = new List<string>();
+        MovementGrid.ClearAllTiles();
         CheckPath(mouseLocation);
-
         for (int i = 0; i < units.Count; i++)
         {
             Actor_Unit actor = units[i];
@@ -3695,56 +3640,66 @@ Turns: {currentTurn}
                 if (remainingLockedPanelTime <= 0)
                     InfoPanel.RefreshTacticalUnitInfo(actor);
 
-                if (!TacticalUtilities.IsUnitControlledByPlayer(actor.Unit) && SelectedUnit != null && SelectedUnit.Targetable)
+                if (SelectedUnit != null && (Config.AllowInfighting || TacticalUtilities.TreatAsHostile(actor,SelectedUnit)) && SelectedUnit.Targetable)
                 {
                     //write chance
                     switch (ActionMode)
                     {
                         case 1:
-
                             if (actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) < 2)
                             {
                                 int weaponDamage = SelectedUnit.WeaponDamageAgainstTarget(actor, false);
-                                string str = System.Math.Round(actor.GetAttackChance(SelectedUnit, false) * 100, 1) + "%\n-" + weaponDamage;
+                                string str = System.Math.Round(actor.GetAttackChance(SelectedUnit, false) * 100, 1) +
+                                             "%\n-" + weaponDamage;
                                 StatusUI.HitRate.text = str;
-                                actor.UnitSprite.ShowDamagedHealthBar(actor, weaponDamage);
+                                UpdateGenericAttackGrid(actor, weaponDamage);
                             }
+
                             break;
                         case 2:
                             if (SelectedUnit.BestRanged.Range > 1
-                                    && actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) > 1
-                                    && actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) <= SelectedUnit.BestRanged.Range)
+                                && actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) > 1
+                                && actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) <=
+                                SelectedUnit.BestRanged.Range)
                             {
                                 int weaponDamage = SelectedUnit.WeaponDamageAgainstTarget(actor, true);
-                                string str = System.Math.Round(actor.GetAttackChance(SelectedUnit, true) * 100, 1) + "%\n-" + weaponDamage;
+                                string str = System.Math.Round(actor.GetAttackChance(SelectedUnit, true) * 100, 1) +
+                                             "%\n-" + weaponDamage;
                                 StatusUI.HitRate.text = str;
-                                actor.UnitSprite.ShowDamagedHealthBar(actor, weaponDamage);
+                                UpdateGenericAttackGrid(actor, weaponDamage);
                             }
+
                             break;
                         case 3:
                             if (actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) < 2)
                             {
-                                if (SelectedUnit.PredatorComponent?.FreeCap() >= actor.Bulk())
+                                if (SelectedUnit.PredatorComponent?.HasSpareCap(actor.Bulk()) ?? false)
                                 {
                                     string str = System.Math.Round(actor.GetDevourChance(SelectedUnit) * 100, 1) + "%";
                                     StatusUI.HitRate.text = str;
+                                    UpdateGenericAttackGrid(actor);
                                 }
                                 else
+                                {
                                     StatusUI.HitRate.text = "Not enough room";
-
+                                    UpdateGenericAttackFailGrid(actor);
+                                }
                             }
                             break;
                         case 4:
                             if (actor.Position.GetNumberOfMovesDistance(SelectedUnit.Position) < 2)
                             {
-                                if (SelectedUnit.PredatorComponent?.FreeCap() >= actor.Bulk())
+                                if (SelectedUnit.PredatorComponent?.HasSpareCap(actor.Bulk()) ?? false)
                                 {
                                     string str = System.Math.Round(actor.GetDevourChance(SelectedUnit) * 100, 1) + "%";
                                     StatusUI.HitRate.text = str;
+                                    UpdateGenericAttackGrid(actor);
                                 }
                                 else
+                                {
                                     StatusUI.HitRate.text = "Not enough room";
-
+                                    UpdateGenericAttackFailGrid(actor);
+                                }
                             }
                             else if (specialType == SpecialAction.PounceMelee)
                             {
@@ -3753,16 +3708,16 @@ Turns: {currentTurn}
                                     weaponDamage = (int)Mathf.Min((weaponDamage + ((weaponDamage * SelectedUnit.PredatorComponent?.Fullness ?? 0) / 4)), weaponDamage * 2);
                                 string str = System.Math.Round(actor.GetAttackChance(SelectedUnit, false) * 100, 1) + "%\n-" + weaponDamage;
                                 StatusUI.HitRate.text = str;
-                                actor.UnitSprite.ShowDamagedHealthBar(actor, weaponDamage);
+                                UpdateGenericAttackGrid(actor, weaponDamage);
                             }
                             if (specialType == SpecialAction.TailStrike)
                             {
-                                UpdateTailStrikeGrid(mouseLocation);
+                                int[,] targetGrid = { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 } };
+                                UpdateMeleeDirectionalGrid(mouseLocation, targetGrid, SelectedUnit.WeaponDamageAgainstTarget(actor, false, .66f));
                             }
-                            break;
                             if (specialType == SpecialAction.DireInfection)
                             {
-                                UpdateOTargetGrid(mouseLocation);
+                                UpdateMeleeAOEGrid(SelectedUnit.WeaponDamageAgainstTarget(actor, false, .75f));
                             }
                             break;
                     }
@@ -3811,9 +3766,9 @@ Turns: {currentTurn}
         if (ActionMode == 6)
         {
             if (CurrentSpell?.AOEType == AreaOfEffectType.FixedPattern)
-                UpdateFixedCustomeGrid(mouseLocation, CurrentSpell?.Pattern, SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation.x, mouseLocation.y));
-            if (CurrentSpell?.AOEType == AreaOfEffectType.RotatablePattern)
-                UpdateRotatingCustomeGrid(mouseLocation, CurrentSpell?.Pattern, SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation.x, mouseLocation.y));
+                UpdateFixedCustomGrid(mouseLocation, CurrentSpell?.Pattern, SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation));
+            else if (CurrentSpell?.AOEType == AreaOfEffectType.RotatablePattern)
+                UpdateRotatingCustomGrid(mouseLocation, CurrentSpell?.Pattern, SelectedUnit.Position.GetNumberOfMovesDistance(mouseLocation));
             else if (CurrentSpell?.AreaOfEffect > 0)
                 UpdateAreaOfEffectGrid(mouseLocation);
 
@@ -3831,6 +3786,7 @@ Turns: {currentTurn}
                                 int spellDamage = spell.Damage(SelectedUnit, actor);
                                 spellDamage = SpellDamageMod(SelectedUnit, actor, spellDamage);
                                 actor.UnitSprite.ShowDamagedHealthBar(actor, spellDamage);
+                                UpdateGenericAttackGrid(actor, spellDamage);
                                 string str = System.Math.Round(actor.GetMagicChance(SelectedUnit, CurrentSpell) * 100, 1) + "%\n-" + spellDamage;
                                 StatusUI.HitRate.text = str;
                             }
@@ -3862,10 +3818,9 @@ Turns: {currentTurn}
                         int spellDamage = spell.Damage(SelectedUnit, splashTarget);
                         spellDamage = SpellDamageMod(SelectedUnit, splashTarget, spellDamage);
                         splashTarget.UnitSprite.ShowDamagedHealthBar(splashTarget, spellDamage);
+                        UpdateGenericAttackGrid(actor, spellDamage);
                     }
                 }
-
-
             }
         }
 
@@ -3896,7 +3851,11 @@ Turns: {currentTurn}
             return;
 
         if (currentPathDestination != null && mouseLocation.Matches(currentPathDestination))
+        {
+            UpdateMovementGrid();
+            UpdateAttackGrid(mouseLocation);
             return;
+        }
         if (TacticalUtilities.OpenTile(mouseLocation, SelectedUnit) == false)
             return;
         currentPathDestination = mouseLocation;
@@ -3917,12 +3876,10 @@ Turns: {currentTurn}
                 arrowManager.PlaceNode(Color.red, new Vec2i(path[i].X, path[i].Y));
             else
                 arrowManager.PlaceNode(Color.gray, new Vec2i(path[i].X, path[i].Y));
-
         }
 
         UpdateMovementGrid();
         UpdateAttackGrid(mouseLocation);
-
     }
 
     internal void RebuildInfo()
@@ -3969,11 +3926,8 @@ Turns: {currentTurn}
                 StatusUI.VoreButton.GetComponentInChildren<UnityEngine.UI.Text>().text = "Vore";
             }
 
-
             CommandsUI.gameObject.SetActive(true);
             CommandsUI.SetUpButtons(SelectedUnit);
-
-
         }
         else if (SelectedUnit == null)
         {
@@ -3995,9 +3949,6 @@ Turns: {currentTurn}
         }
     }
 
-
-
-
     void NextActor(NextUnitType type)
     {
         int startingIndex = units.IndexOf(SelectedUnit);
@@ -4016,11 +3967,9 @@ Turns: {currentTurn}
                     State.GameManager.CenterCameraOnTile(units[currentIndex].Position.x, units[currentIndex].Position.y);
                     break;
                 }
-
             }
             currentIndex++;
         }
-
     }
 
     void MoveActor()
@@ -4082,8 +4031,6 @@ Turns: {currentTurn}
         if ((!IsPlayerTurn && !PseudoTurn) || queuedPath != null)
             return;
 
-
-
         Vec2i clickLocation = new Vec2i(x, y);
 
         for (int i = 0; i < units.Count; i++)
@@ -4092,12 +4039,10 @@ Turns: {currentTurn}
 
             if (unit.Position.GetDistance(clickLocation) < 1 && unit.Targetable == true)
             {
-
                 if (ActionMode == 0)
                 {
                     if (TacticalUtilities.IsUnitControlledByPlayer(unit.Unit) && unit.Unit.Side == activeSide)
                     {
-
                         if (SelectedUnit != units[i])
                         {
                             SelectedUnit = units[i];
@@ -4115,7 +4060,6 @@ Turns: {currentTurn}
                         MeleeAttack(SelectedUnit, unit);
                         return;
                     }
-
                 }
                 if (ActionMode == 2)
                 {
@@ -4124,7 +4068,6 @@ Turns: {currentTurn}
                         RangedAttack(SelectedUnit, unit);
                         return;
                     }
-
                 }
                 if (ActionMode == 3)
                 {
@@ -4133,7 +4076,6 @@ Turns: {currentTurn}
                         VoreAttack(SelectedUnit, unit);
                         return;
                     }
-
                 }
                 if (ActionMode == 4)
                 {
@@ -4143,11 +4085,9 @@ Turns: {currentTurn}
                         ActionDone();
                         return;
                     }
-
                 }
                 if (ActionMode == 6)
                 {
-
                     int distance = SelectedUnit.Position.GetNumberOfMovesDistance(unit.Position);
                     if (TacticalUtilities.MeetsQualifier(CurrentSpell.AcceptibleTargets, SelectedUnit, unit) && CurrentSpell.Range.Max >= distance && CurrentSpell.Range.Min <= distance)
                     {
@@ -4156,11 +4096,9 @@ Turns: {currentTurn}
                         ActionDone();
                         return;
                     }
-
                 }
                 if (ActionMode == 7)
                 {
-
                     int distance = SelectedUnit.Position.GetNumberOfMovesDistance(unit.Position);
                     if (3 >= distance)
                     {
@@ -4169,15 +4107,14 @@ Turns: {currentTurn}
                         ActionDone();
                         return;
                     }
-
                 }
             }
-
         }
         for (int i = 0; i < units.Count; i++)
         {
             Actor_Unit unit = units[i];
-            if (Config.EdibleCorpses && ActionMode == 3 && unit.Position.GetDistance(clickLocation) < 1 && unit.Targetable == false && unit.Visible && unit.Bulk() <= SelectedUnit.PredatorComponent.FreeCap())
+            if (Config.EdibleCorpses && ActionMode == 3 && unit.Position.GetDistance(clickLocation) < 1 && unit.Targetable == false && unit.Visible 
+                && (SelectedUnit?.PredatorComponent?.HasSpareCap(unit.Bulk()) ?? false))
             {
                 var voreTypes = State.RaceSettings.GetVoreTypes(SelectedUnit.Unit.Race);
                 if (voreTypes.Contains(VoreType.Oral))
@@ -4186,7 +4123,8 @@ Turns: {currentTurn}
                     SelectedUnit.PredatorComponent.UsePreferredVore(unit);
                 ActionDone();
             }
-            else if (Config.EdibleCorpses && ActionMode == 4 && unit.Position.GetDistance(clickLocation) < 1 && unit.Targetable == false && unit.Visible && unit.Bulk() <= SelectedUnit.PredatorComponent.FreeCap())
+            else if (Config.EdibleCorpses && ActionMode == 4 && unit.Position.GetDistance(clickLocation) < 1 && unit.Targetable == false && unit.Visible 
+                     && (SelectedUnit?.PredatorComponent?.HasSpareCap(unit.Bulk()) ?? false))
             {
                 if (TakeSpecialAction(specialType, SelectedUnit, unit))
                 {
@@ -4222,12 +4160,7 @@ Turns: {currentTurn}
                 ActionDone();
                 return;
             }
-
-
-
         }
-
-
     }
 
     private bool unitControllableBySide(Actor_Unit unit, int side)
@@ -4249,6 +4182,7 @@ Turns: {currentTurn}
 
     internal void ActionDone()
     {
+        tookCombatActions = true;
         ActionMode = 0;
         PlaceUndoMarker();
         RebuildInfo();
@@ -4303,11 +4237,6 @@ Turns: {currentTurn}
         {
             OrderSelectedUnitToMoveTo(x, y);
         }
-
-
-
-
-
     }
 
     internal void OrderSelectedUnitToMoveTo(int x, int y)
@@ -4318,10 +4247,290 @@ Turns: {currentTurn}
         ActionMode = 0;
     }
 
-    //public void AddUnit(Actor_Unit newUnit)
-    //{
-    //    units.Add(newUnit);
-    //}
+    enum DropType
+    {
+        Melee,
+        Ranged,
+        Summon,
+        Neutral
+    }
+    
+    class DropZones
+    {
+        List<Vec2i> MeleePrimary;
+        List<Vec2i> MeleeSecondary;
+        List<Vec2i> RangedPrimary;
+        List<Vec2i> RangedSecondary;
+        List<Vec2i> SummonPrimary;
+        List<Vec2i> SummonSecondary;
+        List<Vec2i> Tertiary;
+        List<Vec2i> Final;
+        
+        public DropZones(bool[,] tilenetwork, bool attacker)
+        {
+            MeleePrimary = new List<Vec2i>();
+            MeleeSecondary = new List<Vec2i>();
+            RangedPrimary = new List<Vec2i>();
+            RangedSecondary = new List<Vec2i>();
+            SummonPrimary = new List<Vec2i>();
+            SummonSecondary = new List<Vec2i>();
+            Tertiary = new List<Vec2i>();
+            Final = new List<Vec2i>();
+            
+            List<Vec2i> visitedtiles = new List<Vec2i>();
+            
+            int y;
+            int yinc;
+            
+            if (attacker)
+            {
+                y = Config.TacticalSizeY - 1;
+                yinc = -1;
+            }
+            else
+            {
+                y = 0;
+                yinc = 1;
+            }
+            
+            void XTraverse(List<Vec2i> outerZone, List<Vec2i> midZone, List<Vec2i> innerZone)
+            {
+                Vec2i pos;
+                int x = 0;
+                while (x < Config.TacticalSizeX / 8)
+                {
+                    pos = new Vec2i(x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        outerZone.Add(pos);
+                    pos = new Vec2i(Config.TacticalSizeX - 1 - x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        outerZone.Add(pos);
+                    
+                    ++x;
+                }
+                while (x < Config.TacticalSizeX / 4)
+                {
+                    pos = new Vec2i(x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        midZone.Add(pos);
+                    pos = new Vec2i(Config.TacticalSizeX - 1 - x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        midZone.Add(pos);
+                    
+                    ++x;
+                }
+                while (x < Config.TacticalSizeX / 2)
+                {
+                    pos = new Vec2i(x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        innerZone.Add(pos);
+                    pos = new Vec2i(Config.TacticalSizeX - 1 - x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        innerZone.Add(pos);
+                    
+                    ++x;
+                }
+                if (2 * x + 1 == Config.TacticalSizeX) // This conditional will resolve to TRUE if and only if the width of the tactical board is odd, and x is the coordinate of the middle-most column.
+                {
+                    pos = new Vec2i(x, y);
+                    if (tilenetwork[pos.x, pos.y])
+                        innerZone.Add(pos);
+                }
+            }
+            
+            int yloopcount = 0;
+            while (yloopcount < Config.TacticalSizeY / 8)
+            {
+                XTraverse(Tertiary, Tertiary, Tertiary);
+                y += yinc;
+                ++yloopcount;
+            }
+            while (yloopcount < Config.TacticalSizeY / 4)
+            {
+                XTraverse(Tertiary, RangedSecondary, RangedPrimary);
+                y += yinc;
+                ++yloopcount;
+            }
+            while (yloopcount < Config.TacticalSizeY * 3 / 8)
+            {
+                XTraverse(Tertiary, MeleeSecondary, MeleePrimary);
+                y += yinc;
+                ++yloopcount;
+            }
+            while (yloopcount < Config.TacticalSizeY / 2)
+            {
+                XTraverse(Final, SummonSecondary, SummonPrimary);
+                y += yinc;
+                ++yloopcount;
+            }
+        }
+        
+        public void Drop(Actor_Unit actor, DropType type)
+        {
+            // If this is called during a battle, ignore actors that are already prey.
+            if (actor.SelfPrey?.Predator != null) return;
+            
+            List<List<Vec2i>> droporder;
+            switch (type)
+            {
+                case DropType.Melee:
+                    droporder = new List<List<Vec2i>>() { MeleePrimary, MeleeSecondary, RangedPrimary, RangedSecondary, Tertiary, SummonPrimary, SummonSecondary, Final };
+                    break;
+                case DropType.Ranged:
+                    droporder = new List<List<Vec2i>>() { RangedPrimary, RangedSecondary, MeleePrimary, MeleeSecondary, Tertiary, SummonPrimary, SummonSecondary, Final };
+                    break;
+                case DropType.Summon:
+                    droporder = new List<List<Vec2i>>() { SummonPrimary, SummonSecondary, MeleePrimary, MeleeSecondary, RangedPrimary, RangedSecondary, Tertiary, Final };
+                    break;
+                case DropType.Neutral:
+                default:
+                    droporder = new List<List<Vec2i>>() { Final, SummonSecondary, SummonPrimary, Tertiary, RangedSecondary, MeleeSecondary, RangedPrimary, MeleePrimary };
+                    break;
+            }
+            
+            foreach (List<Vec2i> dropzone in droporder)
+            {
+                int count = dropzone.Count();
+                if (count > 0)
+                {
+                    int index = State.Rand.Next(count);
+                    actor.SetPos(dropzone[index]);
+                    dropzone.RemoveAt(index);
+                    return;
+                }
+            }
+            
+            // Failsafe. Kill it, and place it in the corner.
+            State.GameManager.TacticalMode.Log.RegisterMiscellaneous("Killing actor " + actor.Unit.Name + " because there is no place to drop him.");
+            actor.SetPos(new Vec2i(0, 0));
+            actor.Unit.Health = 0;
+            actor.Targetable = false;
+            actor.Surrendered = true;
+            actor.Visible = false;
+            actor.PredatorComponent?.FreeAnyAlivePrey();
+            actor.Unit.Kill(); // Why do we need to execute so many statements to kill a unit?
+            return;
+        }
+    }
+    
+    public void DropAllUnits()
+    {
+        // Drops (places in appropriate drop zones) all the units in the battle.
+        
+        bool[,] bestnetwork = new bool[Config.TacticalSizeX, Config.TacticalSizeY];
+        int bestnetworksize = 0;
+        bool[,] visitedtiles = new bool[Config.TacticalSizeX, Config.TacticalSizeY];
+        int visitedtilescount = 0;
+        
+        bool CanWalkInto(Vec2i tile)
+        {
+            return TacticalTileInfo.CanWalkInto(tiles[tile.x, tile.y], null) && !BlockedTile[tile.x, tile.y];
+        }
+        
+        for (int x = 0; x < Config.TacticalSizeX; ++x)
+        {
+            for (int y = 0; y < Config.TacticalSizeY; ++y)
+            {
+                Vec2i pos = new Vec2i(x, y);
+                if (visitedtiles[pos.x, pos.y])
+                    continue;
+                visitedtiles[pos.x, pos.y] = true;
+                ++visitedtilescount;
+
+                if (CanWalkInto(pos))
+                {
+                    bool[,] currentnetwork = new bool[Config.TacticalSizeX, Config.TacticalSizeY];
+                    currentnetwork[pos.x, pos.y] = true;
+                    int currentnetworksize = 1;
+                    Stack<Vec2i> tilestack = new Stack<Vec2i>();
+                    
+                    void AddTileToStack(Vec2i tile)
+                    {
+                        if (tile.x < 0) return;
+                        if (tile.x >= Config.TacticalSizeX) return;
+                        if (tile.y < 0) return;
+                        if (tile.y >= Config.TacticalSizeY) return;
+                        if (visitedtiles[tile.x, tile.y]) return;
+                        tilestack.Push(tile);
+                        visitedtiles[tile.x, tile.y] = true; // Not literally visited at this time, but queued for an inevitable visit (and we don't want this tile on the stack again).
+                        ++visitedtilescount;
+                    }
+                    
+                    void AddAdjacentTilesToStack()
+                    {
+                        AddTileToStack (new Vec2i(pos.x - 1, pos.y - 1));
+                        AddTileToStack (new Vec2i(pos.x - 1, pos.y));
+                        AddTileToStack (new Vec2i(pos.x - 1, pos.y + 1));
+                        AddTileToStack (new Vec2i(pos.x, pos.y - 1));
+                        AddTileToStack (new Vec2i(pos.x, pos.y + 1));
+                        AddTileToStack (new Vec2i(pos.x + 1, pos.y - 1));
+                        AddTileToStack (new Vec2i(pos.x + 1, pos.y));
+                        AddTileToStack (new Vec2i(pos.x + 1, pos.y + 1));
+                    }
+                    
+                    AddAdjacentTilesToStack();
+                    while (tilestack.Count > 0)
+                    {
+                        pos = tilestack.Pop();
+                        if (CanWalkInto(pos))
+                        {
+                            currentnetwork[pos.x, pos.y] = true;
+                            ++currentnetworksize;
+                            AddAdjacentTilesToStack();
+                        }
+                    }
+                    
+                    if (currentnetworksize > bestnetworksize)
+                    {
+                        for (int tmpx = 0; tmpx < Config.TacticalSizeX; ++tmpx)
+                            for (int tmpy = 0; tmpy < Config.TacticalSizeY; ++tmpy)
+                                bestnetwork[tmpx, tmpy] = currentnetwork[tmpx, tmpy];
+                        bestnetworksize = currentnetworksize;
+                    }
+                }
+                
+                // If there are not enough tiles remaining unvisited to potentially form a better network than the current best network, then we are done.
+                if (bestnetworksize > Config.TacticalSizeX * Config.TacticalSizeY - visitedtilescount)
+                    break;
+            }
+            
+            // If there are not enough tiles remaining unvisited to potentially form a better network than the current best network, then we are done.
+            if (bestnetworksize > Config.TacticalSizeX * Config.TacticalSizeY - visitedtilescount)
+                break;
+        }
+        
+        DropZones attackerdropper = new DropZones (bestnetwork, true);
+        DropZones defenderdropper = new DropZones (bestnetwork, false);
+        foreach (Actor_Unit actor in units)
+        {
+            if (actor.Unit.GetApparentSide() == attackerSide)
+            {
+                if (actor.Unit.Type == UnitType.Summon)
+                    attackerdropper.Drop(actor, DropType.Summon);
+                else if (actor.Unit.GetBestRanged() == null)
+                    attackerdropper.Drop(actor, DropType.Melee);
+                else
+                    attackerdropper.Drop(actor, DropType.Ranged);
+            }
+            else if (actor.Unit.GetApparentSide() == defenderSide)
+            {
+                if (actor.Unit.Type == UnitType.Summon)
+                    defenderdropper.Drop(actor, DropType.Summon);
+                else if (actor.Unit.GetBestRanged() == null)
+                    defenderdropper.Drop(actor, DropType.Melee);
+                else
+                    defenderdropper.Drop(actor, DropType.Ranged);
+            }
+            else
+            {
+                if (State.Rand.Next() > 0.5)
+                    attackerdropper.Drop(actor, DropType.Neutral);
+                else
+                    defenderdropper.Drop(actor, DropType.Neutral);
+            }
+        }
+        TacticalUtilities.UpdateActorLocations();
+    }
 
     internal void SwitchAlignment(Actor_Unit actor)
     {
@@ -4338,7 +4547,6 @@ Turns: {currentTurn}
     {
         return actor.Unit.Side == defenderSide;
     }
-
 
     //public void CheckAlignment(Actor_Unit childUnit, Actor_Unit parentUnit)
     //{
@@ -4413,7 +4621,6 @@ Turns: {currentTurn}
         garrison.Remove(actor);
     }
 
-
     void EndTurn()
     {
         if (waitingForDialog)
@@ -4444,6 +4651,14 @@ Turns: {currentTurn}
         IsPlayerTurn = true;
         if (attackersTurn)
         {
+            if (!tookCombatActions && currentTurn > 10)
+                attackerTrappedUnitsTimer++;
+            else
+                attackerTrappedUnitsTimer = 0;
+            if (attackerTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Attacker unable to fight for {attackerTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = false;
             attackersTurnCheck = false;
             activeSide = defenderSide;
@@ -4454,6 +4669,14 @@ Turns: {currentTurn}
         }
         else
         {
+            if (!tookCombatActions && currentTurn > 10)
+                defenderTrappedUnitsTimer++;
+            else
+                defenderTrappedUnitsTimer = 0;
+            if (defenderTrappedUnitsTimer > 0)
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"<color=orange>Defender unable to fight for {defenderTrappedUnitsTimer} turn(s)</color>");
+            tookCombatActions = false;
+            
             attackersTurn = true;
             attackersTurnCheck = true;
             currentTurn++;
@@ -4470,8 +4693,8 @@ Turns: {currentTurn}
         UpdateEndTurnButtonText();
         StatusUI.EndTurn.interactable = IsPlayerTurn;
         EnemyTurnText.SetActive(!IsPlayerTurn);
-        if (IsPlayerTurn == false)
-            AITimer = .2f;
+        //if (IsPlayerTurn == false)
+            AITimer = Math.Max(AITimer, AutoAdvanceRate);
         if (attackersTurn)
         {
             StatusUI.AttackerText.fontStyle = FontStyle.Bold;
@@ -4507,22 +4730,21 @@ Turns: {currentTurn}
     public bool CanDefect(Actor_Unit unit)
     {
         if (unit.Possessed > 0 || unit.DefectedThisTurn) return false;
-        return TacticalUtilities.GetPreferredSide(unit.Unit, activeSide, attackersTurn ? defenderSide : attackerSide) != activeSide
-                    || units.Any(u => u.Unit.Side != unit.Unit.Side && u.Targetable && u.Visible && !u.Fled) && !units.Any(u => TacticalUtilities.TreatAsHostile(unit, u) && u.Targetable && u.Visible && !u.Fled);
-                
+        return TacticalUtilities.GetPreferredSide(unit.Unit, activeSide, attackersTurn ? defenderSide : attackerSide) != activeSide || units.Any(u => u.Unit.Side != unit.Unit.Side && u.Targetable && u.Visible && !u.Fled) && !units.Any(u => TacticalUtilities.TreatAsHostile(unit, u) && u.Targetable && u.Visible && !u.Fled);
     }
 
     void NewTurn()
     {
         AllSurrenderedCheck();
         Log.RegisterNewTurn(attackersTurn ? AttackerName : DefenderName, currentTurn);
-
+        
         for (int i = 0; i < units.Count; i++)
         {
             if (units[i].Unit.IsDead == false && units[i].Unit.Side != activeSide)
             {
                 //You seem to be causing issues, but I may need you for reference later.
-                /*if (Config.KuroTenkoEnabled)
+                /*
+                if (Config.KuroTenkoEnabled)
                 {
                     List<Actor_Unit> released;
                     released = units[i].BirthCheck();
@@ -4530,10 +4752,10 @@ Turns: {currentTurn}
                     {
                         CheckAlignment(child, units[i]);
                     }
-                }*/
+                }
+                */
                 units[i].RubCount = 0; // Hedonists now get just as much benefit out of mind-control effects
                 units[i].DigestCheck(); //Done first so that freed units are checked properly below
-
             }
             if (units[i].SelfPrey != null)
                 units[i].SelfPrey.TurnsSinceLastDamage++;
@@ -4549,7 +4771,6 @@ Turns: {currentTurn}
                     units[i].Unit.DeactivateConditionalTrait(item.id);
                 }
             }
-
         }
         for (int i = 0; i < units.Count; i++)
         {
@@ -4592,7 +4813,9 @@ Turns: {currentTurn}
         if (turboMode == false)
         {
             RebuildInfo();
-            autoAdvancing = Config.AutoAdvance > 0 && IsOnlyOneSideVisible();
+            bool advance = IsOnlyOneSideVisible(true);
+            autoAdvancing = Config.AutoAdvance > 0 
+                            && advance;
             VictoryCheck();
         }
     }
@@ -4622,22 +4845,22 @@ Turns: {currentTurn}
                     Debug.Log("The AI ended up needing an all surrendered reset... this probably shouldn't have happened");
             }
             else
-                Debug.Log("All units had apparently surrendered without any units surrendered.  I'm guessing it has to do with fleeing units");
-
+                Debug.Log("All units had apparently surrendered without any units surrendered. I'm guessing it has to do with fleeing units.");
         }
     }
 
-    internal bool IsOnlyOneSideVisible()
+    internal bool IsOnlyOneSideVisible(bool setTimer = false)
     {
         List<Actor_Unit> visibleAttackers = new List<Actor_Unit>();
         List<Actor_Unit> visibleDefenders = new List<Actor_Unit>();
-
+        List<Actor_Unit> edibleDefeated = new List<Actor_Unit>();
+        
         for (int i = 0; i < units.Count; i++)
         {
             if (units[i] != null && units[i].Fled == false)
             {
                 Actor_Unit actor = units[i];
-                if (actor.Targetable)
+                if (actor.Targetable && !actor.Surrendered)
                 {
                     if (actor.Unit.Side == armies[0].Side)
                     {
@@ -4648,23 +4871,72 @@ Turns: {currentTurn}
                         visibleDefenders.Add(actor);
                     }
                 }
+                else if ((actor.Unit.IsDead && actor.Visible && Config.EdibleCorpses)
+                         || (actor.Surrendered && actor.Visible))
+                {
+                    edibleDefeated.Add(actor);
+                }
             }
         }
+
+        bool foodRemaining = false;
         bool oneSideLeft = false;
-        if (visibleAttackers.Count() == 0)
+        if (!visibleAttackers.Any())
         {
+            tookCombatActions = true;
+            if (!turboMode && IsPlayerTurn && attackersTurn &&
+                Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+            {
+                RunningFriendlyAI = true;
+            }
+            if (!turboMode && IsPlayerTurn && !attackersTurn && Config.AutoAdvance == Config.AutoAdvanceType.DoNothing)
+            {
+                foodRemaining = CanEatDefeated(visibleDefenders, edibleDefeated);
+            }
             oneSideLeft = !visibleDefenders.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, defenderSide, attackerSide) == attackerSide); // They are probably still fighting in this case
         }
-        if (visibleDefenders.Count() == 0)
+        if (!visibleDefenders.Any())
         {
+            tookCombatActions = true;
+            if (!turboMode && IsPlayerTurn && !attackersTurn &&
+                Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+            {
+                RunningFriendlyAI = true;
+            }
+            if (!turboMode && IsPlayerTurn && attackersTurn && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing)
+            {
+                foodRemaining = CanEatDefeated(visibleAttackers, edibleDefeated);
+            }
             oneSideLeft = !visibleAttackers.Any(vd => !vd.Unit.hiddenFixedSide && TacticalUtilities.GetPreferredSide(vd.Unit, attackerSide, defenderSide) == defenderSide); // They are probably still fighting in this case
         }
-        autoAdvanceTimer = AutoAdvanceRate;
+
+        if (foodRemaining)
+        {
+            RunningFriendlyAI = true;
+            oneSideLeft = false;
+        }
+        //if (setTimer)
+        //    AITimer = Math.Max(AutoAdvanceRate, AITimer);
         AutoAdvanceText.SetActive(oneSideLeft && Config.AutoAdvance > Config.AutoAdvanceType.DoNothing);
         return oneSideLeft;
-
     }
 
+    bool CanEatDefeated(List<Actor_Unit> possiblePreds, List<Actor_Unit> defeated)
+    {
+        if (!possiblePreds.Any() || !defeated.Any())
+            return false;
+        foreach (var actor in possiblePreds)
+        {
+            if (!actor.Unit.Predator)
+                continue;
+            foreach (var target in defeated)
+                if (Config.EatSurrenderedAllies || target.Unit.IsDead || TacticalUtilities.TreatAsHostile(actor, target))
+                    if (actor.PredatorComponent.HasSpareCap(target.Bulk()))
+                        return true;
+        }
+
+        return false;
+    }
 
     bool VictoryCheck()
     {
@@ -4721,7 +4993,6 @@ Turns: {currentTurn}
                                 }
                             }
                         }
-
                     }
                 }
                 if (actor.Fled == false)
@@ -4813,7 +5084,7 @@ Turns: {currentTurn}
                 foreach (var potion in actor.Unit.EquippedPotions)
                 {
                     if (armies[actor.Unit.Side == attackerSide ? 0 : 1] != null)
-                    { 
+                    {
                         int WantedPots = potion.Value[1];
 
                         while (WantedPots > actor.Unit.EquippedPotions[potion.Key][0] && armies[actor.Unit.Side == attackerSide ? 0 : 1].ItemStock.HasItem((ItemType)potion.Key))
@@ -4822,14 +5093,11 @@ Turns: {currentTurn}
                             actor.Unit.EquippedPotions[potion.Key][0] = actor.Unit.EquippedPotions[potion.Key][0] + 1;
                         }
                     }
-
                 }
-
             }
             BattleReviewText.SetActive(false);
             foreach (Actor_Unit actor in units.ToList())
             {
-
                 if (actor.Unit.IsDead)
                 {
                     if (defenderBuildingsInRange != null)
@@ -4855,9 +5123,9 @@ Turns: {currentTurn}
                     IEnumerable<DefenseEncampment> possible_camps = defenderBuildingsInRange.Where(b => b is DefenseEncampment).Cast<DefenseEncampment>();
                     if (possible_camps != null)
                     {
-                        DefenseEncampment camp = possible_camps.Where(d => d.maxDefenders > d.AvailibleDefenders).First();
+                        DefenseEncampment camp = possible_camps.Where(d => d.maxDefenders > d.AvailableDefenders).First();
                         if (camp != null)
-                            camp.AvailibleDefenders++;
+                            camp.AvailableDefenders++;
                     }
                     units.Remove(actor);
                     continue;
@@ -4880,6 +5148,31 @@ Turns: {currentTurn}
                         if (garrison.Contains(actor) && remainingDefenders > 0)
                         {
                             actor.Unit.Health = actor.Unit.MaxHealth;
+                        }
+                        else
+                        {
+                            retreatedDefenders.Add(actor.Unit);
+                            armies[1]?.Units.Remove(actor.Unit);
+                            village?.GetRecruitables().Remove(actor.Unit);
+                        }
+                    }
+                    else
+                    {
+                        retreatedAttackers.Add(actor.Unit);
+                        armies[0].Units.Remove(actor.Unit);
+                    }
+                    actor.PredatorComponent?.PurgePrey();
+                    units.Remove(actor);
+                }
+                else if (actor.Unit.IsDead && actor.Unit.Type != UnitType.Summon && (actor.Unit.HasTrait(Traits.CloseCall)) && actor.KilledByDigestion == false)
+                {
+                    actor.Surrendered = false;
+                    actor.Unit.Health = 1;
+                    if (actor.Unit.Side == defenderSide)
+                    {
+                        if (garrison.Contains(actor) && remainingDefenders > 0)
+                        {
+                            actor.Unit.Health = 1;
                         }
                         else
                         {
@@ -4936,17 +5229,15 @@ Turns: {currentTurn}
                             actor.Unit.RemoveTrait(Traits.Transmigration);
                             State.World.Reincarnators.Add(new Reincarnator(actor.Unit, race, true));
                             State.World.GetEmpireOfSide(actor.Unit.Side)?.Reports.Add(new StrategicReport($"{actor.Unit.Name} will reincarnate as a {InfoPanel.RaceSingular(actor.Unit.KilledBy)}.", new Vec2(0, 0)));
-
                         }
                     }
                 }
-                else if ((actor.Unit.HasTrait(Traits.Reincarnation) || actor.Unit.HasTrait(Traits.InfiniteReincarnation)) && actor.Unit.IsDead 
+                else if ((actor.Unit.HasTrait(Traits.Reincarnation) || actor.Unit.HasTrait(Traits.InfiniteReincarnation)) && actor.Unit.IsDead
                     && actor.Unit.Type != UnitType.Summon && actor.Unit.Type != UnitType.Leader && actor.Unit.Type != UnitType.SpecialMercenary)
                 {
                     if (State.World.MainEmpires != null)
                     {
-                        List<Race> activeRaces = StrategicUtilities.GetAllUnits(false).ConvertAll(u => u.Race).Distinct()
-                            .ToList();
+                        List<Race> activeRaces = StrategicUtilities.GetAllUnits(false).ConvertAll(u => u.Race).Distinct().ToList();
                         if (activeRaces.Any())
                         {
                             Race race = activeRaces[State.Rand.Next(activeRaces.Count)];
@@ -4957,9 +5248,9 @@ Turns: {currentTurn}
                                 actor.Unit.RemoveTrait(Traits.Reincarnation);
                                 State.World.Reincarnators.Add(new Reincarnator(actor.Unit, race));
                                 State.World.GetEmpireOfSide(actor.Unit.Side)?.Reports.Add(new StrategicReport($"{actor.Unit.Name} will reincarnate as a random race.", new Vec2(0, 0)));
+                            }
                         }
-                        }
-                    } 
+                    }
                 }
                 else if (actor.Fled)
                     units.Remove(actor);
@@ -5024,7 +5315,6 @@ Turns: {currentTurn}
             {
                 AssignLeftoverTroops(armies[1], extraDefenders);
             }
-                
 
             ProcessFledUnits();
             remainingAttackers = 0;
@@ -5086,7 +5376,6 @@ Turns: {currentTurn}
                 State.GameManager.StatScreen.AttackerText.text = TacticalStats.AttackerSummary(remainingAttackers) + attackerReceives;
                 State.GameManager.StatScreen.DefenderText.text = TacticalStats.DefenderSummary(remainingDefenders - remainingGarrison, remainingGarrison) + defenderReceives;
                 State.GameManager.StatScreen.Open(AIAttacker && AIDefender);
-
             }
             else
                 State.GameManager.SwitchToStrategyMode();
@@ -5152,7 +5441,6 @@ Turns: {currentTurn}
         List<Item> items = new List<Item>();
         foreach (Actor_Unit actor in units)
         {
-
             if (actor.Unit.IsDead && actor.Unit.Type != UnitType.Leader)
             {
                 foreach (Item item in actor.Unit.Items)
@@ -5180,13 +5468,9 @@ Turns: {currentTurn}
                             items.Add(item);
                             attackerFoundSpell = true;
                         }
-
-
                     }
                 }
-
             }
-
         }
         if (remainingDefenders > 0)
         {
@@ -5267,7 +5551,7 @@ Turns: {currentTurn}
                             }
                             else
                             {
-                                remainingDefenders -= actor.PredatorComponent.GetDirectPrey().Where(s => s.Unit.HasTrait(Traits.TheGreatEscape)).Count(); 
+                                remainingDefenders -= actor.PredatorComponent.GetDirectPrey().Where(s => s.Unit.HasTrait(Traits.TheGreatEscape)).Count();
                             }
                         }
                     }
@@ -5311,7 +5595,6 @@ Turns: {currentTurn}
                                 actor.Unit.Health = 0;
                             }
                         }
-
                     }
                 }
             }
@@ -5329,7 +5612,6 @@ Turns: {currentTurn}
                                 actor.Unit.Health = 0;
                             }
                         }
-
                     }
                 }
             }
@@ -5345,7 +5627,8 @@ Turns: {currentTurn}
                 actors.Remove(actor);
             }
             else
-            {  //Extra safety to eliminate the possibility of doubled units
+            {
+                //Extra safety to eliminate the possibility of doubled units
                 retreatedAttackers.Remove(actor.Unit);
                 retreatedDefenders.Remove(actor.Unit);
             }
@@ -5380,7 +5663,7 @@ Turns: {currentTurn}
                 }
             }
             army.RecalculateSizeValue();
-            if (army.RemainnigSize  < 0)
+            if (army.RemainingSize < 0)
             {
                 while (!StrategicUtilities.ArmyCanFitUnit(army, army.Units.OrderByDescending(u => State.RaceSettings.GetDeployCost(u.Race) * u.TraitBoosts.DeployCostMult).First()))
                 {
@@ -5405,7 +5688,7 @@ Turns: {currentTurn}
         }
         if (actors.Any())
         {
-            TacticalUtilities.ProcessTravelingUnits(actors.Select(s => s.Unit).ToList());            
+            TacticalUtilities.ProcessTravelingUnits(actors.Select(s => s.Unit).ToList());
         }
     }
 
@@ -5443,7 +5726,6 @@ Turns: {currentTurn}
             //Weight gain disabled for consuming corpses
             preyUnit.Unit.Health = -999999;
         }
-
     }
 
     void EatSurrenderedAllies()
@@ -5482,10 +5764,7 @@ Turns: {currentTurn}
                 predatorUnit.Unit.GeneralStatIncrease(1);
             preyUnit.Unit.Health = -999999;
         }
-
     }
-
-
 
     public void ProcessTileEffects()
     {
@@ -5514,7 +5793,6 @@ Turns: {currentTurn}
             }
         }
     }
-
 
     public override void ReceiveInput()
     {
@@ -5581,14 +5859,12 @@ Turns: {currentTurn}
                     ProcessRightClick(x, y);
                 if (Input.GetMouseButtonDown(2))
                     remainingLockedPanelTime = 1.5f;
-
             }
             else
             {
                 arrowManager.ClearNodes();
                 currentPathDestination = null;
             }
-
         }
         if (reviewingBattle)
         {
@@ -5627,10 +5903,7 @@ Turns: {currentTurn}
                 else
                     PromptEndTurn();
             }
-
-
         }
-
     }
 	
     void UpdateFog()
@@ -5785,7 +6058,6 @@ Turns: {currentTurn}
                             actor.PredatorComponent.ForceConsumeAuto(possible_targets[State.Rand.Next(0, possible_targets.Count())]);
                         }
                     }
-
                 }
             }
 
@@ -5798,7 +6070,6 @@ Turns: {currentTurn}
                     {
                         possible_targets[State.Rand.Next(0, possible_targets.Count())].PredatorComponent.ForceConsumeAuto(actor);
                     }
-
                 }
             }
         }

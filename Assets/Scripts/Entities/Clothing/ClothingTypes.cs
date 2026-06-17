@@ -87,6 +87,7 @@ class BeltTop : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing1.YOffset = 0;
         if (actor.Unit.Race == Race.Lizards && actor.IsAnalVoring || actor.IsUnbirthing)
             {
             blocksDick = false;
@@ -97,6 +98,19 @@ class BeltTop : MainClothing
             int breastMod = 0;
             if (actor.Unit.Race == Race.Succubi)
                 breastMod = 3;
+            else if (actor.Unit.Race == Race.Lizards)
+            {
+                if (actor.Unit.BreastSize < 3)
+                    clothing1.YOffset = 2 * 0.625f;
+                else if (actor.Unit.BreastSize < 6)
+                    clothing1.YOffset = 4 * 0.625f;
+                else if (actor.Unit.BreastSize == 6)
+                    clothing1.YOffset = 3 * 0.625f;
+                else
+                    clothing1.YOffset = 1 * 0.625f;
+            }
+            else if (actor.Unit.BreastSize == 2)
+                clothing1.YOffset = -1 * 0.625f;
             clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.Belts[actor.Unit.BreastSize + breastMod];
             actor.SquishedBreasts = true;
         }
@@ -127,6 +141,8 @@ class BikiniBottom : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing1.YOffset = 0;
+        clothing2.YOffset = 0;
         int spr = 0;
         if (actor.Unit.Race == Race.Lizards && actor.IsAnalVoring || actor.IsUnbirthing)
             {
@@ -141,7 +157,10 @@ class BikiniBottom : MainClothing
         else if (actor.Unit.Race == Race.Harpies)
             spr = 9;
         else if (actor.Unit.Race == Race.Lamia)
+        {
             spr = 3 + (actor.Unit.HasBreasts ? 0 : 4);
+            clothing1.YOffset = 0.625f;
+        }
         else
         {
             if (actor.GetBodyWeight() > 0)
@@ -150,7 +169,13 @@ class BikiniBottom : MainClothing
                 spr = 7;
         }
 
-        if (actor.Unit.DickSize > 2)
+        if (actor.Unit.Race == Race.Lamia)
+        {
+            clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.BikiniBottom[10];
+            clothing2.YOffset = 0.625f;
+        }
+        else if (actor.Unit.DickSize > 2
+            && actor.Unit.Race != Race.Lamia)
         {
             if (actor.Unit.Race == Race.Lizards && actor.IsAnalVoring || actor.IsUnbirthing)
             {
@@ -238,6 +263,7 @@ class Loincloth : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing1.YOffset = 0;
         int spr = 0;
         if (actor.Unit.Race == Race.Lizards && actor.IsAnalVoring || actor.IsUnbirthing)
             {
@@ -248,7 +274,10 @@ class Loincloth : MainClothing
         else if (actor.Unit.Race == Race.Harpies)
             spr = 9;
         else if (actor.Unit.Race == Race.Lamia)
+        {
             spr = 3 + (actor.Unit.HasBreasts ? 0 : 4);
+            clothing1.YOffset = 1.25f;
+        }
         else
         {
             if (actor.GetBodyWeight() > 0)
@@ -282,6 +311,8 @@ class Leotard : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing2.YOffset = 0;
+        
         int spr = 0;
         if (actor.Unit.Race == Race.Lizards)
             {
@@ -326,12 +357,18 @@ class Leotard : MainClothing
         
         if (actor.Unit.BreastSize >= 0)
         {
+            actor.SquishedBreasts = true;
             if (actor.Unit.Race == Race.Lizards && actor.IsAnalVoring || actor.IsUnbirthing)
             {
                 blocksDick = false;
                 clothing2.GetSprite = (s) => null;
             }
-            else clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Leotards[12 + actor.Unit.BreastSize];
+            else
+            {
+                if (actor.Unit.Race == Race.Lizards && actor.Unit.BreastSize >= 3)
+                    clothing2.YOffset = 3 * 0.625f;
+                clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Leotards[12 + actor.Unit.BreastSize];
+            }
         }
         else
             clothing2.GetSprite = null;
@@ -356,16 +393,21 @@ class Rags : MainClothing
 
     public override void Configure(CompleteSprite sprite, Actor_Unit actor)
     {
+        clothing1.YOffset = 0;
+        clothing2.YOffset = 0;
         int spr = 0;
         if (actor.Unit.Race == Race.Lizards)
         {
             spr = 8;
-            sprite.ChangeOffset(SpriteType.Clothing2, new Vector2(0, 2.5f));
+            clothing2.YOffset = 2.5f;
         }
         else if (actor.Unit.Race == Race.Harpies)
             spr = 9;
         else if (actor.Unit.Race == Race.Lamia)
+        {
             spr = 3 + (actor.Unit.HasBreasts ? 0 : 4);
+            clothing1.YOffset = 2*0.625f;
+        }
         else if (actor.Unit.Race == Race.Imps || actor.Unit.Race == Race.Goblins)
             spr = 10;
         else
@@ -376,11 +418,11 @@ class Rags : MainClothing
                 spr = 7;
         }
 
-        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && actor.PredatorComponent?.BallsFullness > 0)       
+        if ((blocksDick || inFrontOfDick) && Config.CockVoreHidesClothes && (actor.PredatorComponent?.BallsFullness > 0 || actor.IsErect()))       
             clothing1.GetSprite = null;        
         else
             clothing1.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[spr];
-
+        
         clothing2.layer = 10;
         if (actor.Unit.Race == Race.Imps || actor.Unit.Race == Race.Goblins)
         {
@@ -397,12 +439,15 @@ class Rags : MainClothing
             }
         else if (actor.Unit.BreastSize >= 0)
         {
+            if (actor.Unit.BreastSize != 0)
+                clothing2.YOffset += 0.625f;
             clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[11 + actor.Unit.BreastSize];
             clothing2.layer = 18;
         }
         else
         {
-            clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[11];
+            clothing2.YOffset = -0.625f;
+            clothing2.GetSprite = (s) => State.GameManager.SpriteDictionary.Rags[11]; //should be 11, but sprite is offset by 1 px
         }
 
         base.ConfigureIgnoreHidingRules(sprite, actor);
@@ -451,8 +496,9 @@ class BlackTop : MainClothing
                 }
                 break;
         }
+
         if (actor.Unit.Race == Race.Lizards)
-            sprite.ChangeOffset(SpriteType.Clothing, new Vector2(0, 2.5f));
+            clothing1.YOffset = 2.5f;
         base.Configure(sprite, actor);
     }
 }

@@ -514,7 +514,7 @@ static class SpellList
             Name = "Explosive Hug",
             Id = "explosivehug",
             SpellType = SpellTypes.ExplosiveHug,
-            Description = "Unit detonates, killing itself and dealing 2/3 of it's current HP in damage to targeted unit",
+            Description = "Unit detonates, killing itself and dealing 2/3 of its current HP in damage to targeted unit",
             AcceptibleTargets = new List<AbilityTargets>() { AbilityTargets.Enemy },
             Range = new Range(1),
             Tier = -1,
@@ -923,7 +923,7 @@ static class SpellList
             Name = "Summon",
             Id = "summon",
             SpellType = SpellTypes.Summon,
-            Description = "Summons a random monster at 50 % of caster’s experience (Available monsters depend on what monsters are available to hire as mercs, or set to spawn, so that monsters you aren't interested in don't spawn.)",
+            Description = "Summons a random monster at 50% of caster’s experience (Available monsters depend on what monsters are available to hire as mercs, or set to spawn, so that monsters you aren't interested in don't spawn.)",
             AcceptibleTargets = new List<AbilityTargets>() { AbilityTargets.Tile },
             Range = new Range(4),
             Tier = 3,
@@ -1800,6 +1800,7 @@ public class Spell
             if ((actor.Unit.SingleUseSpells?.Contains(SpellType) ?? false) && actor.Unit.Mana != startMana)
             {
                 actor.Unit.SingleUseSpells.Remove(SpellType);
+                actor.Unit.ExpendedSingleUseSpells.Add(SpellType);
                 actor.Unit.UpdateSpells();
             }
             return true;
@@ -1815,6 +1816,7 @@ public class Spell
             if ((actor.Unit.SingleUseSpells?.Contains(SpellType) ?? false) && actor.Unit.Mana != startMana)
             {
                 actor.Unit.SingleUseSpells.Remove(SpellType);
+                actor.Unit.ExpendedSingleUseSpells.Add(SpellType);
                 actor.Unit.UpdateSpells();
             }
             return true;

@@ -294,35 +294,6 @@ class Taraluxia : BlankSlate
     {
         if (facingFront)
         {
-            if (SelDigesting == true) return Sprites[1]; // Watching her fade away into dragon fat~
-            if (SelGurgled == true)
-            {
-                actor.AnimationController.frameLists[4].currentlyActive = true;
-                if (actor.AnimationController.frameLists[4].currentlyActive)
-                {
-                    if (actor.AnimationController.frameLists[4].currentTime >= TaraLickChops.times[actor.AnimationController.frameLists[4].currentFrame])
-                    {
-                        actor.AnimationController.frameLists[4].currentFrame++;
-                        actor.AnimationController.frameLists[4].currentTime = 0f;
-
-                        if (actor.AnimationController.frameLists[4].currentFrame >= TaraLickChops.frames.Length)
-                        {
-                            actor.AnimationController.frameLists[4].currentFrame = 0;
-                            actor.AnimationController.frameLists[4].currentTime = 0f;
-                            actor.AnimationController.frameLists[4].currentlyActive = false;
-                            SelGurgled = false;
-                            if (Config.BurpOnDigest && State.Rand.NextDouble() < Config.BurpFraction)
-                            {
-                                actor.SetBurpMode();
-                                State.GameManager.SoundManager.PlayBurp(actor);
-                            }
-                        }
-                    }
-                }
-                else
-                    return null;
-                return Sprites[TaraLickChops.frames[actor.AnimationController.frameLists[4].currentFrame]];
-            }
             if (actor.IsAttacking) return Sprites[3];
             if (actor.IsOralVoring)
             {
@@ -371,34 +342,50 @@ class Taraluxia : BlankSlate
                     return Sprites[TaraOralVore.frames[actor.AnimationController.frameLists[2].currentFrame]];
                 }
             }
-
-            if (actor.HasJustVored) //Swallow Animation
+            if (SelDigesting == true) return Sprites[1]; // Watching her fade away into dragon fat~
+            if (SelGurgled == true)
             {
-                actor.AnimationController.frameLists[1].currentlyActive = true;
-                if (actor.AnimationController.frameLists[1].currentlyActive)
+                actor.AnimationController.frameLists[4].currentlyActive = true;
+                if (actor.AnimationController.frameLists[4].currentlyActive)
+                {
+                    if (actor.AnimationController.frameLists[4].currentTime >= TaraLickChops.times[actor.AnimationController.frameLists[4].currentFrame])
                     {
-                        if (actor.AnimationController.frameLists[1].currentTime >= TaraSwallowFront.times[actor.AnimationController.frameLists[1].currentFrame])
-                        {
-                            actor.AnimationController.frameLists[1].currentFrame++;
-                            actor.AnimationController.frameLists[1].currentTime = 0f;
+                        actor.AnimationController.frameLists[4].currentFrame++;
+                        actor.AnimationController.frameLists[4].currentTime = 0f;
 
-                            if (actor.AnimationController.frameLists[1].currentFrame >= TaraSwallowFront.frames.Length)
+                        if (actor.AnimationController.frameLists[4].currentFrame >= TaraLickChops.frames.Length)
+                        {
+                            actor.AnimationController.frameLists[4].currentFrame = 0;
+                            actor.AnimationController.frameLists[4].currentTime = 0f;
+                            actor.AnimationController.frameLists[4].currentlyActive = false;
+                            SelGurgled = false;
+                            if (Config.BurpOnDigest && State.Rand.NextDouble() < Config.BurpFraction)
                             {
-                                actor.AnimationController.frameLists[1].currentFrame = 0;
-                                actor.AnimationController.frameLists[1].currentTime = 0f;
-                                actor.AnimationController.frameLists[1].currentlyActive = false;
+                                actor.SetBurpMode();
+                                State.GameManager.SoundManager.PlayBurp(actor);
                             }
                         }
                     }
-                    else
-                        return null;
-                    return Sprites[TaraSwallowFront.frames[actor.AnimationController.frameLists[1].currentFrame]];
+                }
+                else
+                    return null;
+                return Sprites[TaraLickChops.frames[actor.AnimationController.frameLists[4].currentFrame]];
             }
+            
+            
             //Front View Idle Pose
             return Sprites[0];
         }
         else // Back View
         {
+            if (actor.IsAttacking) return Sprites[10];
+            if (actor.IsOralVoring)
+            {
+                if (actor.Unit.BodyAccentType5 == 1) return Sprites[12]; // Glowing Maw ON
+                else return Sprites[11]; // Glowing Maw OFF
+            }
+
+            if (actor.HasJustVored) return Sprites[13]; //Swallow
             if (SelDigesting == true) return Sprites[8]; // Melt into me, Sel~
             if (SelGurgled == true) // All mine...
             {
@@ -410,14 +397,7 @@ class Taraluxia : BlankSlate
                 }
                 return Sprites[9]; // Placeholder until animation is finished, if that happens.
             }
-            if (actor.IsAttacking) return Sprites[10];
-            if (actor.IsOralVoring)
-            {
-                if (actor.Unit.BodyAccentType5 == 1) return Sprites[12]; // Glowing Maw ON
-                else return Sprites[11]; // Glowing Maw OFF
-            }
-
-            if (actor.HasJustVored) return Sprites[13]; //Swallow
+            
             else return Sprites[7]; // Back View Idle Pose
         }
     }
@@ -458,41 +438,49 @@ class Taraluxia : BlankSlate
     {
         if (facingFront) //Front view
         {
-            if (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)// Oh no, death!
+            if ((actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)
+                && !(actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? false))// Oh no, death!
             {
                 if (SelAlive == true)
                 {
                     SelDigesting = true;
                     actor.AnimationController.frameLists[5].currentlyActive = true;
                     if (actor.AnimationController.frameLists[5].currentlyActive)
+                    {
+                        if (actor.AnimationController.frameLists[5].currentTime >= TaraDigestSelFront.times[actor.AnimationController.frameLists[5].currentFrame])
                         {
-                            if (actor.AnimationController.frameLists[5].currentTime >= TaraDigestSelFront.times[actor.AnimationController.frameLists[5].currentFrame])
-                            {
-                                actor.AnimationController.frameLists[5].currentFrame++;
-                                actor.AnimationController.frameLists[5].currentTime = 0f;
+                            actor.AnimationController.frameLists[5].currentFrame++;
+                            actor.AnimationController.frameLists[5].currentTime = 0f;
 
-                                if (actor.AnimationController.frameLists[5].currentFrame >= TaraDigestSelFront.frames.Length)
-                                {
-                                    actor.AnimationController.frameLists[5].currentFrame = 0;
-                                    actor.AnimationController.frameLists[5].currentTime = 0f;
-                                    actor.AnimationController.frameLists[5].currentlyActive = false;
-                                    SelDigesting = false;
-                                    SelGurgled = true;
-                                    SelAlive = false;
-                                }
+                            if (actor.AnimationController.frameLists[5].currentFrame >= TaraDigestSelFront.frames.Length)
+                            { 
+                                actor.AnimationController.frameLists[5].currentFrame = 0;
+                                actor.AnimationController.frameLists[5].currentTime = 0f;
+                                actor.AnimationController.frameLists[5].currentlyActive = false;
+                                SelDigesting = false;
+                                SelGurgled = true; 
+                                SelAlive = false;
                             }
                         }
-                        else
-                            return null;
-                        return Sprites[TaraDigestSelFront.frames[actor.AnimationController.frameLists[5].currentFrame]];
+                    }
+                    else return null;
+                    return Sprites[TaraDigestSelFront.frames[actor.AnimationController.frameLists[5].currentFrame]];
                 }
                 else return null;
             }
-            else return null;
+            else
+            {
+                actor.AnimationController.frameLists[5].currentFrame = 0;
+                actor.AnimationController.frameLists[5].currentTime = 0f;
+                actor.AnimationController.frameLists[5].currentlyActive = false;
+                SelDigesting = false;
+                return null;
+            }
         }
         else // Back view
         {
-            if (actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)// Oh no, death!
+            if ((actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, false) ?? false)
+                && !(actor.PredatorComponent?.IsUnitOfSpecificationInPrey(Race.Selicia, true) ?? false))// Oh no, death!
             {
                 if (SelAlive == true)
                 {
@@ -522,7 +510,14 @@ class Taraluxia : BlankSlate
                 }
                 else return null;
             }
-            else return null;
+            else
+            {
+                actor.AnimationController.frameLists[6].currentFrame = 0;
+                actor.AnimationController.frameLists[6].currentTime = 0f;
+                actor.AnimationController.frameLists[6].currentlyActive = false;
+                SelDigesting = false;
+                return null;
+            }
         }
     }
 

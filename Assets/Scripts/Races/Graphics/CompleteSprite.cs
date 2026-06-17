@@ -134,7 +134,7 @@ class CompleteSprite
             return sprites[typeInt];
         if (spriteType == SpriteType.Belly && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);
-            else if (spriteType == SpriteType.SecondaryBelly && animatedType != null)
+        else if (spriteType == SpriteType.SecondaryBelly && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);
         else if (spriteType == SpriteType.Balls && animatedType != null)
             sprites[typeInt] = new SpriteContainer(animatedType, folder, spriteType.ToString(), 0, 0, null);
@@ -374,12 +374,41 @@ class CompleteSprite
         if (Config.HideBreasts == false)
         {
             SetSprite(SpriteType.Breasts, race.Breasts);
-        if (actor.Unit.Race == Race.Umbreon && sprites[(int)SpriteType.BodyAccent3] != null && actor.Unit.HasBreasts)
-            sprites[(int)SpriteType.BodyAccent3].GameObject.transform.SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+            if (actor.Unit.Race == Race.Umbreon 
+                && sprites[(int)SpriteType.BodyAccent3] != null 
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent3].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+                
+            }
+            if (actor.Unit.Race == Race.DemiDragons
+                && sprites[(int)SpriteType.BodyAccent15] != null
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent15].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.Breasts].GameObject.transform.parent, false);
+            }
+            
             SetSprite(SpriteType.BreastShadow, race.BreastShadow);
+            
             SetSprite(SpriteType.SecondaryBreasts, race.SecondaryBreasts);
-        if (actor.Unit.Race == Race.Umbreon && sprites[(int)SpriteType.BodyAccent4] != null && actor.Unit.HasBreasts)
-            sprites[(int)SpriteType.BodyAccent4].GameObject.transform.SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+            if (actor.Unit.Race == Race.Umbreon 
+                && sprites[(int)SpriteType.BodyAccent4] != null 
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.BodyAccent4].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+                
+            }
+            if (actor.Unit.Race == Race.DemiDragons
+                && sprites[(int)SpriteType.Beard] != null
+                && actor.Unit.HasBreasts)
+            {
+                sprites[(int)SpriteType.Beard].GameObject.transform
+                    .SetParent(sprites[(int)SpriteType.SecondaryBreasts].GameObject.transform.parent, false);
+            }
+
         }
         else
         {

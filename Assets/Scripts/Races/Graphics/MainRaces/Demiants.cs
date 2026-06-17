@@ -10,8 +10,6 @@ class Demiants : DefaultRaceData
 
     readonly DemiantRags Rags;
 
-    bool oversize = false;
-
     public Demiants()
     {
         BodySizes = 3;
@@ -118,7 +116,7 @@ class Demiants : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor) // Lower Body(black)
     {
         if (actor.Unit.HasBreasts)
@@ -305,7 +303,6 @@ class Demiants : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -769,7 +766,7 @@ class Demiants : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DemiantSkin, actor.Unit.SkinColor);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.DemiantSkin, actor.Unit.SkinColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

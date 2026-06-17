@@ -8,8 +8,6 @@ class Equines : DefaultRaceData
     Sprite[] SpritesClothes = State.GameManager.SpriteDictionary.HorseClothing;
     Sprite[] SpritesAdd1 = State.GameManager.SpriteDictionary.HorseExtras1;
 
-    bool oversize = false;
-
     internal Equines()
     {
         SpecialAccessoryCount = 0;
@@ -296,7 +294,6 @@ class Equines : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(29 * 29, 1f));
@@ -333,7 +330,6 @@ class Equines : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.RightBreastFullness > 0)
         {
             int rightSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetRightBreastSize(29 * 29, 1f));

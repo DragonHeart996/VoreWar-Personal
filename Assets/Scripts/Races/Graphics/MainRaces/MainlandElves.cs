@@ -10,8 +10,6 @@ class MainlandElves : DefaultRaceData
     readonly Sprite[] Sprites4 = State.GameManager.SpriteDictionary.HumansVoreSprites;
     readonly Sprite[] Sprites5 = State.GameManager.SpriteDictionary.HumansBodySprites4;
 
-    bool oversize = false;
-
     public MainlandElves()
     {
         BodySizes = 3;
@@ -291,11 +289,11 @@ class MainlandElves : DefaultRaceData
             case 4:
                 return Sprites[2 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
             case 5:
-                return Sprites[1 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
+                return Sprites[3 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
             case 6:
                 return Sprites[2 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
             case 7:
-                return Sprites[1 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
+                return Sprites[3 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
             default:
                 return Sprites[0 + (actor.Unit.BodySize * 4) + (actor.Unit.HasBreasts ? 0 : 12)];
         }
@@ -569,7 +567,6 @@ class MainlandElves : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

@@ -243,6 +243,7 @@ static class Config
     internal static bool EdibleCorpses => World.GetValue("EdibleCorpses");
 
     internal static List<Traits> LeaderTraits => World.LeaderTraits;
+    internal static List<Traits> SoldierTraits => World.SoldierTraits;
     internal static List<Traits> MaleTraits => World.MaleTraits;
     internal static List<Traits> FemaleTraits => World.FemaleTraits;
     internal static List<Traits> HermTraits => World.HermTraits;

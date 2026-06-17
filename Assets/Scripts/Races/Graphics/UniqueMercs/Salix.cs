@@ -11,8 +11,6 @@ class Salix : DefaultRaceData
     readonly Sprite[] Sprites2 = State.GameManager.SpriteDictionary.SalixVore;
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.SalixGen;
 
-    bool oversize = false;
-
     internal List<MainClothing> AllClothing;
 
     const float stomachMult = 1f;
@@ -106,14 +104,6 @@ class Salix : DefaultRaceData
     }
     internal override int BreastSizes => 8;
     internal override int DickSizes => 6;
-
-    internal override void RunFirst(Actor_Unit actor)
-    {
-        oversize = false;
-        base.RunFirst(actor);
-    }
-
-
 
     protected override Sprite AccessorySprite(Actor_Unit actor)
     {

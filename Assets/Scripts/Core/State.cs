@@ -11,7 +11,7 @@ using UnityEngine;
 public static class State
 {
     static int saveErrors = 0;
-    public const string Version = "44E";
+    public const string Version = "45";
     public static World World;
     public static Rand Rand = new Rand();
     public static NameGenerator NameGen;
@@ -239,11 +239,8 @@ public static class State
         List<TaggedTrait> newTraits = new List<TaggedTrait>();
         foreach (var newTrait in UntaggedTraits)
         {
-            if (newTrait.Value)
-            {
-                continue;
-            }
-            newTraits.Add(newTrait.Key);
+            if (!newTrait.Value && newTrait.Key.tags != null)
+                newTraits.Add(newTrait.Key);
         }
 
         ExternalTraitHandler.AppendTaggedTrait(newTraits);
@@ -633,13 +630,13 @@ public static class State
             // New version check. Initially considered making an array of applicable versions to bridge gaps, but just grabbing the version number should be plenty
             string versionStr = System.Text.RegularExpressions.Regex.Match(World.SaveVersion, @"\d+").Value;
             int version = int.Parse(versionStr);
-
+            string versionUpdateMessage = "";
 
             VillageBuildingList.SetBuildings(World.crazyBuildings);
             if (version < 12)
             {
                 World = null;
-                GameManager.CreateMessageBox("This save file is from before version 12.  I took the liberty of doing a clean sweep when I added the new garrisons to improve the code quality. Sorry.  You can still load .map files from before version 12 though.");
+                GameManager.CreateMessageBox("This save file is from before version 12. I took the liberty of doing a clean sweep when I added the new garrisons to improve the code quality. Sorry. You can still load .map files from before version 12 though.");
                 return;
             }
             Config.World = World.ConfigStorage;
@@ -1192,6 +1189,375 @@ public static class State
                 }
             }
 
+            if (version < 44 + 1)
+            {
+                // Herein are the updates specific to version 45.
+                
+                // Since DefenseEncampment.AvailibleDefenders was renamed to AvailableDefenders, they will not have loaded correctly (if present).
+                bool defcampsfound = false;
+                foreach (ConstructibleBuilding constructible in World.Constructibles)
+                {
+                    if (constructible is DefenseEncampment defcamp)
+                    {
+                        defcampsfound = true;
+                        defcamp.AvailableDefenders = defcamp.maxDefenders / 2;
+                    }
+                }
+                if (defcampsfound)
+                {
+                    versionUpdateMessage += "Version 45: Changes to DefenseEncampments lost data for their available defenders. All DefenseEncampments have been assigned an arbitrary number of available defenders (half of their maxima).\n";
+                }
+                
+                // The Actor_Unit._position fix below will throw some exception for the tutorial. But the tutorial needs a fix anyway, so let's handle it.
+                if (tutorial == true)
+                {
+                    // One problem (introduced by Version 45) is the loss of position data, hereunder recreated manually.
+                    // Second problem (introduced further back) is the lack of PermanentTraits in the tutorial save, hereunder fixed by calling a function that re-initializes PermanentTraits.
+                    List<Actor_Unit> actors = World.TacticalData.units;
+                    actors[0].SetPos(new Vec2i(14, 15));
+                    actors[0].Unit.AddPermanentTrait(Traits.Bulky); // ...Unit.PermanentTraits = new (...) would work better, but PermanentTraits is protected; let's respect that, and use a workaround.
+                    actors[0].Unit.RemoveTrait(Traits.Bulky);
+                    actors[1].SetPos(new Vec2i(16, 12));
+                    actors[1].Unit.AddPermanentTrait(Traits.Bulky);
+                    actors[1].Unit.RemoveTrait(Traits.Bulky);
+                    actors[2].SetPos(new Vec2i(3, 14));
+                    actors[2].Unit.AddPermanentTrait(Traits.Bulky);
+                    actors[2].Unit.RemoveTrait(Traits.Bulky);
+                    actors[3].SetPos(new Vec2i(6, 5));
+                    for (int i = 4; i < actors.Count; ++i)
+                    {
+                        actors[i].SetPos(new Vec2i(i, 1)); // Some actors that aren't visible (but can still generate errors).
+                    }
+                    
+                    versionUpdateMessage += "Version 45: The tutorial had a problem, when it came time to give your unit a level up. The tutorial's data has been fixed to prevent the error (and also, a fix for the actor positions, introduced by this version update).\n";
+                }
+                
+                // Since Actor_Unit.Position was renamed to Actor_Unit._position, no tactical battle will have loaded correctly.
+                else if (World.TacticalData != null)
+                {
+                    // I made TacticalMode.DropAllUnits() specifically for this purpose, only to learn that loading the TacticalData into TacticalMode at all (without fixing it first) will cause disastrous errors anyway.
+                    // Now, I recreate the whole algorithm for use on TacticalData.
+                    
+                    TacticalData data = World.TacticalData;
+                    TacticalTileType[,] tiles = data.tiles;
+                    int width = data.tiles.GetUpperBound(0) + 1;
+                    int height = data.tiles.GetUpperBound(1) + 1;
+                    bool[,] validlocations = new bool[width, height];
+                    
+                    int x;
+                    int y;
+                    for (x = 0; x < width; ++x)
+                        for (y = 0; y < height; ++y)
+                            validlocations[x, y] = TacticalTileInfo.CanWalkInto(data.tiles[x, y], null);
+                    foreach (TacticalBuildings.TacticalBuilding bldg in data.buildings)
+                        for (x = 0; x < bldg.Width && bldg.LowerLeftPosition.x + x < width; ++x)
+                            for (y = 0; y < bldg.Height && bldg.LowerLeftPosition.y + y < height; ++y)
+                                validlocations[bldg.LowerLeftPosition.x + x, bldg.LowerLeftPosition.y + y] = false;
+                    foreach (DecorationStorage dec in data.decorationStorage)
+                        for (x = 0; x < TacticalDecorations.TacticalDecorationList.DecDict[dec.Type].Width && dec.Position.x + x < width; ++x)
+                            for (y = 0; y < TacticalDecorations.TacticalDecorationList.DecDict[dec.Type].Height && dec.Position.x + x < height; ++y)
+                                validlocations[dec.Position.x + x, dec.Position.y + y] = false;
+                    
+                    bool[,] visitedtiles = new bool[width, height];
+                    int remainingunvisitedtiles = width * height;
+                    bool[,] bestnetwork = new bool[width, height];
+                    int bestnetworksize = 0;
+                    for (x = 0; x < width; ++x)
+                    {
+                        for (y = 0; y < height; ++y)
+                        {
+                            if (visitedtiles[x, y] != true)
+                            {
+                                visitedtiles[x, y] = true;
+                                --remainingunvisitedtiles;
+                                
+                                if (validlocations[x, y])
+                                {
+                                    bool[,] currentnetwork = new bool[width, height];
+                                    currentnetwork[x, y] = true;
+                                    int currentnetworksize = 1;
+                                    Stack<Vec2i> tilestack = new Stack<Vec2i>();
+                                    Vec2i pos = new Vec2i(x, y);
+                                    
+                                    void AddTileToStack(Vec2i tile)
+                                    {
+                                        if (tile.x < 0) return;
+                                        if (tile.x >= width) return;
+                                        if (tile.y < 0) return;
+                                        if (tile.y >= height) return;
+                                        if (visitedtiles[tile.x, tile.y]) return;
+                                        tilestack.Push(tile);
+                                        visitedtiles[tile.x, tile.y] = true; // Not literally visited at this time, but queued for an inevitable visit (and we don't want this tile on the stack again).
+                                        --remainingunvisitedtiles;
+                                    }
+                                    
+                                    void AddAdjacentTilesToStack()
+                                    {
+                                        AddTileToStack(new Vec2i(pos.x - 1, pos.y - 1));
+                                        AddTileToStack(new Vec2i(pos.x - 1, pos.y));
+                                        AddTileToStack(new Vec2i(pos.x - 1, pos.y + 1));
+                                        AddTileToStack(new Vec2i(pos.x, pos.y - 1));
+                                        AddTileToStack(new Vec2i(pos.x, pos.y + 1));
+                                        AddTileToStack(new Vec2i(pos.x + 1, pos.y - 1));
+                                        AddTileToStack(new Vec2i(pos.x + 1, pos.y));
+                                        AddTileToStack(new Vec2i(pos.x + 1, pos.y + 1));
+                                    }
+                                    
+                                    AddAdjacentTilesToStack();
+                                    while (tilestack.Count > 0)
+                                    {
+                                        pos = tilestack.Pop();
+                                        if (validlocations[pos.x, pos.y])
+                                        {
+                                            currentnetwork[pos.x, pos.y] = true;
+                                            ++currentnetworksize;
+                                            AddAdjacentTilesToStack();
+                                        }
+                                    }
+                                    
+                                    if (currentnetworksize > bestnetworksize)
+                                    {
+                                        for (int tmpx = 0; tmpx < width; ++tmpx)
+                                            for (int tmpy = 0; tmpy < height; ++tmpy)
+                                                bestnetwork[tmpx, tmpy] = currentnetwork[tmpx, tmpy];
+                                        bestnetworksize = currentnetworksize;
+                                    }
+                                }
+                            }
+                            
+                            if (bestnetworksize > remainingunvisitedtiles) break;
+                        }
+                        if (bestnetworksize > remainingunvisitedtiles) break;
+                    }
+                    
+                    List<Vec2i> atkMeleePrimary;
+                    List<Vec2i> atkMeleeSecondary;
+                    List<Vec2i> atkRangedPrimary;
+                    List<Vec2i> atkRangedSecondary;
+                    List<Vec2i> atkSummonPrimary;
+                    List<Vec2i> atkSummonSecondary;
+                    List<Vec2i> atkTertiary;
+                    List<Vec2i> atkFinal;
+                    List<Vec2i> defMeleePrimary;
+                    List<Vec2i> defMeleeSecondary;
+                    List<Vec2i> defRangedPrimary;
+                    List<Vec2i> defRangedSecondary;
+                    List<Vec2i> defSummonPrimary;
+                    List<Vec2i> defSummonSecondary;
+                    List<Vec2i> defTertiary;
+                    List<Vec2i> defFinal;
+                    
+                    void PopulateDropZones()
+                    {
+                        atkMeleePrimary = new List<Vec2i>();
+                        atkMeleeSecondary = new List<Vec2i>();
+                        atkRangedPrimary = new List<Vec2i>();
+                        atkRangedSecondary = new List<Vec2i>();
+                        atkSummonPrimary = new List<Vec2i>();
+                        atkSummonSecondary = new List<Vec2i>();
+                        atkTertiary = new List<Vec2i>();
+                        atkFinal = new List<Vec2i>();
+                        defMeleePrimary = new List<Vec2i>();
+                        defMeleeSecondary = new List<Vec2i>();
+                        defRangedPrimary = new List<Vec2i>();
+                        defRangedSecondary = new List<Vec2i>();
+                        defSummonPrimary = new List<Vec2i>();
+                        defSummonSecondary = new List<Vec2i>();
+                        defTertiary = new List<Vec2i>();
+                        defFinal = new List<Vec2i>();
+                        
+                        void XTraverse(List<Vec2i> outerZone, List<Vec2i> midZone, List<Vec2i> innerZone)
+                        {
+                            Vec2i pos;
+                            x = 0;
+                            while (x < width / 8)
+                            {
+                                pos = new Vec2i(x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    outerZone.Add(pos);
+                                pos = new Vec2i(width - 1 - x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    outerZone.Add(pos);
+                                
+                                ++x;
+                            }
+                            while (x < width / 4)
+                            {
+                                pos = new Vec2i(x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    midZone.Add(pos);
+                                pos = new Vec2i(width - 1 - x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    midZone.Add(pos);
+                                
+                                ++x;
+                            }
+                            while (x < width / 2)
+                            {
+                                pos = new Vec2i(x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    innerZone.Add(pos);
+                                pos = new Vec2i(width - 1 - x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    innerZone.Add(pos);
+                                
+                                ++x;
+                            }
+                            if (2 * x + 1 == width) // This conditional will resolve to TRUE if and only if the width of the tactical board is odd, and x is the coordinate of the middle-most column.
+                            {
+                                pos = new Vec2i(x, y);
+                                if (bestnetwork[pos.x, pos.y])
+                                    innerZone.Add(pos);
+                            }
+                        }
+                        
+                        y = 0;
+                        int yloopcount = 0;
+                        while (yloopcount < height / 8)
+                        {
+                            XTraverse(defTertiary, defTertiary, defTertiary);
+                            ++y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height / 4)
+                        {
+                            XTraverse(defTertiary, defRangedSecondary, defRangedPrimary);
+                            ++y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height * 3 / 8)
+                        {
+                            XTraverse(defTertiary, defMeleeSecondary, defMeleePrimary);
+                            ++y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height / 2)
+                        {
+                            XTraverse(defFinal, defSummonSecondary, defSummonPrimary);
+                            ++y;
+                            ++yloopcount;
+                        }
+                        
+                        y = height - 1;
+                        yloopcount = 0;
+                        while (yloopcount < height / 8)
+                        {
+                            XTraverse(atkTertiary, atkTertiary, atkTertiary);
+                            --y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height / 4)
+                        {
+                            XTraverse(atkTertiary, atkRangedSecondary, atkRangedPrimary);
+                            --y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height * 3 / 8)
+                        {
+                            XTraverse(atkTertiary, atkMeleeSecondary, atkMeleePrimary);
+                            --y;
+                            ++yloopcount;
+                        }
+                        while (yloopcount < height / 2)
+                        {
+                            XTraverse(atkFinal, atkSummonSecondary, atkSummonPrimary);
+                            --y;
+                            ++yloopcount;
+                        }
+                    }
+                    
+                    void Drop(Actor_Unit actor, int type)
+                    {
+                        // Assign a dummy position to actors that are prey. They shouldn't need a position of their own until escape or regurgitation, but assign it, to be safe.
+                        if (actor.SelfPrey?.Predator != null)
+                        {
+                            actor.SetPos(new Vec2i(0, 0));
+                            return;
+                        }
+                        
+                        List<List<Vec2i>> droporder;
+                        switch (type)
+                        {
+                            // type can't be a DropType from inside TacticalMode, so we'll use integers. Type meanings are noted.
+                            case 1: // Attacker Melee actors.
+                                droporder = new List<List<Vec2i>>() { atkMeleePrimary, atkMeleeSecondary, atkRangedPrimary, atkRangedSecondary, atkTertiary, atkSummonPrimary, atkSummonSecondary, atkFinal };
+                                break;
+                            case 2: // Attacker Ranged actors.
+                                droporder = new List<List<Vec2i>>() { atkRangedPrimary, atkRangedSecondary, atkMeleePrimary, atkMeleeSecondary, atkTertiary, atkSummonPrimary, atkSummonSecondary, atkFinal };
+                                break;
+                            case 3: // Attacker Summon actors.
+                                droporder = new List<List<Vec2i>>() { atkSummonPrimary, atkSummonSecondary, atkMeleePrimary, atkMeleeSecondary, atkRangedPrimary, atkRangedSecondary, atkTertiary, atkFinal };
+                                break;
+                            case 4: // Defender Melee actors.
+                                droporder = new List<List<Vec2i>>() { defMeleePrimary, defMeleeSecondary, defRangedPrimary, defRangedSecondary, defTertiary, defSummonPrimary, defSummonSecondary, defFinal };
+                                break;
+                            case 5: // Defender Ranged actors.
+                                droporder = new List<List<Vec2i>>() { defRangedPrimary, defRangedSecondary, defMeleePrimary, defMeleeSecondary, defTertiary, defSummonPrimary, defSummonSecondary, defFinal };
+                                break;
+                            case 6: // Defender Summon actors.
+                                droporder = new List<List<Vec2i>>() { defSummonPrimary, defSummonSecondary, defMeleePrimary, defMeleeSecondary, defRangedPrimary, defRangedSecondary, defTertiary, defFinal };
+                                break;
+                            case 7: // Neutral actors.
+                            default:
+                                droporder = new List<List<Vec2i>>() { atkFinal, defFinal, defSummonSecondary, atkSummonSecondary, atkSummonPrimary, defSummonPrimary, defTertiary, atkTertiary };
+                                break;
+                        }
+                        
+                        foreach (List<Vec2i> dropzone in droporder)
+                        {
+                            int count = dropzone.Count();
+                            if (count > 0)
+                            {
+                                int index = State.Rand.Next(count);
+                                actor.SetPos(dropzone[index]);
+                                dropzone.RemoveAt(index);
+                                return;
+                            }
+                        }
+                        
+                        // Failsafe. Kill it, and place it in the corner.
+                        State.GameManager.TacticalMode.Log.RegisterMiscellaneous("Killing actor " + actor.Unit.Name + " because there is no place to drop him.");
+                        actor.SetPos(new Vec2i(0, 0));
+                        actor.Unit.Health = 0;
+                        actor.Targetable = false;
+                        actor.Surrendered = true;
+                        actor.Visible = false;
+                        actor.PredatorComponent?.FreeAnyAlivePrey();
+                        actor.Unit.Kill(); // Why do we need to execute so many statements to kill a unit?
+                        return;
+                    }
+                    
+                    PopulateDropZones();
+                    foreach (Actor_Unit actor in data.units)
+                    {
+                        if (actor.Unit.GetApparentSide() == World.TacticalData.attackerSide)
+                        {
+                            if (actor.Unit.Type == UnitType.Summon)
+                                Drop(actor, 3);
+                            else if (actor.Unit.GetBestRanged() == null)
+                                Drop(actor, 1);
+                            else
+                                Drop(actor, 2);
+                        }
+                        else if (actor.Unit.GetApparentSide() == World.TacticalData.defenderSide)
+                        {
+                            if (actor.Unit.Type == UnitType.Summon)
+                                Drop(actor, 6);
+                            else if (actor.Unit.GetBestRanged() == null)
+                                Drop(actor, 4);
+                            else
+                                Drop(actor, 5);
+                        }
+                        else
+                        {
+                            Drop(actor, 7);
+                        }
+                    }
+                    
+                    versionUpdateMessage += "Version 45: Changes to Actor_Unit lost data for their locations, in tactical battles. All Actor_Units have been replaced to locations appropriate for beginning-of-battle.\n";
+                }
+            }
+
             if (World.TacticalData != null)
             {
                 foreach (var unit in World.TacticalData.units)
@@ -1341,6 +1707,11 @@ public static class State
                     GameManager.TacticalMode.RefreshPureTacticalTraits();
                     GameManager.TacticalMode.ForceUpdate();
                 }
+            }
+            
+            if (versionUpdateMessage != "")
+            {
+                GameManager.CreateMessageBox("Updates to the game state due to game version updates are as follows:\n\n" + versionUpdateMessage);
             }
         }
         catch (Exception ex)

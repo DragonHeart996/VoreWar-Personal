@@ -2,7 +2,7 @@ using OdinSerializer;
 using System;
 using UnityEngine;
 
-public class Vec2i
+public class Vec2i : IEquatable<Vec2i>
 {
 
     [OdinSerialize]
@@ -46,4 +46,6 @@ public class Vec2i
     {
         return new Vector2(v.x, v.y);
     }
+    
+    public bool Equals(Vec2i that) => this.x == that?.x && this.y == that?.y;
 }

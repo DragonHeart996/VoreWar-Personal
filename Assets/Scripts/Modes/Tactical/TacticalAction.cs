@@ -252,7 +252,7 @@ static class TacticalActionList
         TargetedActions.Add(new TargetedTacticalAction(
           name: "SweepingSwallow",
           requiresPred: true,
-          conditional: (a) => a.Unit.HasTrait(Traits.Legendary),
+          conditional: (a) => a.Unit.HasTrait(Traits.Legendary) || a.Unit.HasTrait(Traits.SweepingSwallow),
           onClicked: () => State.GameManager.TacticalMode.TrySetSpecialMode(SpecialAction.SweepingSwallow),
           onExecute: (a, t) => a.SweepAttack(false),
           manaCost: 40,

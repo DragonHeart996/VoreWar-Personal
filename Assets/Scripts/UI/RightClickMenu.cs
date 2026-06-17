@@ -107,6 +107,8 @@ public class RightClickMenu : MonoBehaviour
             currentButton++;
         }
         int range = actor.Position.GetNumberOfMovesDistance(location);
+        
+        actor.ReloadSpellTraits();
         foreach (Spell spell in actor.Unit.UseableSpells)
         {
             if (spell.AcceptibleTargets.Contains(AbilityTargets.Tile))
@@ -159,6 +161,7 @@ public class RightClickMenu : MonoBehaviour
 
         if (actor == target)
         {
+            actor.ReloadSpellTraits();
             foreach (Spell spell in actor.Unit.UseableSpells)
             {
                 if (spell.AcceptibleTargets.Contains(AbilityTargets.Ally) || spell.AcceptibleTargets.Contains(AbilityTargets.Self))
@@ -192,6 +195,7 @@ public class RightClickMenu : MonoBehaviour
 
         if (TacticalUtilities.IsUnitControlledByPlayer(target.Unit) || target.Unit.Side == actor.Unit.Side)
         {
+            actor.ReloadSpellTraits();
             foreach (Spell spell in actor.Unit.UseableSpells)
             {
                 if (spell.AcceptibleTargets.Contains(AbilityTargets.Ally))
@@ -268,8 +272,8 @@ public class RightClickMenu : MonoBehaviour
                     Buttons[currentButton].interactable = false;
                 currentButton++;
             }
-
-
+            
+            actor.ReloadSpellTraits();
             if (actor.Unit.UseableSpells != null)
             {
                 foreach (Spell spell in actor.Unit.UseableSpells)
@@ -389,7 +393,7 @@ public class RightClickMenu : MonoBehaviour
                     if (data.Range != 1)
                         Buttons[currentButton].interactable = false;
                 }
-                if (data.Actor.PredatorComponent.FreeCap() < data.Target.Bulk())
+                if (!data.Actor.PredatorComponent.HasSpareCap(data.Target.Bulk()))
                 {
                     Buttons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to vore";
                     Buttons[currentButton].interactable = false;
@@ -435,7 +439,7 @@ public class RightClickMenu : MonoBehaviour
                     if (data.Range != 1)
                         Buttons[currentButton].interactable = false;
                 }
-                if (data.Actor.PredatorComponent.FreeCap() < data.Target.Bulk())
+                if (!data.Actor.PredatorComponent.HasSpareCap(data.Target.Bulk()))
                 {
                     Buttons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to {targetedAction.Name}";
                     Buttons[currentButton].interactable = false;
@@ -552,9 +556,9 @@ public class RightClickMenu : MonoBehaviour
             {
                 PounceButtons[currentButton].onClick.AddListener(() => actor.VorePounce(target));
                 PounceButtons[currentButton].onClick.AddListener(FinishAction);
-                if (data.Actor.PredatorComponent.FreeCap() < data.Target.Bulk())
+                if (!data.Actor.PredatorComponent.HasSpareCap(data.Target.Bulk()))
                 {
-                    PounceButtons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to vore";
+                    PounceButtons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to Vore";
                     PounceButtons[currentButton].interactable = false;
                 }
                 else
@@ -584,7 +588,7 @@ public class RightClickMenu : MonoBehaviour
             {
                 PounceButtons[currentButton].onClick.AddListener(() => data.Actor.VorePounce(data.Target, type));
                 PounceButtons[currentButton].onClick.AddListener(FinishAction);
-                if (data.Actor.PredatorComponent.FreeCap() < data.Target.Bulk())
+                if (!data.Actor.PredatorComponent.HasSpareCap(data.Target.Bulk()))
                 {
                     PounceButtons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to {targetedAction.Name}";
                     PounceButtons[currentButton].interactable = false;
@@ -637,7 +641,7 @@ public class RightClickMenu : MonoBehaviour
                     Buttons[currentButton].onClick.AddListener(() => data.Actor.PredatorComponent.TransferAttempt(data.Target));
                     Buttons[currentButton].onClick.AddListener(FinishAction);
                     Buttons[currentButton].GetComponentInChildren<Text>().text = $"Transfer";
-                    if (data.Target.PredatorComponent.FreeCap() < actor.PredatorComponent.GetTransferBulk())
+                    if (!data.Target.PredatorComponent.HasSpareCap(actor.PredatorComponent.GetTransferBulk()))
                     {
                         Buttons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to Transfer";
                         Buttons[currentButton].interactable = false;
@@ -649,7 +653,7 @@ public class RightClickMenu : MonoBehaviour
                     Buttons[currentButton].onClick.AddListener(() => data.Actor.PredatorComponent.KissTransferAttempt(data.Target));
                     Buttons[currentButton].onClick.AddListener(FinishAction);
                     Buttons[currentButton].GetComponentInChildren<Text>().text = $"Kiss Transfer";
-                    if (data.Target.PredatorComponent.FreeCap() < actor.PredatorComponent.GetKissTransferBulk())
+                    if (!data.Target.PredatorComponent.HasSpareCap(actor.PredatorComponent.GetKissTransferBulk()))
                     {
                         Buttons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to Transfer";
                         Buttons[currentButton].interactable = false;
@@ -664,14 +668,22 @@ public class RightClickMenu : MonoBehaviour
                     Buttons[currentButton].onClick.AddListener(() => data.Actor.PredatorComponent.VoreStealAttempt(data.Target));
                     Buttons[currentButton].onClick.AddListener(FinishAction);
                     Buttons[currentButton].GetComponentInChildren<Text>().text = $"Vore Steal {data.DevourChance}%";
+                    if (!data.Actor.PredatorComponent.HasSpareCap(actor.PredatorComponent.GetVoreStealBulk(data.Target)))
+                    {
+                        Buttons[currentButton].GetComponentInChildren<Text>().text = $"Too bulky to Steal";
+                        Buttons[currentButton].interactable = false;
+                    }
                     currentButton++;
                 }
             }
-            if (actor.PredatorComponent.CanSuckle() && actor.PredatorComponent.GetSuckle(data.Target)[0] + actor.PredatorComponent.GetSuckle(data.Target)[1] != 0)
+
+            int[] suckle = actor.PredatorComponent.GetSuckle(data.Target);
+            if (actor.PredatorComponent.CanSuckle() && suckle[0] + suckle[1] != 0)
             {
                 Buttons[currentButton].onClick.AddListener(() => data.Actor.PredatorComponent.Suckle(data.Target));
                 Buttons[currentButton].onClick.AddListener(FinishAction);
-                Buttons[currentButton].GetComponentInChildren<Text>().text = $"Suckle";
+                float chance = Mathf.Round(100 * actor.PredatorComponent.GetSuckleChance(data.Target));
+                Buttons[currentButton].GetComponentInChildren<Text>().text = $"Suckle {chance}%";
                 currentButton++;
             }
         }

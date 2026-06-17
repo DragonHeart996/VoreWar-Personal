@@ -1596,7 +1596,7 @@ static class TacticalUtilities
 
     internal static bool IsPreyEndoTargetForUnit(Prey preyUnit, Unit unit)
     {
-        return (unit.HasTrait(Traits.FriendlyStomach) && (preyUnit.Unit.FixedSide == unit.GetApparentSide(preyUnit.Unit))) || unit.HasTrait(Traits.Endosoma) && preyUnit.Unit.IsDead == false;
+        return ((unit.HasTrait(Traits.FriendlyStomach) && (preyUnit.Unit.FixedSide == unit.GetApparentSide(preyUnit.Unit))) || unit.HasTrait(Traits.Endosoma)) && preyUnit.Unit.IsDead == false;
     }
 }
 

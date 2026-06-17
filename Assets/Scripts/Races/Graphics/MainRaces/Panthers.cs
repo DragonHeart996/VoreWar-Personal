@@ -19,8 +19,6 @@ class Panthers : BlankSlate
 
     internal List<MainClothing> AllClothing;
 
-    bool oversize = false;
-
     public Panthers()
     {
 
@@ -347,7 +345,6 @@ class Panthers : BlankSlate
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));

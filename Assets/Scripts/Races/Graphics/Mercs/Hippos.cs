@@ -8,8 +8,6 @@ class Hippos : DefaultRaceData
     readonly Sprite[] Sprites2 = State.GameManager.SpriteDictionary.Hippos2;
     readonly Sprite[] Sprites3 = State.GameManager.SpriteDictionary.Hippos3;
 
-    bool oversize = false;
-
     public Hippos()
     {
         BodySizes = 5;
@@ -134,7 +132,7 @@ class Hippos : DefaultRaceData
 
     internal override int DickSizes => 8;
     internal override int BreastSizes => 8;
-
+    
     protected override Sprite BodySprite(Actor_Unit actor)
     {
         if (actor.Unit.HasBreasts)
@@ -234,7 +232,6 @@ class Hippos : DefaultRaceData
     {
         if (actor.Unit.HasBreasts == false)
             return null;
-        oversize = false;
         if (actor.PredatorComponent?.LeftBreastFullness > 0)
         {
             int leftSize = (int)Math.Sqrt((actor.Unit.DefaultBreastSize * actor.Unit.DefaultBreastSize) + actor.GetLeftBreastSize(32 * 32, 1f));
@@ -498,7 +495,7 @@ class Hippos : DefaultRaceData
             clothing1.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.HippoSkin, actor.Unit.SkinColor);
             clothing2.GetPalette = (s) => ColorPaletteMap.GetPalette(ColorPaletteMap.SwapType.HippoSkin, actor.Unit.SkinColor);
 
-            base.Configure(sprite, actor);
+            base.ConfigureNatural(sprite, actor);
         }
     }
 

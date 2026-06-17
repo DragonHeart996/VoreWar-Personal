@@ -9,6 +9,7 @@ public class Translator
     float remainingTime;
     float totalTime;
     Transform transform;
+    bool hasCameraControl = false;
 
     public bool IsActive { get; private set; }
 
@@ -37,12 +38,12 @@ public class Translator
             transform.position = new Vector2(newX, newY);
             if (State.GameManager.CurrentScene == State.GameManager.TacticalMode)
             {
-                if (State.GameManager.TacticalMode.IsPlayerInControl == false)
+                if (State.GameManager.TacticalMode.IsPlayerInControl == false && hasCameraControl)
                     State.GameManager.CameraCall(transform.position);
             }
             else
             {
-                if (State.GameManager.StrategyMode.IsPlayerTurn == false)
+                if (State.GameManager.StrategyMode.IsPlayerTurn == false && hasCameraControl)
                     State.GameManager.CameraCall(transform.position);
             }
 
@@ -64,14 +65,20 @@ public class Translator
         transform = trans;
         startPos = start;
         endPos = end;
+        hasCameraControl = true;
         IsActive = true;
         remainingTime = totalTime;
     }
 
     internal void ClearTranslator()
     {
+        hasCameraControl = false;
         IsActive = false;
     }
 
+    internal void CancelCameraControl()
+    {
+        hasCameraControl = false;
+    }
 }
 

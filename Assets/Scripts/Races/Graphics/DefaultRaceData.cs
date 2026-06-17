@@ -98,6 +98,7 @@ abstract class DefaultRaceData
 
     /// <summary>Whether a unit has the breast vore system, with extended sizes and the two sides being independent.</summary>
     internal bool ExtendedBreastSprites = false;
+    internal bool oversize = false;
 
     /// <summary>Whether a unit uses the gentler version of the stomach wobble (1/2 to 1/3rd the motion)</summary>
     internal bool GentleAnimation = false;
@@ -689,6 +690,8 @@ abstract class DefaultRaceData
             return null;
         if (actor.SquishedBreasts && actor.Unit.BreastSize >= 3 && actor.Unit.BreastSize <= 6)
             return State.GameManager.SpriteDictionary.SquishedBreasts[actor.Unit.BreastSize - 3];
+        if (actor.Unit.BreastSize == 7)
+            AddOffset(Breasts, 0, -3 * .625f);
         return State.GameManager.SpriteDictionary.Breasts[actor.Unit.BreastSize];
     }
 
@@ -914,7 +917,7 @@ abstract class DefaultRaceData
 
     internal virtual void RunFirst(Actor_Unit actor)
     {
-
+        oversize = false;
     }
 
     protected static Color WhiteColored(Actor_Unit actor) => Color.white;

@@ -77,6 +77,7 @@ class Iliijiith : BlankSlate
         if (actor.AnimationController.frameLists == null)
             SetUpAnimations(actor);
         actor.Unit.Pronouns = new List<string> { "it", "it", "its", "its", "itself", "singular" };//Special Pronouns!
+        base.RunFirst(actor);
     }
 
 protected override Sprite BodyAccentSprite(Actor_Unit actor)

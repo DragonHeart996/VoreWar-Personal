@@ -261,7 +261,7 @@ public class HoveringTooltip : MonoBehaviour
                         return $"Unit's stats are boosted by {effect.Duration}% for the rest of the battle.";
                     case StatusEffectType.Necrosis:
                         return $"Unit's healing is reduced by {effect.Strength * 25}% \nTurns Remaining: {effect.Duration}";
-                    case StatusEffectType.Errosion:
+                    case StatusEffectType.Erosion:
                         return $"Unit's weapon taken is increased by {effect.Strength * 20}% and digstion damage taken is increased by {effect.Strength * 50}%\nTurns Remaining: {effect.Duration}";
                     case StatusEffectType.Lethargy:
                         return $"Unit's Str,Dex, and Agi are reduced by {(effect.Strength * effect.Duration / 50)*100}% \nTurns Remaining: {effect.Duration}";
@@ -793,7 +793,7 @@ public class HoveringTooltip : MonoBehaviour
                 return "At the start of battle, this unit has a 25% chance to teleported into a random predator.";       
             case Traits.Competitive:
                 return "Unit deals bonus ranged and melee damage to members of the same race.";      
-            case Traits.CompetetivePredator:
+            case Traits.CompetitivePredator:
                 return "When an another nearby unit is eaten, this unit has a 10% chance to eat a random adjacent unit.";
             case Traits.PassThrough:
                 return "Unit can move past (but not stop on) allied units. Not recommended to use with Blitz or SpectralStep.";
@@ -833,12 +833,16 @@ public class HoveringTooltip : MonoBehaviour
                 return "This unit grants sharpness to any unit that buffs it, equal to 10% of Strength every turn while the buff persists. This unit gives 'Valor' to an ally within 2 spaces every other turn, duration scaling with level.";
             case Traits.TotalAbsorption:
                 return "This unit does not produce waste or remains when digesting or absorbing prey.";
-            case Traits.Crystaline:
+            case Traits.Crystalline:
                 return "Unit takes 25% reduced damage from all sources, but each time it is hit it has a 1/4 chance to gain the 'Fractured' status effect, canceling out this trait and greatly increasing damage from all sources. 'Fractured' lasts until the battle is over.";
             case Traits.DyingStrike:
                 return "When unit is killed in melee or digested does has a 1/3 chance of hitting with a melee attack against the aggressor, 3/4 hit chance if vored.";
             case Traits.DimensionalAntilock:
                 return "This unit is not completely fixed to the space around it. \n(Allows using the Dimension Shift ability once per battle, which attempts to teleport the User to a random open tile within 20 tiles.)";
+            case Traits.WildFury:
+                return "Unarmed but not harmless! Unit can melee attack twice if they have no weapon equipped.";
+            case Traits.CloseCall:
+                return "Unit will flee combat upon fatal strikes from weapons or spells with 1 HP rather than dying. (unit will rejoin if the army wins, otherwise sets off for the closest town) ";
             case Traits.Hoarder:
                 return "Race increase the income of a village by 0.1% per population.";
             case Traits.NaturalCaster:
@@ -875,8 +879,22 @@ public class HoveringTooltip : MonoBehaviour
                 return "Unarmed but not harmless! Unit can melee attack twice if they have no weapon equipped.";
             case Traits.CloseCall:
                 return "Unit will flee combat upon fatal strikes from weapons or spells with 1 HP rather than dying. (unit will rejoin if the army wins, otherwise sets off for the closest town) ";
-        }  
-        return "<b>This trait needs a tooltip!</b>";
+            case Traits.TraitOverride:
+                return
+                    "Forces the trait list containing it to override base racial traits, rather than adding onto them";
+            case Traits.TraitConfigOverride:
+                return
+                    "Forces the trait list containing it to override its corresponding general config traits, rather than adding onto them";
+            case Traits.TraitGenderOverride:
+                return
+                    "Forces the trait list containing it to override gender-specific traits, rather than adding onto them";
+            case Traits.SweepingSwallow:
+                return "Grants SweepingSwallow Attack";
+            case Traits.ExtremelyStretchy:
+                return "Can attempt to eat anything so long as it has some space, also prevents overfeeding damage";
+            default:
+                return "<b>This trait needs a tooltip!</b>";
+        } 
     }
 
     // For traits that need more informaiton to adjust their tooltip. 

@@ -60,7 +60,7 @@ public class NonCombatantTacticalAI : RaceServantTacticalAI
         if (path != null)
             return;
 
-        RunBellyRub(actor, actor.Movement);
+        RunBellyRub(actor, actor.Movement, true);
         if (foundPath || didAction) return;
         //Search for surrendered targets outside of vore range
         //If no path to any targets, will sit out its turn
@@ -68,7 +68,9 @@ public class NonCombatantTacticalAI : RaceServantTacticalAI
         actor.ClearMovement();
     }
 
-    protected override List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves)
+    protected override bool CheckCombatActionsAvailable(Actor_Unit actor) {return false;}
+    
+    protected override List<PotentialTarget> GetListOfPotentialRubTargets(Actor_Unit actor, Vec2i position, int moves, bool spendFinalAP = false)
     {
         List<PotentialTarget> targets = new List<PotentialTarget>();
 
@@ -79,7 +81,8 @@ public class NonCombatantTacticalAI : RaceServantTacticalAI
             if (unit.Targetable == true && unit.Unit.Predator && !TacticalUtilities.TreatAsHostile(actor, unit) && TacticalUtilities.GetMindControlSide(unit.Unit) == -1 && !unit.Surrendered && unit.PredatorComponent?.PreyCount > 0 && !unit.ReceivedRub)
             {
                 int distance = unit.Position.GetNumberOfMovesDistance(position);
-                if (distance - 1 + (actor.MaxMovement() / 3) <= moves)
+                if (distance + (actor.MaxMovement() / 3) <= moves
+                    || (spendFinalAP && distance <= moves))
                 {
                     if (distance > 1 && TacticalUtilities.FreeSpaceAroundTarget(unit.Position, actor) == false)
                         continue;

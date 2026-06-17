@@ -24,6 +24,13 @@ public class TacticalData
     public int defenderSide;
     [OdinSerialize]
     public int attackerSide;
+    
+    [OdinSerialize]
+    public bool tookCombatActions;
+    [OdinSerialize]
+    public int attackerTrappedUnitsTimer;
+    [OdinSerialize]
+    public int defenderTrappedUnitsTimer;
 
     [OdinSerialize]
     public int currentTurn;

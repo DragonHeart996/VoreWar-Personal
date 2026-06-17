@@ -145,12 +145,12 @@ public class ExternalTraitHandler
         string json = File.ReadAllText(State.StorageDirectory + "\\taggedTraits.json");
         var rootObject = new RootObject();
         JsonConvert.PopulateObject(json, rootObject);
-        foreach (TaggedTrait trait in newTrait) 
+        foreach (TaggedTrait trait in newTrait)
         {
             TaggedTraitTempClass toBeAdded = new TaggedTraitTempClass();
             toBeAdded.name = trait.name;
             toBeAdded.tier = trait.tier;
-            toBeAdded.tier = trait.tier.ToString();
+            toBeAdded.tags = trait.tags;
             toBeAdded.traitEnum = trait.traitEnum;
             toBeAdded.tierValue = trait.tierValue;
             rootObject.traits.Add(toBeAdded);

@@ -252,7 +252,7 @@ public enum Traits
     Revenant = 125,
     /// <summary>Unit's first attack will deal 5x damage, or first vore attack will have 3.25 odds each battle.</summary>
     AllOutFirstStrike = 126,
-    /// <summary>If a missed vore from this unit triggers a bite, the tharget will also be poisoned and inflicted with Shaken.</summary>
+    /// <summary>If a missed vore from this unit triggers a bite, the target will also be poisoned and inflicted with Shaken.</summary>
     VenomousBite = 127,
     /// <summary>Allows unit to use <b>Petrify</b>, an attack that petrifies the target once per battle.</summary>
     Petrifier = 128,
@@ -354,13 +354,13 @@ public enum Traits
     ViralDigestion = 178,
     /// <summary>This unit has a very strange body type, making them harder to swallow.</summary>
     AwkwardShape = 179,
-    /// <summary>Unit deals up 1% more weapon damage per agility it has over it's target, up to 25%, tripled when using light weapons.</summary>
+    /// <summary>Unit deals up 1% more weapon damage per agility it has over its target, up to 25%, tripled when using light weapons.</summary>
     SwiftStrike = 180,
     /// <summary>This unit is shaken if the turn ends and there are more enemies than allies are nearby. (This unit counts) </summary>
     Timid = 181,
-    /// <summary>Unit has a chance based on it's missing health to surrender.</summary>
+    /// <summary>Unit has a chance based on its missing health to surrender.</summary>
     Cowardly = 182,
-    /// <summary>Unit has a chance based on it's missing health to change sides.</summary>
+    /// <summary>Unit has a chance based on its missing health to change sides.</summary>
     TurnCoat = 183,
     /// <summary>When hit by a magic spell, gain a single cast of that spell.</summary>
     MagicSynthesis = 184,
@@ -417,11 +417,11 @@ public enum Traits
     ExtraNutritious = 509,
     /// <summary>While full, at the start of turn, unit has a chance based on current fullness to fall asleep.</summary>
     FoodComaProne = 510,
-    /// <summary>While asleep, unit's digestion damage and absorption rate is doubled. Unit has a chance based on fullness to extend it's own sleep status by a turn.</summary>
+    /// <summary>While asleep, unit's digestion damage and absorption rate is doubled. Unit has a chance based on fullness to extend its own sleep status by a turn.</summary>
     SleepItOff = 511,
     /// <summary>Unit has a 10% chance of force-feeding themselves to their melee attack target instead of attacking, if possible. Chance is increased by 5% per difference in level.</summary>
     HaplessPrey = 512,
-    /// <summary>While being digested, unit will heal it's predator each turn.</summary>
+    /// <summary>While being digested, unit will heal its predator each turn.</summary>
     PleasantDigestion = 513,
     /// <summary>Unit gains the ability to make a vore attempt at increased odds, if it fails their target vores them instead, if possible.</summary>
     AllIn = 514,
@@ -430,20 +430,20 @@ public enum Traits
     /// <summary>Unit has a small chance to gain Temptation each time an ally within 3 spaces is eaten.</summary>
     EnviousPrey = 516,
     /// <summary>When an another nearby unit is eaten, it has the chance to eat a random adjacent unit.</summary>
-    CompetetivePredator = 517,
+    CompetitivePredator = 517,
     /// <summary>When this unit rubs a unit's belly, the effect is doubled and 1 stack of Weakness is applied to the target.</summary>
     RoughMassage = 518,
     /// <summary>For the first 5 turns of battle, unit's MP is reduced by 50%.</summary>
     SlowStart = 519,
     /// <summary>When a unit within 3 spaces is consumed, this unit has a 10% chance to trade places with them and be consumed instead.</summary>
     CurseOfSacrifice = 520,
-    /// <summary>At start of turn, Unit deals it's level in fire damage to itself and all units around it or it's predator, if this unit has been consumed. This damage can not kill. Effect does not activate if unit has surrendered.</summary>
+    /// <summary>At start of turn, Unit deals its level in fire damage to itself and all units around it or its predator, if this unit has been consumed. This damage can not kill. Effect does not activate if unit has surrendered.</summary>
     CurseOfImmolation = 521,
     /// <summary>At the start of each turn, this unit's highest stat is reduced by 1 and this unit's lowest stat is increased by 1.</summary>
     CurseOfEquivalency = 522,
     /// <summary>When hit by an attack, unit has a 50% chance to teleport to a random space within 3 spaces. If a unit occupies that space, this unit is consumed by the occupier.</summary>
     CurseOfPhasing = 523,
-    /// <summary>At the start of battle, this unit has a 50% chance to have eaten one of it's allies.</summary>
+    /// <summary>At the start of battle, this unit has a 50% chance to have eaten one of its allies.</summary>
     CurseOfCraving = 524,
     /// <summary>At the start of battle, this unit has a 25% chance to teleported into a random predator.</summary>
     CurseOfPreyportaion = 525,
@@ -592,7 +592,7 @@ public enum Traits
     SeductiveTouch = 266,
     /// <summary>Can emit Gas that turns foes into subservient non-combatants once per battle.</summary>
     HypnoticGas = 295,
-    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorbtion steals any that are left.</summary>
+    /// <summary>Every time digestion progresses, this unit steals one trait from each prey inside them, if only duplicates (or non-assimilable traits) remain, they are turned into exp. Absorption steals any that are left.</summary>
     Extraction = 296,    
     /// <summary>Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was stil alive and cannot be revived.</summary>
     Annihilation = 297,
@@ -631,7 +631,7 @@ public enum Traits
     /// <summary>Unit doesn't produce any post-vore discards for digested units.</summary>
     TotalAbsorption  = 314,
     /// <summary>Unit takes 25% reduced damage from all sources, has a chance to gain the 'Fractured' status effect when attacked; greatly increasing damage from all sources. 'Fractured' lasts until the battle is over.</summary>
-    Crystaline  = 315,
+    Crystalline  = 315,
     /// <summary>When unit is killed in melee or digested does has a 1/3 chance of hitting with a melee attack against the aggressor, 3/4 hit chance if vored.</summary>
     DyingStrike  = 316,
     /// <summary>Provides 1 use of Dimension Shift spell.</summary>
@@ -672,7 +672,19 @@ public enum Traits
     /// <summary>Doubles unit's absorption rate.</summary>
     FasterAbsorption = 280,
     /// <summary>Doubles unit's absorption rate.</summary>
-    Eeveeolutionist = 281
+    Eeveeolutionist = 281,
+    
+    //personal edits
+    /// <summary>Grants SweepingSwallow Attack</summary>
+    SweepingSwallow = 999,
+    /// <summary>Can attempt to eat anything so long as it has some space, also prevents overfeeding damage</summary>
+    ExtremelyStretchy = 998,
+    /// <summary>Forces the trait list containing it to override base racial traits, rather than adding onto them</summary>
+    TraitOverride = 997,
+    /// <summary>Forces the trait list containing it to override its corresponding general config traits, rather than adding onto them</summary>
+    TraitConfigOverride = 996,
+    /// <summary>Forces the trait list containing it to override gender-specific traits, rather than adding onto them</summary>
+    TraitGenderOverride = 995
 
 }
 

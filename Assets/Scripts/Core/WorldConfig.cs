@@ -131,6 +131,8 @@ public class WorldConfig
     [OdinSerialize]
     internal List<Traits> LeaderTraits;
     [OdinSerialize]
+    internal List<Traits> SoldierTraits;
+    [OdinSerialize]
     internal List<Traits> MaleTraits;
     [OdinSerialize]
     internal List<Traits> FemaleTraits;

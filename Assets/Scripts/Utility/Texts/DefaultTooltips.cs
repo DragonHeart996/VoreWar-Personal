@@ -846,6 +846,8 @@ Places them in a simple manner, unconcerned with things like fairness";
 
 The weights affect how often the AI will choose one in comparison to the others.  
 (I.e. if unbirth is high, and everything else is low, unbirth will be a high % of what they choose, provided that the race is capable of it.)";
+            case 500:
+                return "Traits in here will be automatically added to generic Units when created\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
             default:
                 return "";
         }

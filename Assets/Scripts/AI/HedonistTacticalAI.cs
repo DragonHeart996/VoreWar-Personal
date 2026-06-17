@@ -38,6 +38,24 @@ public class HedonistTacticalAI : TacticalAI
 
         //do action
 
+        if (actor.Unit.GetStatusEffect(StatusEffectType.Temptation) != null && (State.Rand.Next(2) == 0 || actor.Unit.GetStatusEffect(StatusEffectType.Temptation).Duration <= 2))
+        {
+            RunForceFeed(actor);
+            if (foundPath && path.Path.Count < actor.Movement)
+                return;
+            if (didAction) return;
+        }
+
+        int spareMp = CheckActionEconomyOfActorFromPositionWithAP(actor, actor.Position, actor.Movement);
+        int thirdMovement = actor.MaxMovement() / 3;
+        if (spareMp >= thirdMovement)
+        {
+            RunBellyRub(actor, spareMp);
+            if (path != null)
+                return;
+            if (didAction) return;
+        }
+
         if (Config.KuroTenkoEnabled && actor.PredatorComponent != null)
         {
             if (actor.PredatorComponent.CanFeed())
@@ -52,28 +70,12 @@ public class HedonistTacticalAI : TacticalAI
             }
         }
 
-        int spareMp = CheckActionEconomyOfActorFromPositionWithAP(actor, actor.Position, actor.Movement);
-        int thirdMovement = actor.MaxMovement() / 3;
-        if (spareMp >= thirdMovement)
-        {
-            RunBellyRub(actor, spareMp);
-            if (path != null)
-                return;
-            if (didAction) return;
-        }
-
-        if (actor.Unit.GetStatusEffect(StatusEffectType.Temptation) != null && (State.Rand.Next(2) == 0 || actor.Unit.GetStatusEffect(StatusEffectType.Temptation).Duration <= 2))
-        {
-            RunForceFeed(actor);
-        }
-
         if (actor.Unit.HasTrait(Traits.Pounce) && actor.Movement >= 2)
         {
             RunVorePounce(actor);
             if (path != null)
                 return;
             if (didAction) return;
-
         }
 
         RunPred(actor);
@@ -91,19 +93,24 @@ public class HedonistTacticalAI : TacticalAI
             RunPotions(actor);
         if (path != null)
             return;
-        if (actor.Unit.HasTrait(Traits.Pounce) && actor.Movement >= 2)
+        
+        if (!actor.Unit.HasTrait(Traits.VoreObsession))
         {
-            if (IsRanged(actor) == false)
+            if (actor.Unit.HasTrait(Traits.Pounce) && actor.Movement >= 2)
             {
-                RunMeleePounce(actor);
-                if (didAction) return;
+                if (IsRanged(actor) == false)
+                {
+                    RunMeleePounce(actor);
+                    if (didAction) return;
+                }
             }
+            if (foundPath || didAction) return;
+            if (IsRanged(actor))
+                RunRanged(actor);
+            else
+                RunMelee(actor);
         }
-        if (foundPath || didAction) return;
-        if (IsRanged(actor))
-            RunRanged(actor);
-        else
-            RunMelee(actor);
+
         if (foundPath || didAction) return;
 
         if (Config.KuroTenkoEnabled && actor.PredatorComponent != null)
@@ -122,11 +129,12 @@ public class HedonistTacticalAI : TacticalAI
             if (foundPath || didAction) return;
         }
 
-        RunBellyRub(actor, actor.Movement);
-        if (foundPath || didAction) return;
+        
         //Search for surrendered targets outside of vore range
         //If no path to any targets, will sit out its turn
         RunPred(actor, true);
+        if (foundPath || didAction) return;
+        RunBellyRub(actor, actor.Movement, true);
         if (foundPath || didAction) return;
         actor.ClearMovement();
     }
