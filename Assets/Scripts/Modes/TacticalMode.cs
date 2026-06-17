@@ -3818,7 +3818,7 @@ public class TacticalMode : SceneBase
                         int spellDamage = spell.Damage(SelectedUnit, splashTarget);
                         spellDamage = SpellDamageMod(SelectedUnit, splashTarget, spellDamage);
                         splashTarget.UnitSprite.ShowDamagedHealthBar(splashTarget, spellDamage);
-                        UpdateGenericAttackGrid(actor, spellDamage);
+                        UpdateGenericAttackGrid(splashTarget, spellDamage);
                     }
                 }
             }

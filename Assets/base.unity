@@ -13638,6 +13638,12 @@ MonoBehaviour:
   IliijiithAttackColor: {fileID: 2800000, guid: ab31a176a61ea6246a5678c3054b452e,
     type: 3}
   DemidragonSkin: {fileID: 2800000, guid: 23896210b9a819449b80ddb29f182c43, type: 3}
+  YordleSkin: {fileID: 2800000, guid: 4c30ce2765b1fe44c910d4a515c68409, type: 3}
+  YordleEyes: {fileID: 2800000, guid: 5e945e1d92c76f9468bce6ff29078aef, type: 3}
+  OoviKatMain: {fileID: 2800000, guid: 581727a639870af43af2ec6f7a3049da, type: 3}
+  OoviKatBright: {fileID: 2800000, guid: e7518849191ec334486cfd43cb709bc0, type: 3}
+  PuddingSkin: {fileID: 2800000, guid: 7b1c3c7887837314694721e947d0af5e, type: 3}
+  SoulSpriteSkin: {fileID: 2800000, guid: cd2cf0257a4c972418bf6165c96cfb19, type: 3}
   BadgersSkin: {fileID: 2800000, guid: 6d3238aec541d414687efbd9bd921e0b, type: 3}
   RenamonSkin: {fileID: 2800000, guid: 268d51455c20e774ba7c25e21569155e, type: 3}
 --- !u!1 &65027874
@@ -92886,7 +92892,7 @@ MonoBehaviour:
   FemaleTraits: {fileID: 1666364420}
   HermTraits: {fileID: 727989324}
   SpawnTraits: {fileID: 301365598}
-  SoldierTraits: {fileID: 1006532813}
+  SoldierTraits: {fileID: 0}
   LeaderTraits: {fileID: 621277037}
   BannerType: {fileID: 574183394}
   FavoredStat: {fileID: 834392605}
@@ -109880,18 +109886,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 533727761}
   m_CullTransparentMesh: 0
---- !u!114 &534052128 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114787627876447784, guid: 89bebbadda021fa4888a74173e78312f,
-    type: 3}
-  m_PrefabInstance: {fileID: 251384589}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 575553740, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &534515487
 GameObject:
   m_ObjectHideFlags: 0
@@ -167871,6 +167865,9 @@ MonoBehaviour:
   - {fileID: 21300086, guid: 17624c20c4b906e42b8395ad0c42976d, type: 3}
   - {fileID: 21300088, guid: 17624c20c4b906e42b8395ad0c42976d, type: 3}
   - {fileID: 21300090, guid: 17624c20c4b906e42b8395ad0c42976d, type: 3}
+  OoviKatFemale: []
+  OoviKatMale: []
+  OoviKatCustomisation: []
   CowsSeliciaBelly:
   - {fileID: 21300004, guid: 7f71fec8abde5924ea5e5d5cdd3e2184, type: 3}
   - {fileID: 21300006, guid: 7f71fec8abde5924ea5e5d5cdd3e2184, type: 3}
@@ -173278,6 +173275,13 @@ MonoBehaviour:
   - {fileID: 21300234, guid: b8513f262b242c94683958908d3da098, type: 3}
   - {fileID: 21300236, guid: b8513f262b242c94683958908d3da098, type: 3}
   - {fileID: 21300238, guid: b8513f262b242c94683958908d3da098, type: 3}
+  YordlesBodies: []
+  YordlesVoreSkin: []
+  YordlesVoreFur: []
+  YordlesCustomization1: []
+  YordlesCustomization2: []
+  YordleClothes1: []
+  YordleClothes2: []
   Selicia:
   - {fileID: 21300016, guid: 1fc983ccdd0de5648887e700bdf3f84a, type: 3}
   - {fileID: 21300018, guid: 1fc983ccdd0de5648887e700bdf3f84a, type: 3}
@@ -175452,6 +175456,75 @@ MonoBehaviour:
   - {fileID: 21300102, guid: 38cd41eee300871449ba2d1d60074239, type: 3}
   - {fileID: 21300104, guid: 38cd41eee300871449ba2d1d60074239, type: 3}
   - {fileID: 21300106, guid: 38cd41eee300871449ba2d1d60074239, type: 3}
+  Cherub:
+  - {fileID: 21300016, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300018, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300020, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300022, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300024, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300026, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300028, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300030, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300032, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300034, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300036, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300038, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300040, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300042, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300044, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300046, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300048, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300050, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300052, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300054, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300056, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300058, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300060, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300062, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300064, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  - {fileID: 21300066, guid: 92b191adef1e6f64a97bf91065de38e6, type: 3}
+  Seraph:
+  - {fileID: 21300016, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300018, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300020, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300022, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300024, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300026, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300028, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300030, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300032, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300034, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300036, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300038, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300040, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300042, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300044, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300046, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300048, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300050, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300052, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300054, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300056, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300058, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300060, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300062, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300064, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300066, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300068, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300070, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300072, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300074, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300076, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300078, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300080, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300082, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300084, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300086, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300088, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300090, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300092, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300094, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
+  - {fileID: 21300096, guid: 929c1f6349ad0894692f86aa2c21cdce, type: 3}
   Abakhanskya:
   - {fileID: 21300016, guid: 0c5f0f9e7c4354e41844d0be529e588b, type: 3}
   - {fileID: 21300018, guid: 0c5f0f9e7c4354e41844d0be529e588b, type: 3}
@@ -180026,6 +180099,23 @@ MonoBehaviour:
   - {fileID: 21300044, guid: 9c89bc3577e4b5c418b2c6852c4cea9d, type: 3}
   - {fileID: 21300046, guid: 9c89bc3577e4b5c418b2c6852c4cea9d, type: 3}
   - {fileID: 21300048, guid: 9c89bc3577e4b5c418b2c6852c4cea9d, type: 3}
+  SoulSprite: []
+  AngelProjectile:
+  - {fileID: 21300000, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300002, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300004, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300006, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300008, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300010, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300012, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300014, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300016, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300018, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300020, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300022, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300024, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300026, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
+  - {fileID: 21300028, guid: 629a7a4cc37140a48862d0b01e6df749, type: 3}
   Scat:
   - {fileID: 21300016, guid: 62d106882424040429ca44f178a01355, type: 3}
   - {fileID: 21300018, guid: 62d106882424040429ca44f178a01355, type: 3}
@@ -225127,18 +225217,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
---- !u!114 &1006532813 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114787627876447784, guid: 89bebbadda021fa4888a74173e78312f,
-    type: 3}
-  m_PrefabInstance: {fileID: 1100969383}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 575553740, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1006969823
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -225796,6 +225874,7 @@ MonoBehaviour:
   CrossShock: {fileID: 5311956398332747120, guid: cfb637d4a910e9448a60c74e8ff5cc58,
     type: 3}
   Potion: {fileID: 5311956398332747120, guid: eccc4eba0e84892499d4fd37d20b336a, type: 3}
+  DivineNovaBlast: {fileID: 0}
   DiamondStorm: {fileID: 1587365558784220, guid: a43dbbe8323df85478489ca3fa1e3279,
     type: 3}
 --- !u!4 &1012778675
@@ -345940,7 +346019,7 @@ MonoBehaviour:
   MercSortDirection: {fileID: 1043706866}
   MonsterConquestTurns: {fileID: 1423329119}
   LeaderTraits: {fileID: 288819545}
-  SoldierTraits: {fileID: 534052128}
+  SoldierTraits: {fileID: 0}
   MaleTraits: {fileID: 1819493723}
   FemaleTraits: {fileID: 1599151775}
   HermTraits: {fileID: 1481282733}

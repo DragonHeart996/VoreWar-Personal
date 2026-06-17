@@ -121,7 +121,6 @@ class Lamia : DefaultRaceData
             */
         base.RunFirst(actor);
     }
-    internal override int DickSizes => 6;
 
     internal override void SetBaseOffsets(Actor_Unit actor)
     {
