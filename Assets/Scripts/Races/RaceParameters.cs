@@ -56,6 +56,7 @@ static class RaceParameters
     static readonly RaceTraits Vargul;
     static readonly RaceTraits Hamsters;
     static readonly RaceTraits RwuMercenaries;
+    static readonly RaceTraits OoviKat;
     static readonly RaceTraits Vagrants;
     static readonly RaceTraits Serpents;
     static readonly RaceTraits Wyvern;
@@ -133,20 +134,29 @@ static class RaceParameters
     static readonly RaceTraits Tatltuae;
     static readonly RaceTraits Lupine;
     static readonly RaceTraits Jackals;
-    static readonly RaceTraits Firefly;
+    static readonly RaceTraits Seville;
     static readonly RaceTraits Nectar;
     static readonly RaceTraits Ryan;
+    static readonly RaceTraits Konane;
     static readonly RaceTraits Otachi;
     static readonly RaceTraits Raiju;
     static readonly RaceTraits Smudger;
     static readonly RaceTraits SpaceCroach;
     static readonly RaceTraits Trex;
     static readonly RaceTraits Utahraptor;
+    static readonly RaceTraits Pudding;
+    static readonly RaceTraits Badgers;
+    static readonly RaceTraits Renamon;
     static readonly RaceTraits Ghosts;
+    static readonly RaceTraits DemiDragons;
+    static readonly RaceTraits Yordles;
     static readonly RaceTraits WoodDryad;
     static readonly RaceTraits EarthDryad;
     static readonly RaceTraits RiverDryad;
     static readonly RaceTraits FungalDryad;
+    static readonly RaceTraits Cherub;
+    static readonly RaceTraits Seraph;
+    static readonly RaceTraits SoulSprite;
 
     static Unit tempUnit;
 
@@ -398,6 +408,8 @@ static class RaceParameters
                 return Gnolls;
             case Race.Centaur:
                 return Centaur;
+            case Race.OoviKat:
+                return OoviKat;
             case Race.FeralSlime:
                 return FeralSlime;
             case Race.Olivia:
@@ -430,12 +442,18 @@ static class RaceParameters
                 return Lupine;
             case Race.Jackals:
                 return Jackals;
-            case Race.Firefly:
-                return Firefly;
+            case Race.Seville:
+                return Seville;
             case Race.Nectar:
                 return Nectar;
             case Race.Ryan:
                 return Ryan;
+            case Race.Konane:
+                return Konane;
+            case Race.Seraph:
+                return Seraph;
+            case Race.Cherub:
+                return Cherub;
             case Race.Otachi:
                 return Otachi;
             case Race.Raiju:
@@ -446,6 +464,10 @@ static class RaceParameters
                 return SpaceCroach;
             case Race.Ghosts:
                 return Ghosts;
+            case Race.DemiDragons:
+                return DemiDragons;
+            case Race.Yordles:
+                return Yordles;
             case Race.WoodDryad:
                 return WoodDryad;
             case Race.EarthDryad:
@@ -458,6 +480,14 @@ static class RaceParameters
                 return Trex;
             case Race.Utahraptor:
                 return Utahraptor;
+            case Race.SoulSprite: 
+                return SoulSprite;
+            case Race.Pudding: 
+                return Pudding;
+            case Race.Badgers:
+                return Badgers;
+            case Race.Renamon:
+                return Renamon;
             case (Race)700: //Singled out so that it doesn't make the debug message
                 return Default;
             case (Race)701:
@@ -538,7 +568,8 @@ static class RaceParameters
             FavoredStat = Stat.Mind,
             DeployCost = 1,
             Upkeep = 21f,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore },
+			PowerAdjustment = 2f,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
             {
                 Traits.Charmer,
@@ -576,7 +607,7 @@ static class RaceParameters
         {
             Traits.PackStrength,
             Traits.PackVoracity,
-			Traits.Tenacious,
+            Traits.Tenacious,
         },
             RaceDescription = "Natives of this realm, the Wolves have a history of hunting in packs extending beyond the crafting of their first weapons. While a lone Wolf can still be a worthy adversary, their true strength comes from working with their kin.",
         };
@@ -609,6 +640,7 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Voracity,
             DeployCost = 1,
+			PowerAdjustment = 1.2f,
             Upkeep = 4f,
             RacialTraits = new List<Traits>()
         {
@@ -691,7 +723,7 @@ static class RaceParameters
             Traits.MagicResistance,
             Traits.AstralCall,
         },
-		RaceStats = new RaceStats()
+            RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 14),
                 Dexterity = new RaceStats.StatRange(6, 14),
@@ -749,13 +781,13 @@ static class RaceParameters
             FavoredStat = Stat.Stomach,
             DeployCost = 1,
             Upkeep = 7f,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
         {
             Traits.Ravenous,
             Traits.Biter,
             Traits.DualStomach,
-			Traits.StrongGullet
+            Traits.StrongGullet
         },
             RaceDescription = "Natives to this realm, these legless beings were once the strongest and largest hunters of the land. The sudden emergence of many new species left the Lamia uncertain at first, but soon their dual stomachs won and they focused on testing the taste of the new arrivals.",
         };
@@ -835,6 +867,7 @@ static class RaceParameters
             FavoredStat = Stat.Agility,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
                 Traits.KeenReflexes,
@@ -852,7 +885,8 @@ static class RaceParameters
             FavoredStat = Stat.Agility,
             DeployCost = 1,
             Upkeep = 4f,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore },
+			PowerAdjustment = 1.2f,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
         {
                 Traits.Flight,
@@ -871,6 +905,18 @@ static class RaceParameters
             FavoredStat = Stat.Strength,
             DeployCost = 1,
             Upkeep = 7f,
+			PowerAdjustment = 1.5f,
+			RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(10, 16),
+                Dexterity = new RaceStats.StatRange(10, 16),
+                Endurance = new RaceStats.StatRange(10, 12),
+                Mind = new RaceStats.StatRange(8, 13),
+                Will = new RaceStats.StatRange(6, 13),
+                Agility = new RaceStats.StatRange(10, 12),
+                Voracity = new RaceStats.StatRange(12, 15),
+                Stomach = new RaceStats.StatRange(15, 18),
+            },
             RacialTraits = new List<Traits>()
         {
                 Traits.StrongMelee,
@@ -922,6 +968,7 @@ static class RaceParameters
             FavoredStat = Stat.Strength,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
                 Traits.TasteForBlood,
@@ -952,27 +999,30 @@ static class RaceParameters
         Avians = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 14,
+            StomachSize = 15,
             HasTail = true,
             FavoredStat = Stat.Agility,
             DeployCost = 1,
-            Upkeep = 3f,
+            Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
                 Traits.KeenShot,
-                Traits.Featherweight
+                Traits.Featherweight,
+                Traits.Flight,
         },
             RaceDescription = "A highly eclectic people, large amounts of \"Avian\" culture are actually derived from other peoples and races. This can largely be credited to their having started late. By the time the Avians properly entered the civilizational stage, most other races had already entered. Now, the Avians are eager to continue adding others to themselves. And if the Avians can't merge your culture into their own, they may instead opt to merge your body into their body fat.",
         };
 
         Demiants = new RaceTraits()
         {
-            BodySize = 9,
+            BodySize = 12,
             StomachSize = 15,
             HasTail = false,
             FavoredStat = Stat.Strength,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
                 Traits.PackStrength,
@@ -1008,6 +1058,7 @@ static class RaceParameters
             FavoredStat = Stat.Voracity,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
                 Traits.Biter,
@@ -1123,6 +1174,7 @@ static class RaceParameters
             FavoredStat = Stat.Agility,
             DeployCost = 1,
             Upkeep = 2f,
+			PowerAdjustment = 0.9f,
             RacialTraits = new List<Traits>()
             {
                 Traits.ProlificBreeder,
@@ -1136,11 +1188,12 @@ static class RaceParameters
         Gnolls = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 20,
+            StomachSize = 15,
             HasTail = true,
             FavoredStat = Stat.Voracity,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
             {
                 Traits.PackVoracity,
@@ -1171,11 +1224,12 @@ static class RaceParameters
         Bears = new RaceTraits()
         {
             BodySize = 15,
-            StomachSize = 20,
+            StomachSize = 15,
             HasTail = false,
             FavoredStat = Stat.Endurance,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
             Traits.Intimidating,
@@ -1221,11 +1275,12 @@ static class RaceParameters
         Lupine = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 20,
+            StomachSize = 15,
             HasTail = false,
             FavoredStat = Stat.Strength,
             DeployCost = 1,
             Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
             Traits.PackStrength,
@@ -1238,11 +1293,12 @@ static class RaceParameters
         Jackals = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 20,
+            StomachSize = 15,
             HasTail = false,
             FavoredStat = Stat.Endurance,
             DeployCost = 1,
-            Upkeep = 3f,
+            Upkeep = 4f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
         {
             Traits.PackMind,
@@ -1255,7 +1311,7 @@ static class RaceParameters
         Ghosts = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 20,
+            StomachSize = 15,
             HasTail = false,
             FavoredStat = Stat.Agility,
             DeployCost = 1,
@@ -1269,6 +1325,41 @@ static class RaceParameters
             RaceDescription = "The spooky spirits of the dead, come back in new incorporeal forms to haunt and feast upon the living. Formed when a soul takes five or more years to cross to the other side, these poltergeists, being dead, have no need for nutrition, and hunt for the fun of it and to spite the living.",
         };
 
+        DemiDragons = new RaceTraits()
+        {
+            BodySize = 15,
+            StomachSize = 20,
+            HasTail = true,
+            FavoredStat = Stat.Mind,
+            DeployCost = 1,
+            Upkeep = 5f,
+            RacialTraits = new List<Traits>()
+        {
+                Traits.Flight,
+                Traits.NaturalCaster,
+                Traits.StrongGullet,
+                Traits.Hoarder,
+        },
+            RaceDescription = "",
+        };
+
+        Yordles = new RaceTraits()
+        {
+            BodySize = 8,
+            StomachSize = 15,
+            HasTail = false,
+            FavoredStat = Stat.Mind,
+            DeployCost = 1,
+            Upkeep = 3f,
+            RacialTraits = new List<Traits>()
+        {
+            Traits.MagicProwess,
+            Traits.Multifaceted,
+            Traits.EasyToVore,
+        },
+            RaceDescription = "These fluffy creatures are commonly mistaken as short mammals. In truth, they are a race of spirits, happening upon this world through their enchanted gateways. Yordles have complex personalities and are attracted to diverse cultures.",
+        };
+
         Centaur = new RaceTraits()
         {
             BodySize = 20,
@@ -1276,7 +1367,8 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Endurance,
             DeployCost = 1,
-            Upkeep = 4f,
+            Upkeep = 5f,
+			PowerAdjustment = 1.2f,
             RacialTraits = new List<Traits>()
             {
                 Traits.DualStomach,
@@ -1294,7 +1386,7 @@ static class RaceParameters
             FavoredStat = Stat.Will,
             DeployCost = 1,
             Upkeep = 4f,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.CockVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
             {
                 Traits.Dazzle,
@@ -1305,7 +1397,7 @@ static class RaceParameters
             },
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(3, 6),
+                Strength = new RaceStats.StatRange(8, 12),
                 Dexterity = new RaceStats.StatRange(8, 14),
                 Endurance = new RaceStats.StatRange(8, 14),
                 Mind = new RaceStats.StatRange(8, 14),
@@ -1321,12 +1413,12 @@ static class RaceParameters
         Tigers = new RaceTraits()
         {
             BodySize = 12,
-            StomachSize = 18,
+            StomachSize = 20,
             HasTail = true,
             FavoredStat = Stat.Strength,
-            PowerAdjustment = 1.3f,
+            PowerAdjustment = 1.5f,
             DeployCost = 1,
-            Upkeep = 7f,
+            Upkeep = 11f,
             RacialTraits = new List<Traits>()
         {
             Traits.Maul,
@@ -1377,22 +1469,22 @@ static class RaceParameters
 
         Alligators = new RaceTraits()
         {
-            BodySize = 20,
-            StomachSize = 20,
+            BodySize = 24,
+            StomachSize = 24,
             HasTail = true,
             FavoredStat = Stat.Strength,
             CanUseRangedWeapons = false,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.25f,
             PowerAdjustment = 1.5f,
             DeployCost = 1,
-            Upkeep = 5f,
+            Upkeep = 10f,
             RaceStats = new RaceStats() // Stronger, tougher, slower moving and with slower digestion. (Crocodilians would normally have a very strong digestion, but that reguires focusing on it, not going on fighting.)
             // Wider, shorter throats also make eating easier, but also make prey's escape easier. (Not in RL, obviously. Or perhaps they would, if crocodilians had a habit of swallowing sizeable living prey.)
             {
                 Strength = new RaceStats.StatRange(16, 22),
                 Dexterity = new RaceStats.StatRange(4, 7),
-                Endurance = new RaceStats.StatRange(12, 22),
+                Endurance = new RaceStats.StatRange(22, 32),
                 Mind = new RaceStats.StatRange(5, 10),
                 Will = new RaceStats.StatRange(8, 14),
                 Agility = new RaceStats.StatRange(6, 10),
@@ -1452,6 +1544,7 @@ static class RaceParameters
             FavoredStat = Stat.Agility,
             DeployCost = 1,
             Upkeep = 2f,
+			PowerAdjustment = 0.9f,
             RacialTraits = new List<Traits>()
             {
                 Traits.ProlificBreeder,
@@ -1477,21 +1570,21 @@ static class RaceParameters
                 Traits.EnthrallingDepths
         },
             RaceDescription = "Dew Sprites are extremely odd, with most believing them to be some form of corrupted Fairies made of dew, though no one has ever had a long enough conversation to verify this. Obviously, there's the issue of them trying to eat you, but even friendly Dew Sprites are rather unintelligent, and speaking with them can feel like speaking to someone with a concussion.",
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal, VoreType.BladderVore },
         };
 
         Hippos = new RaceTraits()
         {
-            BodySize = 20,
-            StomachSize = 20,
+            BodySize = 24,
+            StomachSize = 24,
             HasTail = true,
             FavoredStat = Stat.Endurance,
             PowerAdjustment = 1.3f,
             DeployCost = 1,
-            Upkeep = 5f,
+            Upkeep = 11f,
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(12, 20),
+                Strength = new RaceStats.StatRange(22, 28),
                 Dexterity = new RaceStats.StatRange(6, 14),
                 Endurance = new RaceStats.StatRange(18, 28),
                 Mind = new RaceStats.StatRange(6, 12),
@@ -1515,10 +1608,10 @@ static class RaceParameters
             StomachSize = 24,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             PowerAdjustment = 1.4f,
             DeployCost = 1,
-            Upkeep = 6f,
+            Upkeep = 11f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(10, 16),
@@ -1549,9 +1642,9 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Strength,
             CanUseRangedWeapons = false,
-            PowerAdjustment = 1.4f,
+            PowerAdjustment = 1.3f,
             DeployCost = 1,
-            Upkeep = 7f,
+            Upkeep = 5f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(16, 24),
@@ -1610,9 +1703,9 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Strength,
             ExpMultiplier = 1.25f,
-            PowerAdjustment = 1.5f,
+            PowerAdjustment = 2.5f,
             DeployCost = 1,
-            Upkeep = 8f,
+            Upkeep = 15f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(14, 20),
@@ -1665,6 +1758,34 @@ static class RaceParameters
             RaceDescription = "A race renowned for their excellent smithing and startling strength despite their stature. Their settlements have rarely been seen above ground however, they are known to have ginormous kingdoms underground that dwarf most other faction's capitals.",
         };
 
+        OoviKat = new RaceTraits()
+        {
+            BodySize = 15,
+            StomachSize = 20,
+            HasTail = true,
+            FavoredStat = Stat.Strength,
+            DeployCost = 1,
+            Upkeep = 5f,
+            PowerAdjustment = 1.4f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(10, 15),
+                Dexterity = new RaceStats.StatRange(10, 14),
+                Endurance = new RaceStats.StatRange(9, 13),
+                Mind = new RaceStats.StatRange(12, 17),
+                Will = new RaceStats.StatRange(14, 19),
+                Agility = new RaceStats.StatRange(8, 10),
+                Voracity = new RaceStats.StatRange(8, 12),
+                Stomach = new RaceStats.StatRange(12, 18),
+            },
+            RacialTraits = new List<Traits>()
+        {
+            Traits.InherentGlamour,
+            Traits.EvasiveBattler,
+        },
+            RaceDescription = "OoviKat have the unique ability to touch the soul, the true nature, of living beings. Once identified, they can transform into those they interact with, tapping into their tap into their inner feelings and memorie. Due to this, it is uncertain when the came to this world or how long the've been around in secret.",
+        };
+
         RwuMercenaries = new RaceTraits()
         {
             BodySize = 12,
@@ -1672,7 +1793,7 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Dexterity,
             DeployCost = 1,
-            Upkeep = 6f,
+            Upkeep = 11f,
             PowerAdjustment = 1.1f,
             RaceStats = new RaceStats()
             {
@@ -1696,6 +1817,69 @@ static class RaceParameters
         },
             InnateSpells = new List<SpellTypes>() { SpellTypes.FireBomb },
             RaceDescription = "A highly trained soldier of the Red Wolf United Mercenary Company. It is unknown which faction or race first started this company due to the technology they boast and open recruitment policy. However, one thing is certain; these soldiers are no slouches when it comes to combat and are quite a formidable force on the battlefield.",
+        };
+
+
+        Badgers = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 20,
+            HasTail = true,
+            FavoredStat = Stat.Endurance,
+            CanUseRangedWeapons = false,
+            PowerAdjustment = 1.4f,
+            DeployCost = 1,
+            Upkeep = 8f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(16, 24),
+                Dexterity = new RaceStats.StatRange(6, 10),
+                Endurance = new RaceStats.StatRange(18, 26),
+                Mind = new RaceStats.StatRange(6, 10),
+                Will = new RaceStats.StatRange(8, 16),
+                Agility = new RaceStats.StatRange(10, 16),
+                Voracity = new RaceStats.StatRange(14, 24),
+                Stomach = new RaceStats.StatRange(12, 18),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.WildFury,
+                Traits.GiantSlayer,
+                Traits.Berserk,
+                Traits.Resilient,
+            },
+            RaceDescription = "Created by taking wild, feral badgers and infusing them various types of blood, the Badgers were originally made by a consortium of wizards to serve as their personal bodyguards. However, said consortium were rather unpleasant, and it was not long before they ended up as naught but badger padding. Ever since, the badgers have lived as fighters-for-hire, renowned among the civilized peoples of the realm for their battle prowess and resilience against even the toughest of foes. However, they are still just regular badgers at heart, often having quite the temper, and they aren't always the cleverest. But still, a valuable ally to have in battle.",
+        };
+
+        Renamon = new RaceTraits()
+        {
+            BodySize = 15,
+            StomachSize = 17,
+            HasTail = true,
+            FavoredStat = Stat.Mind,
+            CanUseRangedWeapons = false,
+            PowerAdjustment = 1.4f,
+            DeployCost = 1,
+            Upkeep = 7f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(14, 18),
+                Dexterity = new RaceStats.StatRange(8, 14),
+                Endurance = new RaceStats.StatRange(9, 15),
+                Mind = new RaceStats.StatRange(14, 22),
+                Will = new RaceStats.StatRange(9, 16),
+                Agility = new RaceStats.StatRange(10, 16),
+                Voracity = new RaceStats.StatRange(8, 14),
+                Stomach = new RaceStats.StatRange(12, 16),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.StrongMelee,
+                Traits.ForcefulBlow,
+                Traits.SpellBlade,
+            },
+            InnateSpells = new List<SpellTypes>() { SpellTypes.DiamondStorm },
+            RaceDescription = "Powerful digital creatures from another world that have torn their way into this realm with their power of code seeking to get stronger.",
         };
 
         Vagrants = new RaceTraits()
@@ -1738,7 +1922,7 @@ static class RaceParameters
             ExpMultiplier = 1.25f,
             PowerAdjustment = .9f,
             DeployCost = 1,
-            Upkeep = 4f,
+            Upkeep = 8f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(8, 20),
@@ -1756,6 +1940,7 @@ static class RaceParameters
                 Traits.Biter,
                 Traits.Ravenous,
                 Traits.StrongGullet,
+				Traits.Resilient,
             },
             RaceDescription = "When the lizard folk emerged from their portal to this land, some young snakes from their old world managed to slip along. Growing fast under the effect of this new realm, the Serpents soon emerged as a ravenous horde.",
         };
@@ -1766,11 +1951,11 @@ static class RaceParameters
             StomachSize = 30,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.5f,
-            PowerAdjustment = 2f,
-            DeployCost = 1,
-            Upkeep = 6f,
+            PowerAdjustment = 4f,
+            DeployCost = 2,
+            Upkeep = 13f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(8, 20),
@@ -1785,8 +1970,11 @@ static class RaceParameters
             RacialTraits = new List<Traits>()
         {
                 Traits.Flight,
+				Traits.Biter,
+				Traits.Berserk,
+				Traits.Resilient,
         },
-            RaceDescription = "Fast, winged and ravenous. These lesser cousins of dragons do not have the magical abilities of true dragons, but they are still a dangerous force. They are often followed by their younger kin, but their care only extends as far as not snacking on the weaklings themselves. ",
+            RaceDescription = "Fast, winged, and ravenous. These lesser cousins of dragons do not have the magical abilities of true dragons, but they are still a dangerous force. They are often seen following a larger \"Wyvern Matron\". While you would assume they act as leaders to the Wyverns, it's more a case that, without a force to keep some amount of order, Wyverns often try to snack on the weakest of their ranks.",
 
         };
 
@@ -1795,14 +1983,14 @@ static class RaceParameters
             BodySize = 40,
             StomachSize = 40,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.6f,
-            PowerAdjustment = 2.1f,
-            DeployCost = 1,
-            Upkeep = 15f,
+            PowerAdjustment = 9f,
+            DeployCost = 3,
+            Upkeep = 30f,
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(12, 30),
+                Strength = new RaceStats.StatRange(24, 30),
                 Dexterity = new RaceStats.StatRange(9, 21),
                 Endurance = new RaceStats.StatRange(30, 42),
                 Mind = new RaceStats.StatRange(21, 44),
@@ -1814,6 +2002,9 @@ static class RaceParameters
             RacialTraits = new List<Traits>()
         {
                 Traits.Flight,
+				Traits.Biter,
+				Traits.Berserk,
+				Traits.Resilient,
         },
             RaceDescription = "The beings called Wyvern Matrons are a rare, larger, hermaphroditic variant of the wyvern. Why exactly some wyverns turn into such is unknown, but the resulting being is an even greater threat than average wyverns are.",
         };
@@ -1887,7 +2078,7 @@ static class RaceParameters
             StomachSize = 20,
             HasTail = true,
             FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.75f,
             PowerAdjustment = 1.75f,
             DeployCost = 1,
@@ -1950,7 +2141,7 @@ static class RaceParameters
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             ExpMultiplier = 2.5f,
-            PowerAdjustment = 2.5f,
+            PowerAdjustment = 1.5f,
             DeployCost = 1,
             Upkeep = 8f,
             RaceStats = new RaceStats()
@@ -2079,7 +2270,7 @@ static class RaceParameters
             StomachSize = 12,
             HasTail = false,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.2f,
             PowerAdjustment = 1.5f,
             DeployCost = 1,
@@ -2110,11 +2301,11 @@ static class RaceParameters
             StomachSize = 12,
             HasTail = false,
             FavoredStat = Stat.Stomach,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 1.2f,
             PowerAdjustment = 1.5f,
             DeployCost = 1,
-            Upkeep = 1f,
+            Upkeep = 3f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(12, 16),
@@ -2142,11 +2333,11 @@ static class RaceParameters
             StomachSize = 80,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 6f,
             PowerAdjustment = 12f,
-            DeployCost = 4,
-            Upkeep = 4f,
+            DeployCost = 3,
+            Upkeep = 30f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(24, 32),
@@ -2237,7 +2428,7 @@ static class RaceParameters
             StomachSize = 10,
             HasTail = false,
             FavoredStat = Stat.Mind,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.CockVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.CockVore, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.1f,
             PowerAdjustment = 1.2f,
             DeployCost = 1,
@@ -2270,7 +2461,7 @@ static class RaceParameters
             StomachSize = 10,
             HasTail = false,
             FavoredStat = Stat.Mind,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.CockVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.CockVore, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.1f,
             PowerAdjustment = 1.2f,
             DeployCost = 1,
@@ -2323,7 +2514,7 @@ static class RaceParameters
             StomachSize = 22,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.75f,
             PowerAdjustment = 2.5f,
             DeployCost = 1,
@@ -2356,11 +2547,11 @@ static class RaceParameters
             StomachSize = 20,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.75f,
             PowerAdjustment = 3f,
             DeployCost = 1,
-            Upkeep = 4f,
+            Upkeep = 6f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(14, 20),
@@ -2480,7 +2671,7 @@ static class RaceParameters
             Traits.VerySlowMovement,
             Traits.HardSkin
         },
-            RaceDescription = "One of the four species of giant slug that can be found in the Realm, the Rock Slugs are known for their high resilience, being able to withstand some of the strongest beasts in the Realm. They would be far more difficult to deal with were it not for their speed, which makes the other already slow species of giant slug look like speed demons in comparasine."
+            RaceDescription = "One of the four species of giant slug that can be found in the Realm, the Rock Slugs are known for their high resilience, being able to withstand some of the strongest beasts in the Realm. They would be far more difficult to deal with were it not for their speed, which makes the other already slow species of giant slug look like speed demons in comparison."
         };
 
         CoralSlugs = new RaceTraits()
@@ -2555,9 +2746,9 @@ static class RaceParameters
             StomachSize = 20,
             HasTail = false,
             FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 1.2f,
-            PowerAdjustment = 1.5f,
+            PowerAdjustment = 2.5f,
             DeployCost = 1,
             Upkeep = 6f,
             RaceStats = new RaceStats()
@@ -2587,17 +2778,17 @@ static class RaceParameters
             StomachSize = 80,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 1.6f,
-            PowerAdjustment = 1.9f,
-            DeployCost = 2,
-            Upkeep = 10f,
+            PowerAdjustment = 12f,
+            DeployCost = 3,
+            Upkeep = 36f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(12, 22),
                 Dexterity = new RaceStats.StatRange(8, 16),
                 Endurance = new RaceStats.StatRange(22, 23),
-                Mind = new RaceStats.StatRange(14, 30),
+                Mind = new RaceStats.StatRange(30, 42),
                 Will = new RaceStats.StatRange(8, 18),
                 Agility = new RaceStats.StatRange(14, 28),
                 Voracity = new RaceStats.StatRange(22, 32),
@@ -2654,7 +2845,7 @@ static class RaceParameters
             StomachSize = 12,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = .85f,
             PowerAdjustment = .75f,
             DeployCost = 1,
@@ -2717,7 +2908,7 @@ static class RaceParameters
             StomachSize = 12,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.1f,
             PowerAdjustment = 1.3f,
             DeployCost = 1,
@@ -2778,7 +2969,7 @@ static class RaceParameters
             StomachSize = 16,
             HasTail = true,
             FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.5f,
             PowerAdjustment = 1.75f,
             DeployCost = 1,
@@ -2809,10 +3000,10 @@ static class RaceParameters
             StomachSize = 20,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             PowerAdjustment = 1.3f,
             DeployCost = 1,
-            Upkeep = 6f,
+            Upkeep = 5f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(12, 20),
@@ -2839,7 +3030,7 @@ static class RaceParameters
             StomachSize = 10,
             HasTail = true,
             FavoredStat = Stat.Endurance,
-            AllowedVoreTypes = new List<VoreType> { VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore },
             ExpMultiplier = 1.3f,
             PowerAdjustment = 1.6f,
             DeployCost = 1,
@@ -2870,7 +3061,7 @@ static class RaceParameters
             StomachSize = 18,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.TailVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.TailVore, VoreType.Unbirth, VoreType.BladderVore},
             ExpMultiplier = 1.5f,
             PowerAdjustment = 1.75f,
             DeployCost = 1,
@@ -2901,7 +3092,7 @@ static class RaceParameters
             StomachSize = 15,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.CockVore, VoreType.Oral, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.CockVore, VoreType.Oral, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = .95f,
             PowerAdjustment = .95f,
             DeployCost = 1,
@@ -2932,7 +3123,7 @@ static class RaceParameters
             StomachSize = 20,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BladderVore },
             ExpMultiplier = 1.1f,
             PowerAdjustment = 1.3f,
             DeployCost = 1,
@@ -2963,7 +3154,7 @@ static class RaceParameters
             BodySize = 16,
             StomachSize = 24,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.Anal, VoreType.BladderVore },
             ExpMultiplier = 1.6f,
             PowerAdjustment = 1.3f,
             DeployCost = 1,
@@ -2996,7 +3187,7 @@ static class RaceParameters
             ExpMultiplier = 1.6f,
             PowerAdjustment = 1.3f,
             DeployCost = 1,
-            Upkeep = 4f,
+            Upkeep = 5f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(11, 15),
@@ -3013,6 +3204,7 @@ static class RaceParameters
             Traits.Disgusting,
             Traits.Pounce,
             Traits.FireVulnerable,
+			Traits.Frenzy,
         },
             RaceDescription = "A vicious and territorial race of voracious insects prized for their ability to produce an element known as E-710, though some say it's just oil.  They are very dangerous, especially so in larger numbers and will often attempt to swarm their prey.  No known portal signified their arrival in the realm so how they ended up here is anybody's guess, though a few conspiracy rumors claim they were brought here by someone else.  There is a curious phenomenon surrounding these insects: When struck by them in combat, there is a high likelyhood that the wounded will shout \"No pain, no freedom!\"",
         };
@@ -3056,7 +3248,7 @@ static class RaceParameters
             HasTail = false,
             FavoredStat = Stat.Strength,
             DeployCost = 1,
-            Upkeep = 3f,
+            Upkeep = 5f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(18, 24),
@@ -3122,7 +3314,7 @@ static class RaceParameters
             StomachSize = 17,
             HasTail = true,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 1f,
             PowerAdjustment = 1f,
             DeployCost = 1,
@@ -3157,8 +3349,8 @@ static class RaceParameters
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             ExpMultiplier = 6f,
             PowerAdjustment = 12f,
-            DeployCost = 4,
-            Upkeep = 10f,
+            DeployCost = 2,
+            Upkeep = 21f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 28),
@@ -3287,6 +3479,10 @@ static class RaceParameters
         {
             BodySize = 7,
             StomachSize = 15,
+			ExpMultiplier = 1f,
+            PowerAdjustment = .75f,
+            DeployCost = 1,
+            Upkeep = 2f,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             FavoredStat = Stat.Endurance,
             RaceStats = new RaceStats()
@@ -3316,7 +3512,7 @@ static class RaceParameters
             StomachSize = 10,
             HasTail = true,
             FavoredStat = Stat.Agility,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 6f,
             PowerAdjustment = .75f,
             DeployCost = 1,
@@ -3476,11 +3672,11 @@ static class RaceParameters
             BodySize = 80,
             StomachSize = 80,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 6f,
-            PowerAdjustment = 1.3f,
+            PowerAdjustment = 7f,
             DeployCost = 2,
-            Upkeep = 20f,
+            Upkeep = 30f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 28),
@@ -3508,11 +3704,11 @@ static class RaceParameters
             BodySize = 60,
             StomachSize = 50,
             FavoredStat = Stat.Endurance,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 6f,
             PowerAdjustment = 1.3f,
             DeployCost = 2,
-            Upkeep = 20f,
+            Upkeep = 30f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 28),
@@ -3580,7 +3776,7 @@ static class RaceParameters
             ExpMultiplier = 4f,
             PowerAdjustment = 2f,
             DeployCost = 1,
-            Upkeep = 12f,
+            Upkeep = 13f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 28),
@@ -3610,11 +3806,11 @@ static class RaceParameters
             StomachSize = 50,
             HasTail = false,
             FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 12f,
             PowerAdjustment = 12f,
             DeployCost = 2,
-            Upkeep = 12f,
+            Upkeep = 24f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(30, 42),
@@ -3632,6 +3828,7 @@ static class RaceParameters
             Traits.Biter,
             Traits.Ravenous,
             Traits.IronGut,
+			Traits.Resilient,
         },
             RaceDescription = "They're big, they're scaled, they're hungry, and they got little arms.  Woe betide those who find themselves trapped behind their powerful jaws, for this is the ultimate predator whose iconic roar is known far and wide and strikes fear in all those who hear it."
         };
@@ -3642,7 +3839,7 @@ static class RaceParameters
             StomachSize = 30,
             HasTail = false,
             FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth, VoreType.BladderVore },
             ExpMultiplier = 4f,
             PowerAdjustment = 2f,
             DeployCost = 2,
@@ -3668,6 +3865,76 @@ static class RaceParameters
             RaceDescription = "Utahraptors are much faster and more powerful thatn the usual raptors you see here and there.  More hungry too."
         };
 
+        Pudding = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 20,
+            HasTail = false,
+            FavoredStat = Stat.Stomach,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
+            ExpMultiplier = 1.75f,
+            PowerAdjustment = 1.25f,
+            DeployCost = 1,
+            Upkeep = 6f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(6, 12),
+                Dexterity = new RaceStats.StatRange(4, 8),
+                Endurance = new RaceStats.StatRange(20, 30),
+                Mind = new RaceStats.StatRange(4, 10),
+                Will = new RaceStats.StatRange(6, 12),
+                Agility = new RaceStats.StatRange(6, 10),
+                Voracity = new RaceStats.StatRange(10, 18),
+                Stomach = new RaceStats.StatRange(8, 16),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.MetabolicSurge,
+                Traits.ExtraNutritious,
+                Traits.SoftBody,
+                Traits.GelatinousBody,
+        
+
+            },
+            RaceDescription = "After reciving news about a massacre involving oversized bake goods, a wizard decided to create a way to inform the populace of the dangers of voracious food monsters. What better way than to better prepare than to make more voracious, albeit weaker, food monsters?"
+        };
+
+
+        SoulSprite = new RaceTraits()
+        {
+            BodySize = 8,
+            StomachSize = 12,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            DeployCost = 1,
+            Upkeep = 3f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(2, 6),
+                Dexterity = new RaceStats.StatRange(4, 8),
+                Endurance = new RaceStats.StatRange(4, 8),
+                Mind = new RaceStats.StatRange(12, 16),
+                Will = new RaceStats.StatRange(10, 15),
+                Agility = new RaceStats.StatRange(6, 8),
+                Voracity = new RaceStats.StatRange(6, 10),
+                Stomach = new RaceStats.StatRange(10, 16),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.SlowMetabolism,
+                Traits.Flight,
+                Traits.ManaRich,
+                Traits.ExtraNutritious,
+                Traits.Charmer,
+                Traits.Temptation,
+        },
+        InnateSpells = new List<SpellTypes>()
+            { SpellTypes.Trance, },
+            RaceAI = RaceAI.ServantRace,
+            RaceDescription = "A relatively weak angelic being, created from the soul of a living creature purified by the higher-ranking angels. Soul Sprites act as the main workforce for the angels, and those who gain enough favor among their peers may ascend to higher ranks or even gain a chance to reincarnate to a new life... And it seems as of late, devouring their opponents on the battlefield is a lucrative means to gather said favor.",
+        };
+
 
         Selicia = new RaceTraits()
         {
@@ -3677,9 +3944,9 @@ static class RaceParameters
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth },
             ExpMultiplier = 4f,
-            PowerAdjustment = 7f,
-            DeployCost = 4,
-            Upkeep = 30f,
+            PowerAdjustment = 12f,
+            DeployCost = 3,
+            Upkeep = 26f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(22, 26),
@@ -3705,15 +3972,15 @@ static class RaceParameters
 
         Vision = new RaceTraits()
         {
-            BodySize = 20,
+            BodySize = 30,
             StomachSize = 30,
             HasTail = true,
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             ExpMultiplier = 3f,
-            PowerAdjustment = 4f,
-            DeployCost = 1,
-            Upkeep = 14f,
+            PowerAdjustment = 8f,
+            DeployCost = 2,
+            Upkeep = 21f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 22),
@@ -3730,7 +3997,7 @@ static class RaceParameters
                 Traits.Ravenous,
                 Traits.StrongGullet,
                 Traits.Intimidating,
-
+				Traits.ArtfulDodge,
             },
             RaceDescription = "A Xeno-Spinosaurid about the size of a small horse or large dog. They eat about half or even double their body weight at minimum a day, but have been known to eat things larger than themselves. Because of their huge appetite, their digestive tract is mostly stomach, what they can't digest they regurgitate as an owl-like pellet",
 
@@ -3769,15 +4036,15 @@ static class RaceParameters
 
         Scorch = new RaceTraits()
         {
-            BodySize = 32,
-            StomachSize = 30,
+            BodySize = 40,
+            StomachSize = 40,
             HasTail = true,
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             ExpMultiplier = 4f,
-            PowerAdjustment = 4f,
-            DeployCost = 1,
-            Upkeep = 32f,
+            PowerAdjustment = 11f,
+            DeployCost = 2,
+            Upkeep = 36f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 24),
@@ -3812,12 +4079,12 @@ static class RaceParameters
             ExpMultiplier = 1.4f,
             PowerAdjustment = 3f,
             DeployCost = 1,
-            Upkeep = 15f,
+            Upkeep = 18f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(20, 24),
                 Dexterity = new RaceStats.StatRange(6, 10),
-                Endurance = new RaceStats.StatRange(16, 20),
+                Endurance = new RaceStats.StatRange(20, 24),
                 Mind = new RaceStats.StatRange(8, 12),
                 Will = new RaceStats.StatRange(12, 16),
                 Agility = new RaceStats.StatRange(10, 16),
@@ -3908,10 +4175,10 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Strength,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth },
-            ExpMultiplier = 7f,
+            ExpMultiplier = 14f,
             PowerAdjustment = 7f,
-            DeployCost = 4,
-            Upkeep = 30f,
+            DeployCost = 3,
+            Upkeep = 42f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(32, 40),
@@ -3935,15 +4202,15 @@ static class RaceParameters
 
         Zera = new RaceTraits()
         {
-            BodySize = 24,
-            StomachSize = 30,
+            BodySize = 40,
+            StomachSize = 40,
             HasTail = true,
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore },
             ExpMultiplier = 2.4f,
-            PowerAdjustment = 4f,
-            DeployCost = 1,
-            Upkeep = 16f,
+            PowerAdjustment = 11f,
+            DeployCost = 2,
+            Upkeep = 28f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(24, 30),
@@ -4034,7 +4301,7 @@ static class RaceParameters
             RaceDescription = "Erin belongs to a very rare species known as a Nyangel, the lovechild of an angel and a catgirl.  Thanks to this divine heritage they aremostly all incredible healers... But they're also incredibly tasty.  Every Nyangel has a unique trait to set them apart from eachother, and Erin is no exception to this rule.  Her quirk is total acid resistance, the perfect defense against the raveous predators of this realm.  That doesn't stop her from being devoured, however, and that is unfortunately an all-too-common outcome for the girl.  Regardless of how many times she ends up eaten, the loveable Nyangel still tries her best to heal those she can.",
         };
 
-        
+
 
         Salix = new RaceTraits()
         {
@@ -4045,8 +4312,8 @@ static class RaceParameters
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal, VoreType.CockVore },
             ExpMultiplier = 2.4f,
             PowerAdjustment = 5f,
-            DeployCost = 1,
-            Upkeep = 20f,
+            DeployCost = 2,
+            Upkeep = 28f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 10),
@@ -4078,9 +4345,9 @@ static class RaceParameters
             FavoredStat = Stat.Endurance,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.Anal },
             ExpMultiplier = 1.5f,
-            PowerAdjustment = 1.2f,
-            DeployCost = 1,
-            Upkeep = 20f,
+            PowerAdjustment = 6f,
+            DeployCost = 2,
+            Upkeep = 24f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 10),
@@ -4115,7 +4382,7 @@ static class RaceParameters
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.BreastVore, VoreType.Anal },
             ExpMultiplier = 2f,
-            PowerAdjustment = 4f,
+            PowerAdjustment = 5f,
             DeployCost = 1,
             Upkeep = 15f,
             RaceStats = new RaceStats()
@@ -4182,7 +4449,7 @@ static class RaceParameters
             ExpMultiplier = 7f,
             PowerAdjustment = 15f,
             DeployCost = 4,
-            Upkeep = 40f,
+            Upkeep = 64f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(18, 24),
@@ -4214,8 +4481,8 @@ static class RaceParameters
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth },
             ExpMultiplier = 1.4f,
             PowerAdjustment = 2f,
-            DeployCost = 1,
-            Upkeep = 13f,
+            DeployCost = 2,
+            Upkeep = 21f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(23, 28),
@@ -4242,19 +4509,19 @@ static class RaceParameters
             BodySize = 60,
             StomachSize = 40,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore , VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
             ExpMultiplier = 2f,
-            PowerAdjustment = 4f,
-            DeployCost = 1,
-            Upkeep = 15f,
+            PowerAdjustment = 9f,
+            DeployCost = 2,
+            Upkeep = 28f,
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(10, 15),
+                Strength = new RaceStats.StatRange(32, 45),
                 Dexterity = new RaceStats.StatRange(14, 21),
-                Endurance = new RaceStats.StatRange(12, 19),
+                Endurance = new RaceStats.StatRange(20, 26),
                 Mind = new RaceStats.StatRange(10, 16),
                 Will = new RaceStats.StatRange(16, 21),
-                Agility = new RaceStats.StatRange(7, 11),
+                Agility = new RaceStats.StatRange(15, 19),
                 Voracity = new RaceStats.StatRange(12, 18),
                 Stomach = new RaceStats.StatRange(16, 21),
             },
@@ -4275,8 +4542,8 @@ static class RaceParameters
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore },
             ExpMultiplier = 1.4f,
             PowerAdjustment = 2f,
-            DeployCost = 1,
-            Upkeep = 9f,
+            DeployCost = 2,
+            Upkeep = 32f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 12),
@@ -4294,11 +4561,14 @@ static class RaceParameters
                 Traits.Pounce,
                 Traits.Timid,
                 Traits.Submissive,
-                Traits.Eternal,
+                Traits.BoundWeapon,
                 Traits.TheGreatEscape,
+                Traits.CloseCall,
         },
             InnateSpells = new List<SpellTypes>() { SpellTypes.CrossShock, SpellTypes.ArcBolt },
             RaceDescription = "A small fox with surprisingly strong lightning magic.",
+            CanUseRangedWeapons = false,
+            CanUseMeleeWeapons = false,
         };
 
         Tatltuae = new RaceTraits()
@@ -4307,11 +4577,11 @@ static class RaceParameters
             StomachSize = 27,
             FavoredStat = Stat.Mind,
             HasTail = true,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.BladderVore, VoreType.TailVore },
             ExpMultiplier = 1.4f,
-            PowerAdjustment = 2f,
-            DeployCost = 1,
-            Upkeep = 9f,
+            PowerAdjustment = 7f,
+            DeployCost = 2,
+            Upkeep = 21f,
             RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(4, 12),
@@ -4336,41 +4606,36 @@ static class RaceParameters
             RaceDescription = "Tatltuae is a curious raven. While he seemingly is one of the many who entered this world through a portal, he's taken quite well to his new home, becoming known as a mage, pred, cartographer, and selling his skills as a mercenary. While his hollow bones and spellcasting generally put him in the backlines, he is always eager to add people to his waistline, when given the chance. His main spell seems to be based on chaotic magic, and he definitely seems to enjoy causing chaos where he can. Tatltuae learned some time ago to create pockets of intense chaotic entropy. Interestingly, the spell began as a healing spell, but the raven learned it wrong to the point it harms instead of heals.",
         };
 
-        Firefly = new RaceTraits()
+        Seville = new RaceTraits()
         {
-            BodySize = 12,
-            StomachSize = 12,
-            FavoredStat = Stat.Dexterity,
+            BodySize = 80,
+            StomachSize = 60,
+            FavoredStat = Stat.Voracity,
             HasTail = true,
-            AllowedVoreTypes = new List<VoreType> { },//Perma-prey until vore sprites added
-            ExpMultiplier = 1.4f,
-            PowerAdjustment = 2f,
-            DeployCost = 1,
-            Upkeep = 9f,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.Unbirth, VoreType.BladderVore },
+            ExpMultiplier = 4f,
+            PowerAdjustment = 7f,
+            DeployCost = 4,
+            Upkeep = 30f,
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(8, 15),
-                Dexterity = new RaceStats.StatRange(8, 15),
-                Endurance = new RaceStats.StatRange(8, 13),
-                Mind = new RaceStats.StatRange(6, 11),
-                Will = new RaceStats.StatRange(6, 13),
+                Strength = new RaceStats.StatRange(24, 28),
+                Dexterity = new RaceStats.StatRange(8, 11),
+                Endurance = new RaceStats.StatRange(24, 30),
+                Mind = new RaceStats.StatRange(18, 23),
+                Will = new RaceStats.StatRange(10, 14),
                 Agility = new RaceStats.StatRange(8, 12),
-                Voracity = new RaceStats.StatRange(5, 10),
-                Stomach = new RaceStats.StatRange(12, 15),
+                Voracity = new RaceStats.StatRange(21, 25),
+                Stomach = new RaceStats.StatRange(17, 21),
             },
             RacialTraits = new List<Traits>()
         {
-            Traits.PackStrength,
-            Traits.EscapeArtist,
-            Traits.ArtfulDodge,
-            Traits.Charge,
-            Traits.DefensiveStance,
-            Traits.Fit,
-            Traits.UnpleasantDigestion,
-            Traits.QuickShooter,
-            Traits.Prey,//Perma-prey until vore sprites added
+            Traits.HardSkin,
+            Traits.PoisonSpit,
+            Traits.StrongGullet,
+            Traits.Toxic,
         },
-            RaceDescription = "An unnatural Umbreon from a different universe from the others. His body shape seems different than the Umbreons, Having a differently shaped head, digigrade legs, and a fox like appearance. He claims to come from a realm where the world was much more advanced, having been transported with what he calls a \"HND15\" some kind of \"handgun\" similar to the tarous' revolvers. Being from another realm these bullets are in short supply, forcing him to save the magazines and to forge new bullets to load into them. He also carries around a knife for backup, it seems extra sharp compared to the others of it's kind. Although he prefers to stick along side them, He claims to not be related to the Anthro Umbreons that roam around.",
+            RaceDescription = "The turmoil of wars have stirred many lingering threats from slumber or stillness, former allies turn foes and neutral forces turn voracious and violent. Under the shade of stones unturned rises a rumour shared in hisses and secrecy among snakes and lamias. From the mud of swamps wafts a poison queerly potent choking all life in its creeping embrace. \n\n A great witch has chosen to divest from her most passive schemes and mischief to take part in your conflict, whether with or against you to means undisclosed. Her slithers shall be met with fear and rapacity until she is slain or the battlefields of the land lay quiet and her endless gut cacophonous with churning death.",
         };
 
         Nectar = new RaceTraits()
@@ -4439,6 +4704,110 @@ static class RaceParameters
             RaceDescription = "A skilled warrior captain from the same world as the other Sergals. Strangely enough, not only does he look physically different from them, but he seems to hold some sort of resentment for them as well. He's an incredibly deadly frontline fighter, almost like he has been fighting in wars since birth. Many warriors, even whole companies have already fallen to either his polearm, or his voracious appetite. Needless to say: He seems to feel perfectly in his element here.",
         };
 
+        Konane = new RaceTraits()
+        {
+            BodySize = 15,
+            StomachSize = 40,
+            FavoredStat = Stat.Stomach,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
+            ExpMultiplier = 2f,
+            PowerAdjustment = 5f,
+            DeployCost = 2,
+            Upkeep = 20f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(20, 24),
+                Dexterity = new RaceStats.StatRange(8, 14),
+                Endurance = new RaceStats.StatRange(18, 26),
+                Mind = new RaceStats.StatRange(10, 13),
+                Will = new RaceStats.StatRange(20, 25),
+                Agility = new RaceStats.StatRange(16, 24),
+                Voracity = new RaceStats.StatRange(18, 24),
+                Stomach = new RaceStats.StatRange(16, 24),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.Flight,
+                Traits.BornToMove,
+                ///Traits., Special move trait goes here. Add two actions to this trait
+        },
+            RaceDescription = "Some kind of black falcon/snow leopard mix. Oh no! He's hot!",
+        };
+        Cherub = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 35,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            ExpMultiplier = 2f,
+            PowerAdjustment = 9f,
+            DeployCost = 2,
+            Upkeep = 21f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(4, 10),
+                Dexterity = new RaceStats.StatRange(4, 10),
+                Endurance = new RaceStats.StatRange(10, 15),
+                Mind = new RaceStats.StatRange(18, 25),
+                Will = new RaceStats.StatRange(18, 25),
+                Agility = new RaceStats.StatRange(8, 11),
+                Voracity = new RaceStats.StatRange(15, 20),
+                Stomach = new RaceStats.StatRange(12, 15),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.SlowMetabolism,
+                Traits.BoundWeapon,
+                Traits.Flight,
+                Traits.PleasurableTouch,
+                Traits.ManaDrain,
+                Traits.ManaDynamo,
+        },
+            SpawnRace = Race.SoulSprite,
+            InnateSpells = new List<SpellTypes>()
+            { SpellTypes.DivinitysEmbrace, SpellTypes.ForcePulse, },
+            RaceAI = RaceAI.Hedonist,
+            RaceDescription = "A mysterious angelic being that suddenly manifested into the physical plane. They sport powerful magical abilities and an innate sense of the evil and malice which they hunger for. Despite their friendly demeanor, they have a bad habit of devouring mortals in an attempt to cleanse them of impurity.",
+        };
+
+        Seraph = new RaceTraits()
+        {
+            BodySize = 100,
+            StomachSize = 80,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            ExpMultiplier = 20f,
+            PowerAdjustment = 100f,
+            DeployCost = 8,
+            Upkeep = 150f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(30, 35),
+                Dexterity = new RaceStats.StatRange(30, 35),
+                Endurance = new RaceStats.StatRange(30, 35),
+                Mind = new RaceStats.StatRange(45, 50),
+                Will = new RaceStats.StatRange(40, 50),
+                Agility = new RaceStats.StatRange(25, 30),
+                Voracity = new RaceStats.StatRange(20, 25),
+                Stomach = new RaceStats.StatRange(20, 25),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.DestroyingAngel,
+                Traits.Legendary,
+                Traits.ManaAttuned,
+                Traits.ManaBarrier,
+                Traits.Flight,
+                Traits.CreateSpawn,
+        },
+            SpawnRace = Race.SoulSprite,
+            InnateSpells = new List<SpellTypes>()
+            { SpellTypes.DivinitysEmbrace, SpellTypes.DivineNova, },
+            RaceDescription = "The leader of the angelic beings that descended onto this world. Seraph has existed before recorded history and does not take lightly to troublemakers that disrupt the karmic balance of the world. Their arrival usually precedes a grand shift in the dynamics of a region, usually ending up with them leaving much fatter than they came.",
+        };
     }
 
 }
@@ -4464,7 +4833,7 @@ internal class RaceTraits
     internal List<Traits> SpawnTraits;
     internal List<int> RacialTags = new List<int>();
     //internal List<Traits> RandomTraits;
-    internal List<VoreType> AllowedVoreTypes = new List<VoreType> { VoreType.Anal, VoreType.Oral, VoreType.CockVore, VoreType.BreastVore, VoreType.Unbirth };
+    internal List<VoreType> AllowedVoreTypes = new List<VoreType> { VoreType.Anal, VoreType.Oral, VoreType.CockVore, VoreType.BreastVore, VoreType.Unbirth, VoreType.BladderVore };
     internal Race SpawnRace = Race.none;
     internal Race ConversionRace = Race.none;
     internal Race LeaderRace = Race.none;
@@ -4492,6 +4861,7 @@ internal class RaceTraits
     /// </summary>
     internal float PowerAdjustment = 1f;
     internal bool CanUseRangedWeapons = true;
+    internal bool CanUseMeleeWeapons = true;
     internal string RaceDescription = "";
 
 }
@@ -4505,6 +4875,7 @@ internal enum VoreType
     BreastVore,
     TailVore,
     Anal,
+    BladderVore,
 
 
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.UI.CanvasScaler;
 
 public class Actor_Unit
 {
@@ -19,6 +20,7 @@ public class Actor_Unit
         BreastVore,
         AnalVore,
         Unbirth,
+        BladderVore,
         FrogPouncing,
         VoreSuccess,
         VoreFail,
@@ -137,7 +139,8 @@ public class Actor_Unit
 
     [OdinSerialize]
     internal int TurnUsedShun = -5;
-
+    [OdinSerialize]
+    internal int MultifacetedCooldown = 0;
     [OdinSerialize]
     internal int TurnsSinceLastDamage = 9999;
 
@@ -286,6 +289,8 @@ public class Actor_Unit
         int bonus = 0;
         if (Unit.HasTrait(Traits.Charge) && State.GameManager.TacticalMode.currentTurn <= 2)
             bonus += 4;
+        if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Agility) && Unit.HealthPct >= 0.5f)
+            bonus += 2;
         bonus += Unit.TraitBoosts.SpeedBonus;
         if (State.World?.ItemRepository != null && Unit.Items.Contains(State.World.ItemRepository.GetItem(ItemType.Shoes)))
             bonus += 1;
@@ -307,6 +312,8 @@ public class Actor_Unit
             Unit.ApplyStatusEffect(StatusEffectType.Respawns, 1, 1);
         if (Unit.HasTrait(Traits.RespawnerIII) && (State.GameManager.TacticalMode.currentTurn == 1) && State.GameManager.TacticalMode.attackersTurnCheck == true)
             Unit.ApplyStatusEffect(StatusEffectType.Respawns, 3, 3);
+        if (Unit.Race == Race.Seville && !State.GameManager.TacticalMode.turboMode && TacticalUtilities.IsUnitControlledByPlayer(Unit) && (State.GameManager.TacticalMode.currentTurn == 1) && State.GameManager.TacticalMode.attackersTurnCheck == true && State.Rand.Next(20) == 1)
+            MiscUtilities.DelayedInvoke(() => State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Looking upon the battlefield before her, {LogUtilities.GetRandomStringFrom($"<b>{Unit.Name}</b>", $"the {LogUtilities.GetRaceDescSingl(Unit)}")} {LogUtilities.GetRandomStringFrom("smiles", "laughs", "grins")} {LogUtilities.GetRandomStringFrom("devilishly", "mischievously", "maliciously", "wickedly", "naughtily")}. \"Well, you\'ve got my attention. Now let me reward your curiosssity...\""), .2f); //Delayed to let the game fully load before executing
         int sizePenalty = (int)(PredatorComponent?.Fullness ?? 0);
         sizePenalty = (int)(sizePenalty * Unit.TraitBoosts.SpeedLossFromWeightMultiplier);
         int bonus = 0;
@@ -345,6 +352,7 @@ public class Actor_Unit
         Unit = unit;
         Visible = true;
         Targetable = true;
+        MultifacetedCooldown = Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Dexterity) ? Unit.Level + 1 : 0; // Set timer for extra attacks.
     }
 
     public Actor_Unit(Unit unit, Actor_Unit reciepient)
@@ -358,6 +366,7 @@ public class Actor_Unit
         Unit = unit;
         Visible = false;
         Targetable = false;
+        MultifacetedCooldown = Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Dexterity) ? Unit.Level + 1 : 0; // Set timer for extra attacks.
         RestoreMP();
         ReloadSpellTraits();
     }
@@ -371,6 +380,7 @@ public class Actor_Unit
         animationUpdateTime = 0;
         Position = p;
         Unit = unit;
+        MultifacetedCooldown = Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Dexterity) ? Unit.Level + 1 : 0; // Set timer for extra attacks.
         Visible = true;
         Targetable = true;
         RestoreMP();
@@ -502,6 +512,9 @@ public class Actor_Unit
                 break;
             case PreyLocation.anal:
                 Mode = DisplayMode.AnalVore;
+                break;
+            case PreyLocation.bladder:
+                Mode = DisplayMode.BladderVore;
                 break;
         }
         animationUpdateTime = 1.5F;
@@ -788,7 +801,7 @@ public class Actor_Unit
     {
         if (Mode == DisplayMode.Attacking)
             return 1;
-        if (Mode == DisplayMode.OralVore || Mode == DisplayMode.BreastVore || Mode == DisplayMode.CockVore || Mode == DisplayMode.Unbirth || Mode == DisplayMode.AnalVore)
+        if (Mode == DisplayMode.OralVore || Mode == DisplayMode.BreastVore || Mode == DisplayMode.CockVore || Mode == DisplayMode.Unbirth || Mode == DisplayMode.AnalVore || Mode == DisplayMode.BladderVore)
             return 2;
         return 0;
     }
@@ -801,15 +814,16 @@ public class Actor_Unit
     /// <summary>
     /// This one Covers all forms of consuming
     /// </summary>
-    public bool IsEating => IsOralVoring || IsCockVoring || IsBreastVoring || IsUnbirthing || IsTailVoring || IsAnalVoring;
+    public bool IsEating => IsOralVoring || IsCockVoring || IsBreastVoring || IsUnbirthing || IsTailVoring || IsAnalVoring || IsBladderVoring;
     public bool IsOralVoring => Mode == DisplayMode.OralVore;
     public bool IsOralVoringHalfOver => Mode == DisplayMode.OralVore && animationUpdateTime < .75f;
 
-    public bool IsCockVoring => Mode == DisplayMode.CockVore;
+    public bool IsCockVoring => Mode == DisplayMode.CockVore || IsBladderVoring;
     public bool IsBreastVoring => Mode == DisplayMode.BreastVore;
-    public bool IsUnbirthing => Mode == DisplayMode.Unbirth;
+    public bool IsUnbirthing => Mode == DisplayMode.Unbirth || IsBladderVoring;
     public bool IsTailVoring => Mode == DisplayMode.TailVore;
     public bool IsAnalVoring => Mode == DisplayMode.AnalVore;
+    public bool IsBladderVoring => Mode == DisplayMode.BladderVore;
     public bool IsPouncingFrog => Mode == DisplayMode.FrogPouncing;
     public bool HasJustVored => Mode == DisplayMode.VoreSuccess;
     public bool HasJustFailedToVore => Mode == DisplayMode.VoreFail;
@@ -1041,6 +1055,11 @@ public class Actor_Unit
             }
         }
 
+        if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Agility) && Unit.HealthPct <= 0.5f)
+        {
+            odds *= 0.9f;
+        }
+
         if (Config.BoostedAccuracy)
             odds = 100 - ((100 - odds) * .5f);
 
@@ -1207,6 +1226,12 @@ public class Actor_Unit
                 damage += (int)(damage * 0.2f);
             }
         }
+
+        if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Strength) && MultifacetedCooldown == 0)
+        {
+            damage += (int)Math.Round(target.Unit.MaxHealth * 0.05f);
+        }
+
         if (Unit.HasTrait(Traits.SwiftStrike))
         {
             int current_weapon_class = GetWeaponSprite();
@@ -1294,6 +1319,18 @@ public class Actor_Unit
             float sizeDiff = Math.Abs(BodySize() - target.BodySize());
             damage = (int)Math.Round(damage * (1 + (.01f * Math.Min(sizeDiff, 25))));
         }
+
+        if (target.Unit.HasTrait(Traits.Multifaceted) && target.Unit.IsHighestStat(Stat.Endurance))
+        {
+            int tenP = (int)Math.Round(target.Unit.Health * 0.1f);
+            if (damage > tenP) // Check if damage is over 10% current
+            {
+                int mitigation = damage - tenP;
+                mitigation = (int)Math.Floor(mitigation * 0.5f);
+                damage -= mitigation;
+            }
+        }
+
 
         if (damage < 1)
             damage = 1;
@@ -1397,6 +1434,9 @@ public class Actor_Unit
                         break;
                     case SpecialAction.AnalVore:
                         PredatorComponent.AnalVore(target);
+                        break;
+                    case SpecialAction.BladderVore:
+                        PredatorComponent.BladderVore(target);
                         break;
                     default:
                         PredatorComponent.Devour(target);
@@ -1516,6 +1556,53 @@ public class Actor_Unit
         }
     }
 
+    public bool AiSweepAttack(Actor_Unit mainTarget, Actor_Unit self, bool attack_ver)
+    {
+        if (Movement < 1 || Unit.HasTrait(Traits.Legendary) == false)
+            return false;
+        if (Unit.Mana >= 40)
+        {
+            Unit.SpendMana(40);
+        }
+        else
+            return false;
+        List<Actor_Unit> targets = TacticalUtilities.UnitsWithinPattern(self.Position, new int[3, 3] { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } });
+        List<AbilityTargets> targetTypes = new List<AbilityTargets>();
+        targetTypes.Add(AbilityTargets.Enemy);
+
+        foreach (var target in targets)
+        {
+            if (!TacticalUtilities.MeetsQualifier(targetTypes, this, target))
+                return false;
+            if (attack_ver)
+                TestAttack(target);
+            else
+                TestSwallow(target);
+        }
+
+        Movement = 0;
+
+        return true;
+
+        void TestAttack(Actor_Unit sideTarget)
+        {
+            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
+            {
+                Movement = 1;
+                Attack(sideTarget, false, damageMultiplier: .66f);
+            }
+        }
+        void TestSwallow(Actor_Unit sideTarget)
+        {
+            if (sideTarget != null && sideTarget.Position.GetNumberOfMovesDistance(Position) == 1)
+            {
+                Movement = 1;
+                PredatorComponent.Devour(sideTarget);
+
+            }
+        }
+    }
+
     public bool SweepAttack(bool attack_ver)
     {
         if (Movement < 1 || Unit.HasTrait(Traits.Legendary) == false)
@@ -1596,6 +1683,9 @@ public class Actor_Unit
                 case SpecialAction.AnalVore:
                     succeded_attempt = PredatorComponent.AnalVore(target);
                     break;
+                case SpecialAction.BladderVore:
+                    succeded_attempt = PredatorComponent.BladderVore(target);
+                    break;
                 default:
                     succeded_attempt = PredatorComponent.Devour(target);
                     break;
@@ -1633,7 +1723,7 @@ public class Actor_Unit
         return true;
     }
 
-    public bool Attack(Actor_Unit target, bool ranged, bool forceBite = false, float damageMultiplier = 1, bool canKill = true)
+    public bool Attack(Actor_Unit target, bool ranged, bool forceBite = false, float damageMultiplier = 1, bool canKill = true, bool canRecurse = true)
     {
         Weapon weapon;
         if (ranged)
@@ -1677,6 +1767,8 @@ public class Actor_Unit
             }
         }
 
+        int extraAttacks = CalculateExtraAttacks();
+
         float origDamageMult = damageMultiplier;
         bool grazebool = false;
         bool critbool = false;
@@ -1689,7 +1781,7 @@ public class Actor_Unit
                 grazechance = GrazeCheck(this, target);
             }
             grazechance += Unit.TraitBoosts.Outgoing.GrazeRateShift - target.Unit.TraitBoosts.Incoming.GrazeRateShift;
-            grazechance += TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.GrazeRateShift);
+            grazechance *= TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.GrazeRateShift);
 
             if (State.Rand.NextDouble() < grazechance)
             {
@@ -1706,7 +1798,7 @@ public class Actor_Unit
                 critchance = CritCheck(this, target);
             }
             critchance += Unit.TraitBoosts.Outgoing.CritRateShift - target.Unit.TraitBoosts.Incoming.CritRateShift;
-            critchance += TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.CritRateShift);
+            critchance *= TagConditionChecker.ApplyTagEffect(Unit, target.Unit, UnitTagModifierEffect.CritRateShift);
             if (State.Rand.NextDouble() < critchance)
             {
                 float calculatedCritDamage = Unit.TraitBoosts.Outgoing.CritDamageMult * target.Unit.TraitBoosts.Incoming.CritDamageMult;
@@ -1726,13 +1818,13 @@ public class Actor_Unit
         {
             if ((targetRange >= 2 || (targetRange >= 1 && weapon.Omni)) && targetRange <= weapon.Range)
             {
+                animationUpdateTime = 1.0F;
                 if (Unit.Race == Race.Succubi)
                     TacticalGraphicalEffects.SuccubusSwordEffect(target.Position);
                 if (Unit.Race == Race.Tatltuae)
                     TacticalGraphicalEffects.EntropicChaosEffect(target.Position);
-                animationUpdateTime = 1.0F;
-                if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
-                    Mode = DisplayMode.RangeAttacking;
+                //if (Unit.Race == Race.Tigers)//Use to specify races that can use differint attacks with the same weapon depending on range (Currently unused)
+                //    Mode = DisplayMode.RangeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
 
@@ -1742,9 +1834,11 @@ public class Actor_Unit
                     target = possibleTargets[State.Rand.Next(0,possibleTargets.Count()-1)];
                 }
 
-                if (Unit.TraitBoosts.RangedAttacks > 1)
+                int rangedattacks = Unit.TraitBoosts.RangedAttacks;
+                rangedattacks += extraAttacks + Unit.TempBoosts.ExtraAttacks;
+                if (rangedattacks > 1)
                 {
-                    int movementFraction = 1 + MaxMovement() / Unit.TraitBoosts.RangedAttacks;
+                    int movementFraction = 1 + MaxMovement() / rangedattacks;
                     if (Movement > movementFraction)
                         Movement -= movementFraction;
                     else
@@ -1770,6 +1864,8 @@ public class Actor_Unit
                     }
                     if (Unit.HasTrait(Traits.WeaponChanneler) && Unit.Mana >= 6)
                         Unit.SpendMana(6);
+                    if (Unit.HasTrait(Traits.Elementist) && Unit.SpendMana(3))
+                        TacticalUtilities.CreateEffect(target.Position,  (TileEffectType)State.Rand.Next(0, (int)TileEffectType.None), 0, 1 + Unit.GetStat(Stat.Mind) / 30, 4);
                     if (Unit.HasTrait(Traits.Tenacious))
                         Unit.RemoveTenacious();
                     if (target.Unit.HasTrait(Traits.Tenacious))
@@ -1778,6 +1874,13 @@ public class Actor_Unit
                         target.Unit.RemoveFocus();
                     if (target.Unit.HasTrait(Traits.Crystaline) && State.Rand.Next(4) == 0)
                         target.Unit.ApplyStatusEffect(StatusEffectType.Fractured, 1, 1);
+                    if (target.Unit.IsACopy())
+                    {
+                        if (target.Unit.OriginalUnit.HasTrait(Traits.InherentGlamour) && (target.Unit.HealthPct - 1) * 2 > (float)State.Rand.NextDouble())
+                        {
+                            target.Unit.RevertCopiedUnit();
+                        }
+                    }
                     if (Unit.GetStatusEffect(StatusEffectType.Sharpness) != null)                  
                         Unit.RemoveStackStatus(StatusEffectType.Sharpness, Unit.GetStatusEffect(StatusEffectType.Sharpness).Duration / 2);
 
@@ -1823,12 +1926,17 @@ public class Actor_Unit
             if (targetRange < 2)
             {
                 animationUpdateTime = 1.0F;
-                if (Unit.Race == Race.Firefly)//Use to specify races that can use differint attacks with the same weapon depending on range
-                    Mode = DisplayMode.MeleeAttacking;
+                if (Unit.Race == Race.Seville)
+                    TacticalGraphicalEffects.VenomBiteEffect(target.Position);
+                //if (Unit.Race == Race.Tigers)//Use to specify races that can use differint attacks with the same weapon depending on range (Currently unused)
+                //    Mode = DisplayMode.MeleeAttacking;
                 else
                     Mode = DisplayMode.Attacking;
                 int meleeAttacks = Unit.TraitBoosts.MeleeAttacks;
+                meleeAttacks += extraAttacks + Unit.TempBoosts.ExtraAttacks;
                 if (Unit.HasTrait(Traits.LightFrame) && PredatorComponent?.PreyCount == 0)
+                    meleeAttacks++;
+                if (Unit.HasTrait(Traits.WildFury) && Unit.GetBestMelee() == State.World.ItemRepository.Claws)
                     meleeAttacks++;
                 if (meleeAttacks > 1)
                 {
@@ -1872,6 +1980,8 @@ public class Actor_Unit
                         target.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 2);
                     if (Unit.HasTrait(Traits.WeaponChanneler) && Unit.Mana >= 6)
                         Unit.SpendMana(6);
+                    if (Unit.HasTrait(Traits.Elementist) && Unit.SpendMana(3))
+                        TacticalUtilities.CreateEffect(target.Position, (TileEffectType)State.Rand.Next(0, (int)TileEffectType.None), 1, 1 + Unit.GetStat(Stat.Mind) / 30, 4);
                     if (Unit.HasTrait(Traits.BladeDance))
                         Unit.AddBladeDance();
                     if (target.Unit.HasTrait(Traits.BladeDance))
@@ -1890,6 +2000,13 @@ public class Actor_Unit
                         TacticalUtilities.KnockBack(this, target);
                     if (Unit.GetStatusEffect(StatusEffectType.Sharpness) != null)
                         Unit.RemoveStackStatus(StatusEffectType.Sharpness, Unit.GetStatusEffect(StatusEffectType.Sharpness).Duration / 2);
+                    if (target.Unit.IsACopy())
+                    {
+                        if (target.Unit.OriginalUnit.HasTrait(Traits.InherentGlamour) && (target.Unit.HealthPct - 1) * 2 > (float)State.Rand.NextDouble())
+                        {
+                            target.Unit.RevertCopiedUnit();
+                        }
+                    }
                     State.GameManager.SoundManager.PlayMeleeHit(target);
 
                     State.GameManager.TacticalMode.TacticalStats.RegisterHit(BestMelee, Mathf.Min(damage, remainingHealth), Unit.Side);
@@ -1942,6 +2059,14 @@ public class Actor_Unit
                     EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.OnMeleeMiss, new object[] { this, target, damage });
                    
                 }
+
+                if (Unit.HasTrait(Traits.SweepingStrikes) && canRecurse == true)
+                {
+                    foreach (var sweepTarget in TacticalUtilities.UnitsWithinTiles(target.Position, 1).Where(u => u != target && u != this))
+                    {
+                        Attack(sweepTarget, false, false, 0.33f, true, false);
+                    }
+                }
             }
 
         }
@@ -1985,6 +2110,11 @@ public class Actor_Unit
         }
         if (Unit.HasTrait(Traits.KillerKnowledge) && Unit.KilledUnits % 4 == 0)
             Unit.GeneralStatIncrease(1);
+        if (Unit.HasTrait(Traits.KillingMomentum))
+        {
+            RestoreMP();
+            Movement /= 2;
+        }       
         if (Unit.HasTrait(Traits.TasteForBlood))
             GiveRandomBoost();
         if (Unit.HasTrait(Traits.InfectiousReproduction) && target.Unit.GetStatusEffect(StatusEffectType.Poisoned) != null)
@@ -2042,6 +2172,11 @@ public class Actor_Unit
         }
         if (Unit.HasTrait(Traits.KillerKnowledge) && Unit.KilledUnits % 4 == 0)
             Unit.GeneralStatIncrease(1);
+        if (Unit.HasTrait(Traits.KillingMomentum))
+        {
+            RestoreMP();
+            Movement /= 2;
+        }
         if (Unit.HasTrait(Traits.TasteForBlood))
             GiveRandomBoost();
         Unit.GiveScaledExp(4 * target.Unit.ExpMultiplier, Unit.Level - target.Unit.Level);
@@ -2129,6 +2264,17 @@ public class Actor_Unit
                 Unit.TraitBoosts.Incoming.MagicDamage *= 1.50f;
             }
             damage = (int)(damage * attacker.Unit.TraitBoosts.Outgoing.MagicDamage * Unit.TraitBoosts.Incoming.MagicDamage * TagConditionChecker.ApplyTagEffect(attacker.Unit, Unit, UnitTagModifierEffect.MagicDamageMult));
+            if (attacker.Unit.HasTrait(Traits.Multifaceted) && attacker.Unit.IsHighestStat(Stat.Mind))
+            {
+                damage += (int)Math.Round(Unit.GetStat(Stat.Mind) * 0.1f);
+            }
+            if (attacker.Unit.HasTrait(Traits.ManaBurn))
+            {
+                if (!Unit.SpendMana(damage/2))
+                {
+                    damage += damage / 2; 
+                }
+            }
             EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.WhenHitBySpellDamage, new object[] { this, attacker, damage });
             State.GameManager.TacticalMode.TacticalStats.RegisterHit(spell, Mathf.Min(damage, Unit.Health), attacker.Unit.Side);
             Damage(damage, true, damageType: spell.DamageType);
@@ -2287,6 +2433,12 @@ public class Actor_Unit
             State.GameManager.CameraCall(Position);
         chance = GetAttackChance(attacker, ranged);
 
+        StatusEffect mark = Unit.GetStatusEffect(StatusEffectType.Marked);
+        if (mark != null)
+        {
+            chance += mark.Strength * 0.01f;
+        }
+
         float r = (float)State.Rand.NextDouble();
         if (r < chance)
         {
@@ -2297,6 +2449,11 @@ public class Actor_Unit
             {
                 Unit.ApplyStatusEffect(StatusEffectType.Poisoned, 3, 3);
                 Unit.ApplyStatusEffect(StatusEffectType.Shaken, .2f, 2);
+            }
+
+            if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Strength))
+            {
+                MultifacetedCooldown = 4;
             }
 
             return true;
@@ -2413,7 +2570,7 @@ public class Actor_Unit
         {
             possible.Add(1);
         }
-        if (target.PredatorComponent.WombFullness > 0 || target.PredatorComponent.CombinedStomachFullness > 0)
+        if (target.PredatorComponent.CombinedStomachFullness > 0 || target.PredatorComponent.WombFullness > 0 || target.PredatorComponent.BladderFullness > 0)
         {
             possible.Add(0);
         }
@@ -2438,10 +2595,25 @@ public class Actor_Unit
         type = possible[index];
         switch (type)
         {
-            case 0:
-                prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.stomach) || p.Location.Equals(PreyLocation.stomach2) || p.Location.Equals(PreyLocation.anal) || p.Location.Equals(PreyLocation.womb));
-                if (prey == null) break;
-                TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, 1f);
+            case 0:// Split womb and stomachs (and added bladder) from being grouped up as of post version 44D to fix log issues
+                prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.bladder));
+                if (prey != null)
+                {
+                    TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, PreyLocation.bladder, 1f);
+                    break;
+                }
+                prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.womb));
+                if (prey != null)
+                {
+                    TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, PreyLocation.womb, 1f);
+                    break;
+                }
+                prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.stomach) || p.Location.Equals(PreyLocation.stomach2) || p.Location.Equals(PreyLocation.anal));
+                if (prey != null) 
+                {
+                    TacticalUtilities.Log.RegisterBellyRub(Unit, target.Unit, prey.Unit, PreyLocation.stomach, 1f);
+                    break;
+                }
                 break;
             case 1:
                 prey = target.PredatorComponent.GetDirectPrey().FirstOrDefault(p => p.Location.Equals(PreyLocation.breasts) || p.Location.Equals(PreyLocation.leftBreast) || p.Location.Equals(PreyLocation.rightBreast));
@@ -2740,12 +2912,20 @@ public class Actor_Unit
         NewTurnPreMPTraits();
 
         Unit.RestoreMana(Unit.TraitBoosts.ManaRegen);
+        if (SelfPrey == null)
+        {
+            Unit.RestoreStamPct(0.1f);
+        }
         UnitSprite.UpdateHealthBar(this);
         TurnsSinceLastParalysis++;
         if (Targetable && Visible && Surrendered == false && Fled == false)
             RestoreMP();
         Unit.TickStatusEffects();
-        Unit.Heal(Unit.TraitBoosts.HealthRegen);
+        if (SelfPrey != null)
+        {
+            if (SelfPrey.TurnsDigested <= 100)
+                Unit.Heal(Unit.TraitBoosts.HealthRegen);
+        }
 
         if ((Config.AbsorbLoss ? PredatorComponent?.AlivePrey <= 0 : PredatorComponent.Fullness <= 0))
         {
@@ -2775,6 +2955,7 @@ public class Actor_Unit
     //Traits that should be applied before MP is refreshed.
     public void NewTurnPreMPTraits()
     {
+
         if (Surrendered && Unit.HasTrait(Traits.Fearless))
         {
             Surrendered = false;
@@ -2784,6 +2965,15 @@ public class Actor_Unit
             SurrenderedThisTurn = false;
             Movement = 0;
         }
+
+        if (Unit.HasTrait(Traits.Multifaceted))
+        {
+            if (MultifacetedCooldown > 0)
+            {
+                MultifacetedCooldown--;
+            }
+        }
+
 
         if (Unit.HasTrait(Traits.ManaAttuned))
         {
@@ -2970,6 +3160,18 @@ public class Actor_Unit
         }
     }
 
+    // Inline calculation of extra attacks
+    public int CalculateExtraAttacks()
+    {
+        int extra = 0;
+        if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Dexterity))
+        {
+            if (Unit.Level >= State.GameManager.TacticalMode.currentTurn)
+                extra++;
+        }
+        return extra;
+    }
+
     public void SubtractHealth(int damage)
     {
         Unit.Health -= damage;
@@ -3026,7 +3228,8 @@ public class Actor_Unit
             return false;
         }        
         int modifiedDamage = CalculateDamageWithResistance(damage, damageType);
-        UnitSprite.DisplayDamage(modifiedDamage, spellDamage);
+        if (damageType != DamageTypes.Mutual)//Prevents damage from flashing every unit.
+            UnitSprite.DisplayDamage(modifiedDamage, spellDamage);
         modifiedDamage = Unit.DamageBarrier(modifiedDamage);
         SubtractHealth(modifiedDamage);
         if (Unit.GetStatusEffect(StatusEffectType.Agony) != null)
@@ -3051,6 +3254,11 @@ public class Actor_Unit
                 State.GameManager.TacticalMode.SwitchAlignment(this);
                 State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"{Unit.Name} switched sides when they were hit");
             }
+        }
+        if (Unit.HasTrait(Traits.MutualBiology) && damageType != DamageTypes.Mutual)
+        {
+            TacticalUtilities.MutuallyDamageUnits(this, damage);
+            Debug.Log(Unit.TempBoosts.HealthBoost);
         }
         if (Unit.HasTrait(Traits.Berserk) && GoneBerserk == false)
         {
@@ -3133,7 +3341,7 @@ public class Actor_Unit
             State.GameManager.TacticalMode.DirtyPack = true;
             Targetable = false;
             Surrendered = true;
-            if (Config.VisibleCorpses && Unit.Race != Race.Erin && Unit.Race != Race.Iliijiith && Unit.Race != Race.Olivia)
+            if (Config.VisibleCorpses && Unit.Race != Race.Erin && Unit.Race != Race.Iliijiith && !Unit.HasTrait(Traits.CloseCall))
             {
                 float angle = 40 + State.Rand.Next(280);
                 UnitSprite.transform.rotation = Quaternion.Euler(0, 0, angle);
@@ -3142,6 +3350,8 @@ public class Actor_Unit
             else
             {
                 Visible = false;
+                if (Unit.HasTrait(Traits.CloseCall))
+                State.GameManager.TacticalMode.Log.RegisterMiscellaneous($"Barely hanging on, {Unit.Name} quickly {LogUtilities.GetRandomStringFrom("flees", "bolts", "retreats")} out of combat with {LogUtilities.GPPHis(Unit)} life barely intact");
             }
 
             PredatorComponent?.FreeAnyAlivePrey();
@@ -3282,6 +3492,7 @@ public class Actor_Unit
         if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true)
             return false;
         Unit.GiveExp(1);
+        OnSpellCast(spell, target);
         //if (target != null && target.DefendSpellCheck(spell, this, out float chance) == false)
         //    return false;
 
@@ -3329,7 +3540,7 @@ public class Actor_Unit
             return;
         if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true)
             return;
-
+        OnSpellCast(spell, target);
         State.GameManager.SoundManager.PlaySpellCast(spell, this);
         if (target != null)
         {
@@ -3377,8 +3588,7 @@ public class Actor_Unit
         if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true)
             return;
         State.GameManager.SoundManager.PlaySpellCast(spell, this);
-
-        EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.OnSpellCast, new object[] { this, target, spell });
+        OnSpellCast(spell, target);
 
         if (target != null)
         {
@@ -3470,12 +3680,10 @@ public class Actor_Unit
     {
         if (Unit.SpendMana(spell.ManaCost) == false && spell.IsFree != true)
             return false;
-
+        OnSpellCast(spell, target);
         bool hit = false;
 
         State.GameManager.SoundManager.PlaySpellCast(spell, this);
-
-        EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.OnSpellCast, new object[] { this, target, spell } );
 
         if (target != null)
         {
@@ -3733,6 +3941,23 @@ public class Actor_Unit
             return true;
         }
         return false;
+    }
+
+    public void OnSpellCast(Spell spell, Actor_Unit target)
+    {
+        EquipmentFunctions.CheckEquipment(Unit, EquipmentActivator.OnSpellCast, new object[] { this, target, spell });
+
+        if (Unit.HasTrait(Traits.Multifaceted) && Unit.IsHighestStat(Stat.Will))
+        {
+            if (Unit.IsEnemyOfSide(target.Unit.Side))
+            {
+                target.Unit.ApplyStatusEffect(StatusEffectType.Marked, Unit.GetStat(Stat.Will) / 10, 2);
+            }
+            else
+            {
+                target.Unit.RestoreBarrier(Unit.GetStat(Stat.Will) / 10);
+            }
+        }
     }
 
     public void ChangeRacePrey()
