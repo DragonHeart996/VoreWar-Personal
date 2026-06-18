@@ -881,12 +881,12 @@ public class RaceEditorPanel : MonoBehaviour
             }
             Upkeep.text = upMult.ToString();
 
-            FemaleTraits.text = item.FemaleTraitsText;
-            MaleTraits.text = item.MaleTraitsText;
-            HermTraits.text = item.HermTraitsText;
-            SpawnTraits.text = item.SpawnTraitsText;
-            SoldierTraits.text = item.SoldierTraitsText;
-            LeaderTraits.text = item.LeaderTraitsText;
+            FemaleTraits.text = item.FemaleTraitsText ?? "";
+            MaleTraits.text = item.MaleTraitsText ?? "";
+            HermTraits.text = item.HermTraitsText ?? "";
+            SpawnTraits.text = item.SpawnTraitsText ?? "";
+            SoldierTraits.text = item.SoldierTraitsText ?? "";
+            LeaderTraits.text = item.LeaderTraitsText ?? "";
         }
     }
 

@@ -254,7 +254,7 @@ class Yordles : DefaultRaceData
 
         if (actor.Unit.BodyAccentType5 == 0)
         {
-            return YordlesCustomization1[108 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
+            return YordlesCustomization1[106 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
         }
         else if (actor.Unit.BodyAccentType5 == 2 ||
             actor.Unit.BodyAccentType5 == 3 ||
@@ -267,11 +267,11 @@ class Yordles : DefaultRaceData
             {
                 actor.Unit.BodyAccentType2 = 8;
             }
-            return YordlesCustomization1[140 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
+            return YordlesCustomization1[138 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
         }
         else
         {
-            return YordlesCustomization1[124 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
+            return YordlesCustomization1[122 + (actor.Unit.BodyAccentType2 * 2) + (actor.IsOralVoring ? 1 : 0)];
         }
     }
 
