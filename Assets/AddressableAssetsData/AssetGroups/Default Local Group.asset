@@ -16,7 +16,13 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: e5903f2ab451bb04788bdadac1d9e2c2
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 47d8de9ed67b0914a870620e2f01acd0
+    m_Address: Sprite Dictionary
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 4e101b279cf88274a8948f29c54486b9, type: 2}
   m_SchemaSet:

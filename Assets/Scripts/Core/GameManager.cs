@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class GameManager : MonoBehaviour
 {
@@ -73,6 +76,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject UnitBase;
     public UnitEditorPanel UnitEditor;
+    public AssetReferenceGameObject SDReference;
     public SpriteDictionary SpriteDictionary;
     public TacticalBuildingDictionary TacticalBuildingSpriteDictionary;
     public PaletteDictionary PaletteDictionary;
@@ -104,10 +108,32 @@ public class GameManager : MonoBehaviour
 
     internal PreviewSkip CurrentPreviewSkip;
 
-
+    private async void LoadSpriteDict()
+    {
+        // Start loading the asset asynchronously
+        var result = await Addressables.LoadAssetAsync<GameObject>(SDReference).Task;
+        
+        if (result != null)
+        {
+            // Assign the asset to your local variable
+            SpriteDictionary = Instantiate(result).GetComponent<SpriteDictionary>(); 
+            Debug.Log("Asset successfully loaded into variable!");
+        }
+        
+        Start_Mode.UI.SetActive(true);
+    }
+    
     void Start()
     {
-        Start_Mode.UI.SetActive(true);
+        // Combine loading and instantiation in one simplified line
+        LoadSpriteDict();
+        
+        //string bundlePath = Path.Combine(Application.streamingAssetsPath, "test");
+        //AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+        //SpriteDictionary prefab = bundle.LoadAsset<SpriteDictionary>("Sprite Dictionary");
+        //SpriteDictionary = Instantiate(prefab);
+        //bundle.Unload(false);
+        
         currentScene = Start_Mode;
         State.GameManager = this;
         Application.wantsToQuit += () => WantsToQuit();
