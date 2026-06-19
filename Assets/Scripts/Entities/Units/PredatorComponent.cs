@@ -1017,11 +1017,6 @@ public class PredatorComponent
     {
         float c = State.RaceSettings.GetStomachSize(unit.Race);
 
-        if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
-        {
-            c += unit.GetStatusEffect(StatusEffectType.Gorging).Strength * 10;
-        }
-
         c *= unit.GetStat(Stat.Stomach) / 12f * unit.TraitBoosts.CapacityMult;
         
         // Adding more Capacity with greater scale makes sense from an in-universe standpoint; larger-scaled units can eat more, right?
@@ -1030,6 +1025,11 @@ public class PredatorComponent
         // In play-testing, we see that with multi-dimensional Capacity increases, it's not long before a single unit can eat an entire (non-Scaled) army.
         // Since Scaled-up units already get too strong too quickly, if they really want to eat an army solo, let's make them buy some Stomach at level up.
         //c *= unit.GetScale(1);
+        
+        if (unit.GetStatusEffect(StatusEffectType.Gorging)?.Duration > 0)
+        {
+            c += unit.GetStatusEffect(StatusEffectType.Gorging).Strength * 10;
+        }
         
         return c;
     }
@@ -1603,6 +1603,12 @@ public class PredatorComponent
             damage -= damage * (unit.GetStatusEffect(StatusEffectType.Diluted).Strength *
                                       unit.GetStatusEffect(StatusEffectType.Diluted).Duration);
         int finalDamage = (int)Math.Round(damage);
+        
+        if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
+        {
+            finalDamage = 0;
+        }
+        
         if (finalDamage < 1)
             finalDamage = 1;
 
@@ -1789,6 +1795,7 @@ public class PredatorComponent
         var location = preyUnit.Location;
         int totalHeal = 0;
         bool freshKill = false;
+        
         if (unit.HasTrait(Traits.Extraction) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
         {
             if (preyUnit.Unit.HiddenUnit.GetTraits.Any())
@@ -2111,6 +2118,10 @@ public class PredatorComponent
             }
 
             int healthReduction = (int)Math.Max(Math.Round(preyUnit.Unit.MaxHealth * speedFactor / 15), 1);
+            if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
+            {
+                healthReduction = 0;
+            }
             if (healthReduction > preyUnit.Unit.MaxHealth + preyUnit.Unit.Health)
                 healthReduction = preyUnit.Unit.MaxHealth + preyUnit.Unit.Health;
             preyUnit.Actor.SubtractHealth(healthReduction);
@@ -2275,8 +2286,11 @@ public class PredatorComponent
                 if (!callback.OnDigestion(preyUnit, actor, location))
                     return 0;
             }
-
-            preyUnit.TurnsDigested++;
+            if (unit.GetStatusEffect(StatusEffectType.Gorging) == null)
+            {
+                preyUnit.TurnsDigested++;
+            }
+            
             AlivePrey++;
 
             if (actor.Unit.HasTrait(Traits.SedativeStomach) && State.Rand.NextDouble() > 0.80f - (preyUnit.TurnsDigested * 0.01f))
@@ -2289,11 +2303,11 @@ public class PredatorComponent
 
             preyUnit.UpdateEscapeRate();
             float escapeMult = 1;
-            if (FreeCap() < 0 && !unit.HasTrait(Traits.ExtremelyStretchy))
+            if (FreeCap() < 0)
             {
                 float cap = TotalCapacity();
                 escapeMult = 1.4f + 2 * ((Fullness / cap) - 1);
-                if (Config.OverfeedingDamage) actor.Damage((int)(FreeCap() * -1) / 2);
+                if (Config.OverfeedingDamage && !unit.HasTrait(Traits.ExtremelyStretchy)) actor.Damage(Math.Max(0, Math.Min((int)Math.Sqrt(FreeCap() * -1) / 2, (int)(actor.Unit.Health - actor.Unit.MaxHealth * 0.25f))));
             }
 
             if (State.Rand.NextDouble() < preyUnit.EscapeRate * escapeMult && preyUnit.Actor.Surrendered == false)
@@ -3472,11 +3486,11 @@ public class PredatorComponent
         {
             if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
             {
-                unit.ApplyStatusEffect(StatusEffectType.Gorging, unit.GetStatusEffect(StatusEffectType.Gorging).Strength + 1, 2);
+                unit.ApplyStatusEffect(StatusEffectType.Gorging, unit.GetStatusEffect(StatusEffectType.Gorging).Strength + 1, 5);
             }
             else
             {
-                unit.ApplyStatusEffect(StatusEffectType.Gorging, 1, 2);
+                unit.ApplyStatusEffect(StatusEffectType.Gorging, 1, 5);
             }
         }
         if (target.Unit == unit)

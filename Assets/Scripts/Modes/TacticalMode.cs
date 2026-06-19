@@ -2510,7 +2510,7 @@ public class TacticalMode : SceneBase
                 break;
             case SpecialAction.SweepingSwallow:
                 ShowVoreHitPercentages(actor, PreyLocation.stomach);
-                UpdateMeleeAOEGrid();
+                
                 break;
             case SpecialAction.GiantSweep:
                 ShowMeleeHitPercentages(actor, .66f);
@@ -3715,6 +3715,14 @@ public class TacticalMode : SceneBase
                                 int[,] targetGrid = { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 } };
                                 UpdateMeleeDirectionalGrid(mouseLocation, targetGrid, SelectedUnit.WeaponDamageAgainstTarget(actor, false, .66f));
                             }
+                            if (specialType == SpecialAction.SweepingSwallow)
+                            {
+                                UpdateMeleeAOEGrid();
+                            }
+                            if (specialType == SpecialAction.GiantSweep)
+                            {
+                                UpdateMeleeAOEGrid(SelectedUnit.WeaponDamageAgainstTarget(actor, false));
+                            }
                             if (specialType == SpecialAction.DireInfection)
                             {
                                 UpdateMeleeAOEGrid(SelectedUnit.WeaponDamageAgainstTarget(actor, false, .75f));
@@ -4879,6 +4887,17 @@ public class TacticalMode : SceneBase
             }
         }
 
+        if (!visibleAttackers.Any(u => u.Movement > 0) && !turboMode && IsPlayerTurn && attackersTurn &&
+            Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+        {
+            RunningFriendlyAI = true;
+        }
+        if (!visibleDefenders.Any(u => u.Movement > 0) && !turboMode && IsPlayerTurn && !attackersTurn &&
+            Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+        {
+            RunningFriendlyAI = true;
+        }
+
         bool foodRemaining = false;
         bool oneSideLeft = false;
         if (!visibleAttackers.Any())
@@ -4944,14 +4963,26 @@ public class TacticalMode : SceneBase
             return false;
         int remainingAttackers = 0;
         int remainingDefenders = 0;
-        CalculateRemaining(ref remainingAttackers, ref remainingDefenders);
-
+        float smallestEdibleBulk = Mathf.Infinity;
+        CalculateRemaining(ref remainingAttackers, ref remainingDefenders, ref smallestEdibleBulk);
+        
         if (remainingAttackers == 0 || remainingDefenders == 0)
         {
+            if (!float.IsPositiveInfinity(smallestEdibleBulk)
+                && units.Any(p => p.Targetable 
+                                  && p.Visible 
+                                  && !p.Fled 
+                                  && !p.Surrendered 
+                                  && p.Unit.Predator 
+                                  && p.PredatorComponent.HasExpectedSpareCap(smallestEdibleBulk)))
+            {
+                return false;
+            }
             foreach (Actor_Unit actor in units.ToList())
             {
                 if (actor.Targetable && actor.Visible && !actor.Fled && !actor.Surrendered && (actor.TurnsSinceLastDamage < 2 & !actor.Unit.HasTrait(Traits.CurseOfImmolation))) return false;
                 if (actor.Targetable && actor.Visible && !actor.Fled && !actor.Surrendered && !actor.Unit.hiddenFixedSide && units.Any(u => u.Targetable && !u.Fled && u.Visible && TacticalUtilities.TreatAsHostile(actor, u))) return false;
+                
                 if (actor.Unit.Predator == false)
                     continue;
                 foreach (var prey in actor.PredatorComponent.GetDirectPrey().Where(s => s.Unit.HasTrait(Traits.TheGreatEscape)).ToList())
@@ -5508,6 +5539,11 @@ public class TacticalMode : SceneBase
 
     private void CalculateRemaining(ref int remainingAttackers, ref int remainingDefenders)
     {
+        float smallestEdibleBulk = 0;
+        CalculateRemaining(ref remainingAttackers, ref remainingDefenders, ref smallestEdibleBulk);
+    }
+    private void CalculateRemaining(ref int remainingAttackers, ref int remainingDefenders, ref float smallestEdibleBulk)
+    {
         int surrenderedAttackers = 0;
         int surrenderedDefenders = 0;
 
@@ -5516,7 +5552,14 @@ public class TacticalMode : SceneBase
             if (units[i] != null && units[i].Fled == false)
             {
                 Actor_Unit actor = units[i];
-                if (actor.Unit.IsDead == false)
+                if (actor.Unit.IsDead)
+                {
+                    if (!turboMode && Config.EdibleCorpses && actor.Visible)
+                    {
+                        smallestEdibleBulk = Math.Min(smallestEdibleBulk, actor.Bulk());
+                    }
+                }
+                else
                 {
                     //if (actor.SelfPrey == null && actor.Visible == false || actor.Targetable == false)
                     //{
@@ -5579,7 +5622,7 @@ public class TacticalMode : SceneBase
                 }
             }
         }
-        if (currentTurn > 500)
+        if (currentTurn > 500 && turboMode)
         {
             if (surrenderedAttackers == remainingAttackers)
             {

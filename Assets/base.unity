@@ -199233,7 +199233,8 @@ MonoBehaviour:
   CrossShock: {fileID: 5311956398332747120, guid: cfb637d4a910e9448a60c74e8ff5cc58,
     type: 3}
   Potion: {fileID: 5311956398332747120, guid: eccc4eba0e84892499d4fd37d20b336a, type: 3}
-  DivineNovaBlast: {fileID: 0}
+  DivineNovaBlast: {fileID: 5311956398332747120, guid: 8edbf0a77acab2b408a228fe2a23f2e6,
+    type: 3}
   DiamondStorm: {fileID: 1587365558784220, guid: a43dbbe8323df85478489ca3fa1e3279,
     type: 3}
 --- !u!4 &1012778675
@@ -230797,6 +230798,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 2109663825, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1183647404 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114787627876447784, guid: 89bebbadda021fa4888a74173e78312f,
+    type: 3}
+  m_PrefabInstance: {fileID: 251384589}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 575553740, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1183839929
@@ -319378,7 +319391,7 @@ MonoBehaviour:
   MercSortDirection: {fileID: 1043706866}
   MonsterConquestTurns: {fileID: 1423329119}
   LeaderTraits: {fileID: 288819545}
-  SoldierTraits: {fileID: 0}
+  SoldierTraits: {fileID: 1183647404}
   MaleTraits: {fileID: 1819493723}
   FemaleTraits: {fileID: 1599151775}
   HermTraits: {fileID: 1481282733}
