@@ -445,6 +445,8 @@ public class ContentSettings : MonoBehaviour
                     spawner.AddonRace.GetComponent<DisplayTooltip>().value = 209;
                 else if (race == Race.Monitors)
                     spawner.AddonRace.GetComponent<DisplayTooltip>().value = 232;
+                else if (race == Race.SoulSprite)
+                    spawner.AddonRace.GetComponent<DisplayTooltip>().value = 347;
                 else
                     spawner.AddonRace.gameObject.SetActive(false);
             }
@@ -604,6 +606,12 @@ public class ContentSettings : MonoBehaviour
                 break;
             case Race.Iliijiith:
                 tooltip.value = 346;
+                break;
+            case Race.Pudding:
+                tooltip.value = 347;
+                break;
+            case Race.SoulSprite:
+                tooltip.value = 350;
                 break;
         }
         return spawner;
@@ -956,12 +964,12 @@ public class ContentSettings : MonoBehaviour
         DiplomacyScale.RefreshShownValue();
         MaxSpellLevelDrop.RefreshShownValue();
         MaxEquipmentLevelDrop.RefreshShownValue();
-        LeaderTraits.text = RaceEditorPanel.VerifyTraitText(LeaderTraits.text);
-        SoldierTraits.text = RaceEditorPanel.VerifyTraitText(SoldierTraits.text);
-        MaleTraits.text = RaceEditorPanel.VerifyTraitText(MaleTraits.text);
-        FemaleTraits.text = RaceEditorPanel.VerifyTraitText(FemaleTraits.text);
-        HermTraits.text = RaceEditorPanel.VerifyTraitText(HermTraits.text);
-        SpawnTraits.text = RaceEditorPanel.VerifyTraitText(SpawnTraits.text);
+        LeaderTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.LeaderTraitsText);
+        SoldierTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.SoldierTraitsText);
+        MaleTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.MaleTraitsText);
+        FemaleTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.FemaleTraitsText);
+        HermTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.HermTraitsText);
+        SpawnTraits.text = RaceEditorPanel.VerifyTraitText(Config.World.SpawnTraitsText);
         TacticalMovementSoftCap.text = Config.TacticalMovementSoftCap.ToString();
         TacticalMovementHardCap.text = Config.TacticalMovementHardCap.ToString();
         SizeAccuracyMod.text = Config.SizeAccuracyMod.ToString();
@@ -1177,11 +1185,17 @@ public class ContentSettings : MonoBehaviour
         Config.World.MaxSpellLevelDrop = MaxSpellLevelDrop.value + 1;
         Config.World.MaxEquipmentLevelDrop = MaxEquipmentLevelDrop.value + 1;
         Config.World.LeaderTraits = RaceEditorPanel.TextToTraitList(LeaderTraits.text);
+        Config.World.LeaderTraitsText = LeaderTraits.text;
         Config.World.SoldierTraits = RaceEditorPanel.TextToTraitList(SoldierTraits.text);
+        Config.World.SoldierTraitsText = SoldierTraits.text;
         Config.World.MaleTraits = RaceEditorPanel.TextToTraitList(MaleTraits.text);
+        Config.World.MaleTraitsText = MaleTraits.text;
         Config.World.FemaleTraits = RaceEditorPanel.TextToTraitList(FemaleTraits.text);
+        Config.World.FemaleTraitsText = FemaleTraits.text;
         Config.World.HermTraits = RaceEditorPanel.TextToTraitList(HermTraits.text);
+        Config.World.HermTraitsText = HermTraits.text;
         Config.World.SpawnTraits = RaceEditorPanel.TextToTraitList(SpawnTraits.text);
+        Config.World.SpawnTraitsText  = SpawnTraits.text;
         Config.World.OralWeight = (int)OralWeight.value;
         Config.World.UnbirthWeight = (int)UnbirthWeight.value;
         Config.World.CockWeight = (int)CockWeight.value;
@@ -1438,6 +1452,7 @@ public class ContentSettings : MonoBehaviour
         PlayerPrefs.SetInt("MaxEquipmentLevelDrop", MaxEquipmentLevelDrop.value + 1);
         PlayerPrefs.SetInt("MonsterConquestTurns", int.TryParse(MonsterConquestTurns.text, out int monsterTurns) ? monsterTurns : 0);
         PlayerPrefs.SetString("LeaderTraits", LeaderTraits.text);
+        PlayerPrefs.SetString("SoldierTraits", SoldierTraits.text);
         PlayerPrefs.SetString("MaleTraits", MaleTraits.text);
         PlayerPrefs.SetString("FemaleTraits", FemaleTraits.text);
         PlayerPrefs.SetString("HermTraits", HermTraits.text);

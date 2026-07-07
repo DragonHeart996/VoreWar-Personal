@@ -140,6 +140,19 @@ public class WorldConfig
     internal List<Traits> HermTraits;
     [OdinSerialize]
     internal List<Traits> SpawnTraits;
+    [OdinSerialize]
+    internal String LeaderTraitsText;
+    [OdinSerialize]
+    internal String SoldierTraitsText;
+    [OdinSerialize]
+    internal String MaleTraitsText;
+    [OdinSerialize]
+    internal String FemaleTraitsText;
+    [OdinSerialize]
+    internal String HermTraitsText;
+    [OdinSerialize]
+    internal String SpawnTraitsText;
+    
 
     [OdinSerialize]
     internal float CustomEventFrequency = 0;

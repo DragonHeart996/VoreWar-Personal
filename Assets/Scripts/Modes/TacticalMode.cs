@@ -220,6 +220,7 @@ public class TacticalMode : SceneBase
     List<Unit> retreatedDefenders;
 
     List<Actor_Unit> garrison;
+    Dictionary<Traits, List<Actor_Unit>> linkedUnits;
 
     internal List<ConstructibleBuilding> attackerBuildingsInRange;
     internal List<ConstructibleBuilding> defenderBuildingsInRange;
@@ -555,6 +556,36 @@ public class TacticalMode : SceneBase
 
         IsPlayerTurn = !AIAttacker;
 
+        if (!State.GameManager.PureTactical)//Apply Empire Traits to units that don't have them at the start of combat
+        {
+            foreach (Actor_Unit actor in attackers)
+            {
+                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
+                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
+                    {
+                        actor.Unit.AddPermanentTrait(trait);
+                    }
+            }
+            foreach (Actor_Unit actor in defenders)
+            {
+                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
+                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
+                    {
+                        actor.Unit.AddPermanentTrait(trait);
+                    }
+            }
+            foreach (Actor_Unit actor in garrison.ToList())
+            {
+                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
+                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
+                    {
+                        actor.Unit.AddPermanentTrait(trait);
+                    }
+            }
+        }
+
+        ActivatePreBattleTraits();
+
         GeneralSetup();
 
         if ((armies[1]?.Units.Count ?? 0) <= 0 && garrison.Count <= 0)
@@ -605,37 +636,7 @@ public class TacticalMode : SceneBase
         if (tacticalBattleOverride == TacticalBattleOverride.ForceSkip && AIAttacker && AIDefender)
             skip = true;
         if (units.Any(actor => State.World.AllActiveEmpires != null && State.World.GetEmpireOfSide(actor.Unit.FixedSide)?.StrategicAI == null))
-            skip = false;
-
-        ActivatePreBattleTraits();
-
-        if (!State.GameManager.PureTactical)//Apply Empire Traits to units that don't have them at the start of combat
-        {
-            foreach (Actor_Unit actor in attackers)
-            {
-                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
-                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
-                    {
-                        actor.Unit.AddPermanentTrait(trait);
-                    }
-            }
-            foreach (Actor_Unit actor in defenders)
-            {
-                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
-                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
-                    {
-                        actor.Unit.AddPermanentTrait(trait);
-                    }
-            }
-            foreach (Actor_Unit actor in garrison.ToList())
-            {
-                if (State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits != null)
-                    foreach (Traits trait in State.World.GetEmpireOfSide(actor.Unit.HiddenUnit.Side).EmpTraits)
-                    {
-                        actor.Unit.AddPermanentTrait(trait);
-                    }
-            }
-        }
+            skip = false;       
 
         if (!State.GameManager.PureTactical)
         {
@@ -1680,7 +1681,7 @@ public class TacticalMode : SceneBase
             StatusUI.DefenderText.fontStyle = FontStyle.Bold;
         }
 
-        TacticalUtilities.ResetData(armies, village, units, garrison, tiles, BlockedTile, BlockedClimberTile);
+        TacticalUtilities.ResetData(armies, village, units, garrison, tiles, BlockedTile, BlockedClimberTile, linkedUnits);
     }
 
     void RebuildDecorations()
@@ -1757,6 +1758,8 @@ public class TacticalMode : SceneBase
 
             garrison = garrison,
 
+            linkedUnits = linkedUnits,
+
             selectedUnit = SelectedUnit,
 
             activeEffects = ActiveEffects,
@@ -1813,6 +1816,7 @@ public class TacticalMode : SceneBase
         Buildings = data.buildings;
 
         garrison = data.garrison;
+        linkedUnits = data.linkedUnits;
 
         tiles = data.tiles;
         DecorationStorage = data.decorationStorage;
@@ -2506,7 +2510,7 @@ public class TacticalMode : SceneBase
                 break;
             case SpecialAction.SweepingSwallow:
                 ShowVoreHitPercentages(actor, PreyLocation.stomach);
-                UpdateMeleeAOEGrid();
+                
                 break;
             case SpecialAction.GiantSweep:
                 ShowMeleeHitPercentages(actor, .66f);
@@ -2772,6 +2776,10 @@ public class TacticalMode : SceneBase
                 if (TacticalUtilities.SneakAttackCheck(actor.Unit, target.Unit)) // sneakAttack
                 {
                     spellDamage *= 3;
+                }
+                if (SelectedUnit.Unit.HasTrait(Traits.Multifaceted) && SelectedUnit.Unit.IsHighestStat(Stat.Mind)) //For correct display of damage
+                {
+                    spellDamage += (int)Math.Round(target.Unit.GetStat(Stat.Mind) * 0.1f);
                 }
             }
              
@@ -3707,6 +3715,14 @@ public class TacticalMode : SceneBase
                                 int[,] targetGrid = { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 } };
                                 UpdateMeleeDirectionalGrid(mouseLocation, targetGrid, SelectedUnit.WeaponDamageAgainstTarget(actor, false, .66f));
                             }
+                            if (specialType == SpecialAction.SweepingSwallow)
+                            {
+                                UpdateMeleeAOEGrid();
+                            }
+                            if (specialType == SpecialAction.GiantSweep)
+                            {
+                                UpdateMeleeAOEGrid(SelectedUnit.WeaponDamageAgainstTarget(actor, false));
+                            }
                             if (specialType == SpecialAction.DireInfection)
                             {
                                 UpdateMeleeAOEGrid(SelectedUnit.WeaponDamageAgainstTarget(actor, false, .75f));
@@ -3776,10 +3792,8 @@ public class TacticalMode : SceneBase
                             if (actor != null)
                             {
                                 int spellDamage = spell.Damage(SelectedUnit, actor);
-                                if (TacticalUtilities.SneakAttackCheck(SelectedUnit.Unit, actor.Unit)) // sneakAttack
-                                {
-                                    spellDamage *= 3;
-                                }
+                                spellDamage = SpellDamageMod(SelectedUnit, actor, spellDamage);
+                                actor.UnitSprite.ShowDamagedHealthBar(actor, spellDamage);
                                 UpdateGenericAttackGrid(actor, spellDamage);
                                 string str = System.Math.Round(actor.GetMagicChance(SelectedUnit, CurrentSpell) * 100, 1) + "%\n-" + spellDamage;
                                 StatusUI.HitRate.text = str;
@@ -3792,10 +3806,7 @@ public class TacticalMode : SceneBase
                     foreach (var splashTarget in TacticalUtilities.UnitsWithinPattern(mouseLocation, spell.Pattern))
                     {
                         int spellDamage = spell.Damage(SelectedUnit, splashTarget);
-                        if (TacticalUtilities.SneakAttackCheck(SelectedUnit.Unit, splashTarget.Unit)) // sneakAttack
-                        {
-                            spellDamage *= 3;
-                        }
+                        spellDamage = SpellDamageMod(SelectedUnit, splashTarget, spellDamage);
                         splashTarget.UnitSprite.ShowDamagedHealthBar(splashTarget, spellDamage);
                     }
                 }
@@ -3804,10 +3815,7 @@ public class TacticalMode : SceneBase
                     foreach (var splashTarget in TacticalUtilities.UnitsWithinRotatingPattern(mouseLocation, spell.Pattern, TacticalUtilities.GetRotatingOctant(SelectedUnit.Position, mouseLocation)))
                     {
                         int spellDamage = spell.Damage(SelectedUnit, splashTarget);
-                        if (TacticalUtilities.SneakAttackCheck(SelectedUnit.Unit, splashTarget.Unit)) // sneakAttack
-                        {
-                            spellDamage *= 3;
-                        }
+                        spellDamage = SpellDamageMod(SelectedUnit, splashTarget, spellDamage);
                         splashTarget.UnitSprite.ShowDamagedHealthBar(splashTarget, spellDamage);
                     }
                 }
@@ -3816,14 +3824,26 @@ public class TacticalMode : SceneBase
                     foreach (var splashTarget in TacticalUtilities.UnitsWithinTiles(mouseLocation, spell.AreaOfEffect))
                     {
                         int spellDamage = spell.Damage(SelectedUnit, splashTarget);
-                        if (TacticalUtilities.SneakAttackCheck(SelectedUnit.Unit, splashTarget.Unit)) // sneakAttack
-                        {
-                            spellDamage *= 3;
-                        }
+                        spellDamage = SpellDamageMod(SelectedUnit, splashTarget, spellDamage);
+                        splashTarget.UnitSprite.ShowDamagedHealthBar(splashTarget, spellDamage);
                         UpdateGenericAttackGrid(splashTarget, spellDamage);
                     }
                 }
             }
+        }
+
+        int SpellDamageMod(Actor_Unit attacker, Actor_Unit target, int damage)
+        {
+            int damMod = damage;
+            if (TacticalUtilities.SneakAttackCheck(SelectedUnit.Unit, target.Unit)) // sneakAttack
+            {
+                damMod *= 3;
+            }
+            if (SelectedUnit.Unit.HasTrait(Traits.Multifaceted) && SelectedUnit.Unit.IsHighestStat(Stat.Mind)) //For correct display of damage
+            {
+                damMod += (int)Math.Round(target.Unit.GetStat(Stat.Mind) * 0.1f);
+            }
+            return damMod;
         }
     }
 
@@ -4867,6 +4887,17 @@ public class TacticalMode : SceneBase
             }
         }
 
+        if (!visibleAttackers.Any(u => u.Movement > 0) && !turboMode && IsPlayerTurn && attackersTurn &&
+            Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+        {
+            RunningFriendlyAI = true;
+        }
+        if (!visibleDefenders.Any(u => u.Movement > 0) && !turboMode && IsPlayerTurn && !attackersTurn &&
+            Config.AutoAdvance == Config.AutoAdvanceType.AdvanceTurns)
+        {
+            RunningFriendlyAI = true;
+        }
+
         bool foodRemaining = false;
         bool oneSideLeft = false;
         if (!visibleAttackers.Any())
@@ -4932,14 +4963,26 @@ public class TacticalMode : SceneBase
             return false;
         int remainingAttackers = 0;
         int remainingDefenders = 0;
-        CalculateRemaining(ref remainingAttackers, ref remainingDefenders);
-
+        float smallestEdibleBulk = Mathf.Infinity;
+        CalculateRemaining(ref remainingAttackers, ref remainingDefenders, ref smallestEdibleBulk);
+        
         if (remainingAttackers == 0 || remainingDefenders == 0)
         {
+            if (!float.IsPositiveInfinity(smallestEdibleBulk)
+                && units.Any(p => p.Targetable 
+                                  && p.Visible 
+                                  && !p.Fled 
+                                  && !p.Surrendered 
+                                  && p.Unit.Predator 
+                                  && p.PredatorComponent.HasExpectedSpareCap(smallestEdibleBulk)))
+            {
+                return false;
+            }
             foreach (Actor_Unit actor in units.ToList())
             {
                 if (actor.Targetable && actor.Visible && !actor.Fled && !actor.Surrendered && (actor.TurnsSinceLastDamage < 2 & !actor.Unit.HasTrait(Traits.CurseOfImmolation))) return false;
                 if (actor.Targetable && actor.Visible && !actor.Fled && !actor.Surrendered && !actor.Unit.hiddenFixedSide && units.Any(u => u.Targetable && !u.Fled && u.Visible && TacticalUtilities.TreatAsHostile(actor, u))) return false;
+                
                 if (actor.Unit.Predator == false)
                     continue;
                 foreach (var prey in actor.PredatorComponent.GetDirectPrey().Where(s => s.Unit.HasTrait(Traits.TheGreatEscape)).ToList())
@@ -5050,6 +5093,7 @@ public class TacticalMode : SceneBase
                 StatusUI.EndTurn.interactable = true;
                 return false;
             }
+            HandlePostBattleTraits();
             ProcessReplaceable(remainingAttackers);
 
             foreach (Actor_Unit actor in units)
@@ -5118,6 +5162,7 @@ public class TacticalMode : SceneBase
                     continue;
                 }
                 actor.Unit.SetSizeToDefault();
+                actor.Unit.TempBoosts.ResetAll();
                 actor.Unit.EnemiesKilledThisBattle = 0;
                 if (actor.Unit.IsDead && actor.Unit.Type != UnitType.Summon &&
                     (actor.Unit.HasTrait(Traits.Eternal) || (actor.Unit.HasTrait(Traits.LuckySurvival) && State.Rand.Next(5) != 0) ||
@@ -5141,6 +5186,32 @@ public class TacticalMode : SceneBase
                             armies[1]?.Units.Remove(actor.Unit);
                             village?.GetRecruitables().Remove(actor.Unit);
                         }
+                    }
+                    else
+                    {
+                        retreatedAttackers.Add(actor.Unit);
+                        armies[0].Units.Remove(actor.Unit);
+                    }
+                    actor.PredatorComponent?.PurgePrey();
+                    units.Remove(actor);
+                }
+                else if (actor.Unit.IsDead && actor.Unit.Type != UnitType.Summon && (actor.Unit.HasTrait(Traits.CloseCall)) && actor.KilledByDigestion == false)
+                {
+                    actor.Surrendered = false;
+                    actor.Unit.Health = 1;
+                    if (actor.Unit.Side == defenderSide)
+                    {
+                        if (garrison.Contains(actor) && remainingDefenders > 0)
+                        {
+                            actor.Unit.Health = 1;
+                        }
+                        else
+                        {
+                            retreatedDefenders.Add(actor.Unit);
+                            armies[1]?.Units.Remove(actor.Unit);
+                            village?.GetRecruitables().Remove(actor.Unit);
+                        }
+
                     }
                     else
                     {
@@ -5468,6 +5539,11 @@ public class TacticalMode : SceneBase
 
     private void CalculateRemaining(ref int remainingAttackers, ref int remainingDefenders)
     {
+        float smallestEdibleBulk = 0;
+        CalculateRemaining(ref remainingAttackers, ref remainingDefenders, ref smallestEdibleBulk);
+    }
+    private void CalculateRemaining(ref int remainingAttackers, ref int remainingDefenders, ref float smallestEdibleBulk)
+    {
         int surrenderedAttackers = 0;
         int surrenderedDefenders = 0;
 
@@ -5476,7 +5552,14 @@ public class TacticalMode : SceneBase
             if (units[i] != null && units[i].Fled == false)
             {
                 Actor_Unit actor = units[i];
-                if (actor.Unit.IsDead == false)
+                if (actor.Unit.IsDead)
+                {
+                    if (!turboMode && Config.EdibleCorpses && actor.Visible)
+                    {
+                        smallestEdibleBulk = Math.Min(smallestEdibleBulk, actor.Bulk());
+                    }
+                }
+                else
                 {
                     //if (actor.SelfPrey == null && actor.Visible == false || actor.Targetable == false)
                     //{
@@ -5539,7 +5622,7 @@ public class TacticalMode : SceneBase
                 }
             }
         }
-        if (currentTurn > 500)
+        if (currentTurn > 500 && turboMode)
         {
             if (surrenderedAttackers == remainingAttackers)
             {
@@ -5939,8 +6022,73 @@ public class TacticalMode : SceneBase
 
     internal void ActivatePreBattleTraits()
     {
+        int MutualBiologyHealthAttacker = 0;
+        int MutualBiologyHealthDefender = 0;
+
+        // Link up all units with their respecive triat
+        linkedUnits = new Dictionary<Traits, List<Actor_Unit>>
+        {
+            { Traits.MutualBiology, new List<Actor_Unit>() }
+        };
         foreach (var actor in units)
         {
+            if (actor.Unit.HasTrait(Traits.InherentGlamour))
+            {
+                var possible_targets = units.Where(u => !u.Unit.IsEnemyOfSide(actor.Unit.Side) && !u.Unit.HasTrait(Traits.InherentGlamour)).ToList();
+                if (possible_targets.Any())
+                {
+                    actor.Unit.TacticalCopy = possible_targets[State.Rand.Next(0, possible_targets.Count())].Unit;
+                    actor.Unit.CopyTacticalUnit();
+                    actor.UpdateBestWeapons();
+                }
+            }
+
+            if (actor.Unit.HasTrait(Traits.MutualBiology))
+            {
+                linkedUnits[Traits.MutualBiology].Add(actor);
+                if (actor.Unit.Side == attackerSide)
+                {
+                    if (MutualBiologyHealthAttacker == 0)
+                    {
+                        foreach (var unit in armies[0].Units)
+                        {
+                            if (unit.HasTrait(Traits.MutualBiology))
+                            {
+                                MutualBiologyHealthAttacker += unit.Health;
+                                //Debug.Log("Adding: " + MutualBiologyHealthDefender);
+                            }
+                        }
+                    }
+                    actor.Unit.TempBoosts.HealthBoost += MutualBiologyHealthAttacker - actor.Unit.Health; //Gain all health and remove this units contribution from itself.
+                    actor.Unit.Health += MutualBiologyHealthAttacker - actor.Unit.Health;
+                }
+                else
+                {
+                    if (MutualBiologyHealthDefender == 0)
+                    {
+                        if (armies[1] != null)
+                        {
+                            foreach (var unit in armies[1].Units)
+                            {
+                                if (unit.HasTrait(Traits.MutualBiology))
+                                {
+                                    MutualBiologyHealthDefender += unit.Health;
+                                }
+                            }
+                        }
+                        foreach (var unit in garrison)
+                        {
+                            if (unit.Unit.HasTrait(Traits.MutualBiology))
+                            {
+                                MutualBiologyHealthDefender += unit.Unit.Health;
+                            }
+                        }
+                    }
+                    actor.Unit.TempBoosts.HealthBoost += MutualBiologyHealthDefender - actor.Unit.Health; //Gain all health and remove this units contribution from itself.
+                    actor.Unit.Health += MutualBiologyHealthDefender - actor.Unit.Health;
+                }
+            }
+
             if (actor.Unit.HasTrait(Traits.CurseOfCraving))
             {
                 if (actor.Unit.Predator)
@@ -5965,6 +6113,21 @@ public class TacticalMode : SceneBase
                     {
                         possible_targets[State.Rand.Next(0, possible_targets.Count())].PredatorComponent.ForceConsumeAuto(actor);
                     }
+                }
+            }
+        }
+    }
+
+    internal void HandlePostBattleTraits()
+    {
+        foreach (var actor in units)
+        {
+            // Check if Unit is still a copy of another unit.
+            if (actor.Unit.IsACopy())
+            {
+                if (actor.Unit.OriginalUnit.HasTrait(Traits.InherentGlamour))
+                {
+                    actor.Unit.RevertCopiedUnit(); // Return unit to initial state
                 }
             }
         }

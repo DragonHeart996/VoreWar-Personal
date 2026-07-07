@@ -231,6 +231,9 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] BadgersVoreBlack;
     public Sprite[] BadgersVoreWhite;
     public Sprite[] Equaleon;
+    public Sprite[] OoviKatFemale;
+    public Sprite[] OoviKatMale;
+    public Sprite[] OoviKatCustomisation;
     public Sprite[] CowsSeliciaBelly;
 
     public Sprite[] PantherBase;
@@ -301,6 +304,14 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] DemidragonPatterns2;
     public Sprite[] DemidragonBelliesBalls;
 
+    public Sprite[] YordlesBodies;
+    public Sprite[] YordlesVoreSkin;
+    public Sprite[] YordlesVoreFur;
+    public Sprite[] YordlesCustomization1;
+    public Sprite[] YordlesCustomization2;
+    public Sprite[] YordleClothes1;
+    public Sprite[] YordleClothes2;
+
     [Header("Unique Mercenaries")]
     public Sprite[] Selicia;
     public Sprite[] Vision;
@@ -348,6 +359,8 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] Ryan;
     public Sprite[] RyanVore;
     public Sprite[] Konane;
+    public Sprite[] Cherub;
+    public Sprite[] Seraph;
     
     [Header("Bosses")]
     public Sprite[] Abakhanskya;
@@ -429,6 +442,9 @@ public class SpriteDictionary : MonoBehaviour
     public Sprite[] DryadSprites5;
 
     public Sprite[] Cake;
+
+    public Sprite[] SoulSprite;
+    public Sprite[] AngelProjectile;
 
 
     [Header("Other")]

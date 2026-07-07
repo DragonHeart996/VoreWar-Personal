@@ -56,6 +56,7 @@ static class RaceParameters
     static readonly RaceTraits Vargul;
     static readonly RaceTraits Hamsters;
     static readonly RaceTraits RwuMercenaries;
+    static readonly RaceTraits OoviKat;
     static readonly RaceTraits Vagrants;
     static readonly RaceTraits Serpents;
     static readonly RaceTraits Wyvern;
@@ -148,10 +149,14 @@ static class RaceParameters
     static readonly RaceTraits Renamon;
     static readonly RaceTraits Ghosts;
     static readonly RaceTraits DemiDragons;
+    static readonly RaceTraits Yordles;
     static readonly RaceTraits WoodDryad;
     static readonly RaceTraits EarthDryad;
     static readonly RaceTraits RiverDryad;
     static readonly RaceTraits FungalDryad;
+    static readonly RaceTraits Cherub;
+    static readonly RaceTraits Seraph;
+    static readonly RaceTraits SoulSprite;
 
     static Unit tempUnit;
 
@@ -403,6 +408,8 @@ static class RaceParameters
                 return Gnolls;
             case Race.Centaur:
                 return Centaur;
+            case Race.OoviKat:
+                return OoviKat;
             case Race.FeralSlime:
                 return FeralSlime;
             case Race.Olivia:
@@ -443,6 +450,10 @@ static class RaceParameters
                 return Ryan;
             case Race.Konane:
                 return Konane;
+            case Race.Seraph:
+                return Seraph;
+            case Race.Cherub:
+                return Cherub;
             case Race.Otachi:
                 return Otachi;
             case Race.Raiju:
@@ -455,6 +466,8 @@ static class RaceParameters
                 return Ghosts;
             case Race.DemiDragons:
                 return DemiDragons;
+            case Race.Yordles:
+                return Yordles;
             case Race.WoodDryad:
                 return WoodDryad;
             case Race.EarthDryad:
@@ -467,7 +480,9 @@ static class RaceParameters
                 return Trex;
             case Race.Utahraptor:
                 return Utahraptor;
-            case Race.Pudding:
+            case Race.SoulSprite: 
+                return SoulSprite;
+            case Race.Pudding: 
                 return Pudding;
             case Race.Badgers:
                 return Badgers;
@@ -553,6 +568,7 @@ static class RaceParameters
             FavoredStat = Stat.Mind,
             DeployCost = 1,
             Upkeep = 21f,
+			PowerAdjustment = 2f,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
             {
@@ -591,7 +607,7 @@ static class RaceParameters
         {
             Traits.PackStrength,
             Traits.PackVoracity,
-			Traits.Tenacious,
+            Traits.Tenacious,
         },
             RaceDescription = "Natives of this realm, the Wolves have a history of hunting in packs extending beyond the crafting of their first weapons. While a lone Wolf can still be a worthy adversary, their true strength comes from working with their kin.",
         };
@@ -707,7 +723,7 @@ static class RaceParameters
             Traits.MagicResistance,
             Traits.AstralCall,
         },
-		RaceStats = new RaceStats()
+            RaceStats = new RaceStats()
             {
                 Strength = new RaceStats.StatRange(6, 14),
                 Dexterity = new RaceStats.StatRange(6, 14),
@@ -765,25 +781,13 @@ static class RaceParameters
             FavoredStat = Stat.Stomach,
             DeployCost = 1,
             Upkeep = 7f,
-			PowerAdjustment = 1.5f,
-			RaceStats = new RaceStats()
-            {
-                Strength = new RaceStats.StatRange(10, 16),
-                Dexterity = new RaceStats.StatRange(10, 16),
-                Endurance = new RaceStats.StatRange(14, 20),
-                Mind = new RaceStats.StatRange(8, 13),
-                Will = new RaceStats.StatRange(6, 13),
-                Agility = new RaceStats.StatRange(5, 9),
-                Voracity = new RaceStats.StatRange(12, 15),
-                Stomach = new RaceStats.StatRange(15, 18),
-            },
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
             RacialTraits = new List<Traits>()
         {
             Traits.Ravenous,
             Traits.Biter,
             Traits.DualStomach,
-			Traits.StrongGullet
+            Traits.StrongGullet
         },
             RaceDescription = "Natives to this realm, these legless beings were once the strongest and largest hunters of the land. The sudden emergence of many new species left the Lamia uncertain at first, but soon their dual stomachs won and they focused on testing the taste of the new arrivals.",
         };
@@ -1325,7 +1329,7 @@ static class RaceParameters
         {
             BodySize = 15,
             StomachSize = 20,
-            HasTail = false,
+            HasTail = true,
             FavoredStat = Stat.Mind,
             DeployCost = 1,
             Upkeep = 5f,
@@ -1334,8 +1338,26 @@ static class RaceParameters
                 Traits.Flight,
                 Traits.NaturalCaster,
                 Traits.StrongGullet,
+                Traits.Hoarder,
         },
-            RaceDescription = "Dragon goes brrr",
+            RaceDescription = "",
+        };
+
+        Yordles = new RaceTraits()
+        {
+            BodySize = 8,
+            StomachSize = 15,
+            HasTail = false,
+            FavoredStat = Stat.Mind,
+            DeployCost = 1,
+            Upkeep = 3f,
+            RacialTraits = new List<Traits>()
+        {
+            Traits.MagicProwess,
+            Traits.Multifaceted,
+            Traits.EasyToVore,
+        },
+            RaceDescription = "These fluffy creatures are commonly mistaken as short mammals. In truth, they are a race of spirits, happening upon this world through their enchanted gateways. Yordles have complex personalities and are attracted to diverse cultures.",
         };
 
         Centaur = new RaceTraits()
@@ -1587,7 +1609,7 @@ static class RaceParameters
             HasTail = true,
             FavoredStat = Stat.Voracity,
             AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Unbirth, VoreType.CockVore, VoreType.BreastVore, VoreType.Anal, VoreType.TailVore, VoreType.BladderVore },
-            PowerAdjustment = 2f,
+            PowerAdjustment = 1.4f,
             DeployCost = 1,
             Upkeep = 11f,
             RaceStats = new RaceStats()
@@ -1734,6 +1756,34 @@ static class RaceParameters
             Traits.Biter,
         },
             RaceDescription = "A race renowned for their excellent smithing and startling strength despite their stature. Their settlements have rarely been seen above ground however, they are known to have ginormous kingdoms underground that dwarf most other faction's capitals.",
+        };
+
+        OoviKat = new RaceTraits()
+        {
+            BodySize = 15,
+            StomachSize = 20,
+            HasTail = true,
+            FavoredStat = Stat.Strength,
+            DeployCost = 1,
+            Upkeep = 5f,
+            PowerAdjustment = 1.4f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(10, 15),
+                Dexterity = new RaceStats.StatRange(10, 14),
+                Endurance = new RaceStats.StatRange(9, 13),
+                Mind = new RaceStats.StatRange(12, 17),
+                Will = new RaceStats.StatRange(14, 19),
+                Agility = new RaceStats.StatRange(8, 10),
+                Voracity = new RaceStats.StatRange(8, 12),
+                Stomach = new RaceStats.StatRange(12, 18),
+            },
+            RacialTraits = new List<Traits>()
+        {
+            Traits.InherentGlamour,
+            Traits.EvasiveBattler,
+        },
+            RaceDescription = "OoviKat have the unique ability to touch the soul, the true nature, of living beings. Once identified, they can transform into those they interact with, tapping into their tap into their inner feelings and memorie. Due to this, it is uncertain when the came to this world or how long the've been around in secret.",
         };
 
         RwuMercenaries = new RaceTraits()
@@ -3817,34 +3867,72 @@ static class RaceParameters
 
         Pudding = new RaceTraits()
         {
-            BodySize = 30,
-            StomachSize = 30,
+            BodySize = 20,
+            StomachSize = 20,
             HasTail = false,
-            FavoredStat = Stat.Strength,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
-            ExpMultiplier = 4f,
-            PowerAdjustment = 2f,
-            DeployCost = 2,
-            Upkeep = 5f,
+            FavoredStat = Stat.Stomach,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
+            ExpMultiplier = 1.75f,
+            PowerAdjustment = 1.25f,
+            DeployCost = 1,
+            Upkeep = 6f,
             RaceStats = new RaceStats()
             {
-                Strength = new RaceStats.StatRange(15, 20),
-                Dexterity = new RaceStats.StatRange(8, 12),
-                Endurance = new RaceStats.StatRange(15, 20),
-                Mind = new RaceStats.StatRange(10, 14),
-                Will = new RaceStats.StatRange(10, 14),
-                Agility = new RaceStats.StatRange(12, 18),
-                Voracity = new RaceStats.StatRange(14, 20),
-                Stomach = new RaceStats.StatRange(14, 20),
+                Strength = new RaceStats.StatRange(6, 12),
+                Dexterity = new RaceStats.StatRange(4, 8),
+                Endurance = new RaceStats.StatRange(20, 30),
+                Mind = new RaceStats.StatRange(4, 10),
+                Will = new RaceStats.StatRange(6, 12),
+                Agility = new RaceStats.StatRange(6, 10),
+                Voracity = new RaceStats.StatRange(10, 18),
+                Stomach = new RaceStats.StatRange(8, 16),
+            },
+            RacialTraits = new List<Traits>()
+            {
+                Traits.MetabolicSurge,
+                Traits.ExtraNutritious,
+                Traits.SoftBody,
+                Traits.GelatinousBody,
+        
+
+            },
+            RaceDescription = "After reciving news about a massacre involving oversized bake goods, a wizard decided to create a way to inform the populace of the dangers of voracious food monsters. What better way than to better prepare than to make more voracious, albeit weaker, food monsters?"
+        };
+
+
+        SoulSprite = new RaceTraits()
+        {
+            BodySize = 8,
+            StomachSize = 12,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            DeployCost = 1,
+            Upkeep = 3f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(2, 6),
+                Dexterity = new RaceStats.StatRange(4, 8),
+                Endurance = new RaceStats.StatRange(4, 8),
+                Mind = new RaceStats.StatRange(12, 16),
+                Will = new RaceStats.StatRange(10, 15),
+                Agility = new RaceStats.StatRange(6, 8),
+                Voracity = new RaceStats.StatRange(6, 10),
+                Stomach = new RaceStats.StatRange(10, 16),
             },
             RacialTraits = new List<Traits>()
         {
-            Traits.Charge,
-            Traits.Pounce,
-            Traits.Biter,
-            Traits.BornToMove,
+                Traits.SlowMetabolism,
+                Traits.Flight,
+                Traits.ManaRich,
+                Traits.ExtraNutritious,
+                Traits.Charmer,
+                Traits.Temptation,
         },
-            RaceDescription = "Utahraptors are much faster and more powerful thatn the usual raptors you see here and there.  More hungry too."
+        InnateSpells = new List<SpellTypes>()
+            { SpellTypes.Trance, },
+            RaceAI = RaceAI.ServantRace,
+            RaceDescription = "A relatively weak angelic being, created from the soul of a living creature purified by the higher-ranking angels. Soul Sprites act as the main workforce for the angels, and those who gain enough favor among their peers may ascend to higher ranks or even gain a chance to reincarnate to a new life... And it seems as of late, devouring their opponents on the battlefield is a lucrative means to gather said favor.",
         };
 
 
@@ -4213,7 +4301,7 @@ static class RaceParameters
             RaceDescription = "Erin belongs to a very rare species known as a Nyangel, the lovechild of an angel and a catgirl.  Thanks to this divine heritage they are mostly all incredible healers... But they're also incredibly tasty.  Every Nyangel has a unique trait to set them apart from eachother, and Erin is no exception to this rule.  Her quirk is total acid resistance, the perfect defense against the raveous predators of this realm.  That doesn't stop her from being devoured, however, and that is unfortunately an all-too-common outcome for the girl.  Regardless of how many times she ends up eaten, the loveable Nyangel still tries her best to heal those she can.",
         };
 
-        
+
 
         Salix = new RaceTraits()
         {
@@ -4421,7 +4509,7 @@ static class RaceParameters
             BodySize = 60,
             StomachSize = 40,
             FavoredStat = Stat.Voracity,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore , VoreType.Unbirth },
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal, VoreType.CockVore, VoreType.Unbirth },
             ExpMultiplier = 2f,
             PowerAdjustment = 9f,
             DeployCost = 2,
@@ -4622,7 +4710,7 @@ static class RaceParameters
             StomachSize = 40,
             FavoredStat = Stat.Stomach,
             HasTail = true,
-            AllowedVoreTypes = new List<VoreType> { VoreType.Oral},
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral },
             ExpMultiplier = 2f,
             PowerAdjustment = 5f,
             DeployCost = 2,
@@ -4646,7 +4734,80 @@ static class RaceParameters
         },
             RaceDescription = "Some kind of black falcon/snow leopard mix. Oh no! He's hot!",
         };
+        Cherub = new RaceTraits()
+        {
+            BodySize = 20,
+            StomachSize = 35,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            ExpMultiplier = 2f,
+            PowerAdjustment = 9f,
+            DeployCost = 2,
+            Upkeep = 21f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(4, 10),
+                Dexterity = new RaceStats.StatRange(4, 10),
+                Endurance = new RaceStats.StatRange(10, 15),
+                Mind = new RaceStats.StatRange(18, 25),
+                Will = new RaceStats.StatRange(18, 25),
+                Agility = new RaceStats.StatRange(8, 11),
+                Voracity = new RaceStats.StatRange(15, 20),
+                Stomach = new RaceStats.StatRange(12, 15),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.SlowMetabolism,
+                Traits.BoundWeapon,
+                Traits.Flight,
+                Traits.PleasurableTouch,
+                Traits.ManaDrain,
+                Traits.ManaDynamo,
+        },
+            SpawnRace = Race.SoulSprite,
+            InnateSpells = new List<SpellTypes>()
+            { SpellTypes.DivinitysEmbrace, SpellTypes.ForcePulse, },
+            RaceAI = RaceAI.Hedonist,
+            RaceDescription = "A mysterious angelic being that suddenly manifested into the physical plane. They sport powerful magical abilities and an innate sense of the evil and malice which they hunger for. Despite their friendly demeanor, they have a bad habit of devouring mortals in an attempt to cleanse them of impurity.",
+        };
 
+        Seraph = new RaceTraits()
+        {
+            BodySize = 100,
+            StomachSize = 80,
+            FavoredStat = Stat.Mind,
+            HasTail = true,
+            AllowedVoreTypes = new List<VoreType> { VoreType.Oral, VoreType.Anal },
+            ExpMultiplier = 20f,
+            PowerAdjustment = 100f,
+            DeployCost = 8,
+            Upkeep = 150f,
+            RaceStats = new RaceStats()
+            {
+                Strength = new RaceStats.StatRange(30, 35),
+                Dexterity = new RaceStats.StatRange(30, 35),
+                Endurance = new RaceStats.StatRange(30, 35),
+                Mind = new RaceStats.StatRange(45, 50),
+                Will = new RaceStats.StatRange(40, 50),
+                Agility = new RaceStats.StatRange(25, 30),
+                Voracity = new RaceStats.StatRange(20, 25),
+                Stomach = new RaceStats.StatRange(20, 25),
+            },
+            RacialTraits = new List<Traits>()
+        {
+                Traits.DestroyingAngel,
+                Traits.Legendary,
+                Traits.ManaAttuned,
+                Traits.ManaBarrier,
+                Traits.Flight,
+                Traits.CreateSpawn,
+        },
+            SpawnRace = Race.SoulSprite,
+            InnateSpells = new List<SpellTypes>()
+            { SpellTypes.DivinitysEmbrace, SpellTypes.DivineNova, },
+            RaceDescription = "The leader of the angelic beings that descended onto this world. Seraph has existed before recorded history and does not take lightly to troublemakers that disrupt the karmic balance of the world. Their arrival usually precedes a grand shift in the dynamics of a region, usually ending up with them leaving much fatter than they came.",
+        };
     }
 
 }

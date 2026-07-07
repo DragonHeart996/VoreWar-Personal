@@ -457,6 +457,71 @@ public class PredatorComponent
 
         return prey;
     }
+    List<Prey> PreyRefInLocation(PreyLocation location)
+    {
+        List <Prey> prey = new List<Prey>();
+        switch (location)
+        {
+            case PreyLocation.balls:
+                foreach (Prey unit in balls)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.stomach:
+            case PreyLocation.anal:
+                foreach (Prey unit in stomach)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.stomach2:
+                foreach (Prey unit in stomach2)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.tail:
+                foreach (Prey unit in tail)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.womb:
+                foreach (Prey unit in womb)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.leftBreast:
+                foreach (Prey unit in leftBreast)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.rightBreast:
+                foreach (Prey unit in rightBreast)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+            case PreyLocation.breasts:
+                foreach (Prey unit in breasts)
+                {
+                    if (!unit.Unit.IsDead)
+                        prey.Add(unit);
+                }
+                break;
+        }
+        return prey;
+    }
 
     internal void UpdateAlivePrey()
     {
@@ -951,6 +1016,7 @@ public class PredatorComponent
     public float TotalCapacity()
     {
         float c = State.RaceSettings.GetStomachSize(unit.Race);
+
         c *= unit.GetStat(Stat.Stomach) / 12f * unit.TraitBoosts.CapacityMult;
         
         // Adding more Capacity with greater scale makes sense from an in-universe standpoint; larger-scaled units can eat more, right?
@@ -959,6 +1025,11 @@ public class PredatorComponent
         // In play-testing, we see that with multi-dimensional Capacity increases, it's not long before a single unit can eat an entire (non-Scaled) army.
         // Since Scaled-up units already get too strong too quickly, if they really want to eat an army solo, let's make them buy some Stomach at level up.
         //c *= unit.GetScale(1);
+        
+        if (unit.GetStatusEffect(StatusEffectType.Gorging)?.Duration > 0)
+        {
+            c += unit.GetStatusEffect(StatusEffectType.Gorging).Strength * 10;
+        }
         
         return c;
     }
@@ -1082,7 +1153,7 @@ public class PredatorComponent
                 preyUnit.Actor.Visible = true;
                 preyUnit.Actor.Targetable = true;
 
-                if (Config.DisorientedPrey)
+                if (Config.DisorientedPrey && !preyUnit.Unit.HasTrait(Traits.InvigoratingEscape))
                 {
                     preyUnit.Actor.WasJustFreed = true;
                     preyUnit.Actor.Movement =
@@ -1312,7 +1383,17 @@ public class PredatorComponent
             {
                 preyUnit.Unit.ApplyStatusEffect(StatusEffectType.WillingPrey, 0, 3);
             }
-
+            if (actor.Unit.HasTrait(Traits.Multifaceted) && actor.Unit.IsHighestStat(Stat.Stomach))
+            {
+                if (preyUnit.Unit.GetStatusEffect(StatusEffectType.Lethargy) == null)
+                {
+                    preyUnit.Unit.ApplyStatusEffect(StatusEffectType.Lethargy, 1f, 3);
+                }
+                else
+                {
+                    preyUnit.Unit.ApplyStatusEffect(StatusEffectType.Lethargy, preyUnit.Unit.GetStatusEffect(StatusEffectType.Lethargy).Strength + 1f, 3);
+                }
+            }
             int preyDamage = CalculateDigestionDamage(preyUnit);
             if (preyUnit.Predator.Unit.HasTrait(Traits.Honeymaker) && preyUnit.Unit.IsDead &&
                 (preyUnit.Location == PreyLocation.breasts || preyUnit.Location == PreyLocation.leftBreast ||
@@ -1522,6 +1603,12 @@ public class PredatorComponent
             damage -= damage * (unit.GetStatusEffect(StatusEffectType.Diluted).Strength *
                                       unit.GetStatusEffect(StatusEffectType.Diluted).Duration);
         int finalDamage = (int)Math.Round(damage);
+        
+        if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
+        {
+            finalDamage = 0;
+        }
+        
         if (finalDamage < 1)
             finalDamage = 1;
 
@@ -1708,6 +1795,7 @@ public class PredatorComponent
         var location = preyUnit.Location;
         int totalHeal = 0;
         bool freshKill = false;
+        
         if (unit.HasTrait(Traits.Extraction) && !TacticalUtilities.IsPreyEndoTargetForUnit(preyUnit, unit))
         {
             if (preyUnit.Unit.HiddenUnit.GetTraits.Any())
@@ -1949,6 +2037,10 @@ public class PredatorComponent
             //    $"<color:orange>Debug: {preyDamage}</color>");
             preyUnit.Actor.SubtractHealth(preyDamage);
             preyUnit.TurnsSinceLastDamage = 0;
+            if (preyUnit.Actor.Unit.HasTrait(Traits.MutualBiology))
+            {
+                TacticalUtilities.MutuallyDamageUnits(preyUnit.Actor, preyDamage);
+            }
         }
 
         if (freshKill)
@@ -2026,6 +2118,10 @@ public class PredatorComponent
             }
 
             int healthReduction = (int)Math.Max(Math.Round(preyUnit.Unit.MaxHealth * speedFactor / 15), 1);
+            if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
+            {
+                healthReduction = 0;
+            }
             if (healthReduction > preyUnit.Unit.MaxHealth + preyUnit.Unit.Health)
                 healthReduction = preyUnit.Unit.MaxHealth + preyUnit.Unit.Health;
             preyUnit.Actor.SubtractHealth(healthReduction);
@@ -2190,16 +2286,28 @@ public class PredatorComponent
                 if (!callback.OnDigestion(preyUnit, actor, location))
                     return 0;
             }
-
-            preyUnit.TurnsDigested++;
+            if (unit.GetStatusEffect(StatusEffectType.Gorging) == null)
+            {
+                preyUnit.TurnsDigested++;
+            }
+            
             AlivePrey++;
+
+            if (actor.Unit.HasTrait(Traits.SedativeStomach) && State.Rand.NextDouble() > 0.80f - (preyUnit.TurnsDigested * 0.01f))
+            {
+                if (actor.Unit.Level - preyUnit.Unit.Level >= -3)
+                {
+                    preyUnit.Unit.ApplyStatusEffect(StatusEffectType.Sleeping, 1, 1 + State.Rand.Next(4) + (actor.Unit.Level - preyUnit.Unit.Level));
+                }
+            }
+
             preyUnit.UpdateEscapeRate();
             float escapeMult = 1;
-            if (FreeCap() < 0 && !unit.HasTrait(Traits.ExtremelyStretchy))
+            if (FreeCap() < 0)
             {
                 float cap = TotalCapacity();
                 escapeMult = 1.4f + 2 * ((Fullness / cap) - 1);
-                if (Config.OverfeedingDamage) actor.Damage((int)(FreeCap() * -1) / 2);
+                if (Config.OverfeedingDamage && !unit.HasTrait(Traits.ExtremelyStretchy)) actor.Damage(Math.Max(0, Math.Min((int)Math.Sqrt(FreeCap() * -1) / 2, (int)(actor.Unit.Health - actor.Unit.MaxHealth * 0.25f))));
             }
 
             if (State.Rand.NextDouble() < preyUnit.EscapeRate * escapeMult && preyUnit.Actor.Surrendered == false)
@@ -2978,16 +3086,6 @@ public class PredatorComponent
 
         Fullness = fullnessFactor * fullness / stomachSize;
 
-        TailFullness = fullnessFactor * tailFullness / stomachSize;
-
-
-        WombFullness = fullnessFactor * wombFullness / stomachSize;
-
-        ExclusiveStomachFullness = fullnessFactor * exclusiveStomachFullness / stomachSize;
-
-
-        Stomach2ndFullness = fullnessFactor * stomach2ndFullness / stomachSize;
-        CombinedStomachFullness = fullnessFactor * (stomach2ndFullness + stomachFullness) / stomachSize;
         if (breastFullness <= 0) breastFullness = -1;
         BreastFullness = breastFullness;
 
@@ -3384,7 +3482,17 @@ public class PredatorComponent
         {
             return false;
         }
-
+        if (unit.HasTrait(Traits.SerialSwallower))
+        {
+            if (unit.GetStatusEffect(StatusEffectType.Gorging) != null)
+            {
+                unit.ApplyStatusEffect(StatusEffectType.Gorging, unit.GetStatusEffect(StatusEffectType.Gorging).Strength + 1, 5);
+            }
+            else
+            {
+                unit.ApplyStatusEffect(StatusEffectType.Gorging, 1, 5);
+            }
+        }
         if (target.Unit == unit)
             return false;
         if (unit.CanVore(preyType) != CanVore(preyType, target))
@@ -3482,6 +3590,14 @@ public class PredatorComponent
                     if (unit.HasTrait(Traits.Tenacious))
                         unit.AddTenacious();
                 }
+                if (actor.Unit.HasTrait(Traits.Multifaceted) && actor.Unit.IsHighestStat(Stat.Voracity))
+                {
+                    if (actor.Unit.GetStatusEffect(StatusEffectType.Predation) == null)
+                    {
+                        actor.Unit.ApplyStatusEffect(StatusEffectType.Predation, 0.2f, 2);
+                    }
+                }
+
             }
 
             if (bit == false && (target.Surrendered ||

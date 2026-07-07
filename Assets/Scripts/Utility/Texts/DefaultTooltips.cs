@@ -831,16 +831,22 @@ Does not retroactively affect already created units.";
             case 346:
                 return "Enables wandering clusters of Iliijiith.";
             case 347:
-                return "Determines how much EXP a single villager provides when devoured by an occupying army.";
+                return "Enables wandering groups of Pudding.";
             case 348:
-                return @"Enable bladder vore
-
-The weights affect how often the AI will choose one in comparison to the others.  
-(I.e. if unbirth is high, and everything else is low, unbirth will be a high % of what they choose, provided that the race is capable of it.)";
+                return "Determines how much EXP a single villager provides when devoured by an occupying army.";
             case 349:
                 return @"Controls how many ancient teleporters the generator will spawn.
 Places them in a simple manner, unconcerned with things like fairness";
             case 350:
+                return "Enables wandering hosts of Soul Sprites";
+            case 351:
+                return "When enabled, allows Seraph to spawn alongside the armies of Soul Sprites. (Recommended to set the max armies for Soul Sprites to 1, as to avoid being overwhelmed.)";
+            case 352:
+                return @"Enable bladder vore
+
+The weights affect how often the AI will choose one in comparison to the others.  
+(I.e. if unbirth is high, and everything else is low, unbirth will be a high % of what they choose, provided that the race is capable of it.)";
+            case 500:
                 return "Traits in here will be automatically added to generic Units when created\n So for instance you could make all leaders large\nCan add multiple traits i.e. \"Eternal, Large\"\nIf you're not sure if you added a trait right, save and reopen the content settings and real traits will still be there ";
             default:
                 return "";

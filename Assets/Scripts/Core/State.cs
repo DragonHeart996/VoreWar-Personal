@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
@@ -52,7 +53,8 @@ public static class State
             ,"femaleWyvern","maleWyvern","femaleYouko","maleYouko","FeralAnts","FeralFrogs","FeralSharks","FeralWolves","Harvesters","Raptor","RockSlugs","Salamanders","Schiwardez","Serpents","SpitterSlugs","SpringSlugs","Voilin","WarriorAnts","Whisp","femaleBoomBunnies"
             ,"maleBoomBunnies","WyvernMatron","maleFeralOrcas","femaleFeralOrcas","femaleBears","maleBears","femaleCentaur","maleCentaur","femaleGnolls","maleGnolls","femaleMainlandElves","maleMainlandElves","femaleViisels","maleViisels","FeralSlimes","femaleEevee","maleEevee","femaleEqualeon"
             ,"maleEqualeon","femaleUmbreon","maleUmbreon","maleLupine","femaleLupine","femaleMatronsMinions","maleMatronsMinions","femaleJackals","maleJackals","femaleRwuMercenaries","maleRwuMercenaries","TwistedVines","femaleOtachi","maleOtachi","femaleRaiju","maleRaiju","femaleSmudger","maleSmudger","femaleBadgers","maleBadgers"
-            ,"WoodDryad","RiverDryad","EarthDryad","FungalDryad","maleGhosts","femaleGhosts","femaleUtahraptor","maleUtahraptor","femaleTrex","maleTrex","femaleSpaceCroach","maleSpaceCroach","femaleMice","maleMice","Terminid","femaleFeralEevee","maleFeralEevee","femaleFeralEqualeon","maleFeralEqualeon","femaleFeralUmbreon","maleFeralUmbreon","Iliijiith","maleRenamon","femaleRenamon"};
+            ,"WoodDryad","RiverDryad","EarthDryad","FungalDryad","maleGhosts","femaleGhosts","femaleUtahraptor","maleUtahraptor","femaleTrex","maleTrex","femaleSpaceCroach","maleSpaceCroach","femaleMice","maleMice","Terminid","femaleFeralEevee","maleFeralEevee","femaleFeralEqualeon","maleFeralEqualeon","femaleFeralUmbreon","maleFeralUmbreon","Iliijiith","maleRenamon","femaleRenamon"
+            ,"maleOoviKat","femaleOoviKat","maleDemiDragon","femaleDemiDragon","maleYordle","femaleYordle","Pudding"};
 
 
     static State()
@@ -158,7 +160,8 @@ public static class State
         UnitTagAssociatedTraitDictionary = new Dictionary<Traits, List<int>>();
         UntaggedTraits = new Dictionary<TaggedTrait, bool>();
 
-        TieredTraitsList = ExternalTraitHandler.TaggedTraitParser();
+        TieredTraitsList = ExternalTraitHandler.TaggedTraitParser(); 
+        TieredTraitsList = ExternalTraitHandler.TaggedTraitUpdater();
         TieredTraitsTagsList = new List<string>();
         ExternalTraitHandler.CustomTraitParser();
         ExternalTraitHandler.ConditionalTraitParser();
@@ -210,6 +213,10 @@ public static class State
             {
                 if (TieredTraitsList[trait].tags == null)
                 {
+                    if (UntaggedTraits.ContainsKey(TieredTraitsList[trait]))
+                    {
+                        continue;
+                    }
                     UntaggedTraits.Add(TieredTraitsList[trait], true);
                     continue;
                 }
@@ -905,6 +912,7 @@ public static class State
                 Config.World.TailWeight = 40;
                 Config.World.UnbirthWeight = 40;
                 Config.World.AnalWeight = 40;
+                Config.World.BladderWeight = 40;
             }
 
             if (version < 28 + 1)

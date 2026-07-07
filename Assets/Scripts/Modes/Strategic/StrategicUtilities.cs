@@ -317,6 +317,8 @@ static class StrategicUtilities
             return new List<Unit>();
         }
 
+        Debug.LogWarning(GetAllArmies().Length);
+        
         List<Unit> units = new List<Unit>();
         foreach (Army army in GetAllArmies(excludeMonsters))
         {
@@ -351,6 +353,7 @@ static class StrategicUtilities
                 }
             }
         }
+        Debug.LogWarning(units.Count);
         return units;
     }
 
